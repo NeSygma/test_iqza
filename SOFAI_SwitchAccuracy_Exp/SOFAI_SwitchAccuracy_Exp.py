@@ -14,9 +14,8 @@ import json
 import re
 import time
 import gc
-import traceback
-from typing import Optional, Dict, List, Any
-from dataclasses import dataclass, field
+from typing import Dict, List, Any
+from dataclasses import dataclass
 
 import numpy as np
 import pandas as pd
@@ -44,11 +43,9 @@ class Config:
     REPEAT_PENALTY = 1.05
 
     # Benchmark settings
-    NUM_PUZZLES = 25
+    NUM_PUZZLES = 3
     SEED = 42
-
-    # Metacognitive thresholds
-    CONFIDENCE_THRESHOLD = 8
+    PTRUE_THRESHOLD = 0.5
 
 config = Config()
 
@@ -65,6 +62,7 @@ llm = Llama.from_pretrained(
     use_mmap=True,
     verbose=True,
     seed=config.SEED,
+    logits_all=True,
 )
 print('Model loaded successfully!')
 
@@ -117,7 +115,7 @@ class LLMEngine:
         print(f"\n{'─'*50}")
         print(f"[DEBUG LLMEngine] Call #{call_num}")
         print(f"[DEBUG LLMEngine] Prompt:\n  {prompt}")
-        print(f"[DEBUG LLMEngine] Raw response:\n  {raw_text[:500]}{'...' if len(raw_text) > 500 else ''}")
+        print(f"[DEBUG LLMEngine] Raw response:\n  {raw_text}")
         print(f"[DEBUG LLMEngine] Tokens: prompt={prompt_tokens}, completion={completion_tokens} | Latency: {latency_ms:.0f}ms")
         print(f"{'─'*50}")
         # ===== END DEBUG =====
@@ -133,8 +131,71 @@ class LLMEngine:
         self.call_log.append(result)
         return result
 
+    def generate_ptrue(self, prompt: str) -> Dict:
+        """Return P(True) by reading the logprob of the first generated token.
+
+        The model is asked to produce a single token; we read logprobs for 'True'/'False' variants
+        from the top-k list and compute p_true = softmax over those two.
+        """
+        call_num = len(self.call_log) + 1
+        start = time.perf_counter()
+
+        response = self.llm.create_completion(
+            prompt=prompt,
+            max_tokens=1,
+            temperature=0.0,
+            logprobs=20,
+            echo=False,
+        )
+        latency_ms = (time.perf_counter() - start) * 1000
+
+        choice = response["choices"][0]
+        logprobs_data = choice.get("logprobs", {})
+        top_logprobs = logprobs_data.get("top_logprobs", [{}])[0] if logprobs_data else {}
+
+        TRUE_TOKENS  = {"True", "true", " True", " true", "TRUE"}
+        FALSE_TOKENS = {"False", "false", " False", " false", "FALSE"}
+
+        lp_true  = max((top_logprobs.get(t, float("-inf")) for t in TRUE_TOKENS),  default=float("-inf"))
+        lp_false = max((top_logprobs.get(t, float("-inf")) for t in FALSE_TOKENS), default=float("-inf"))
+
+        if lp_true == float("-inf") and lp_false == float("-inf"):
+            p_true = 0.5
+            print(f"[DEBUG LLMEngine.generate_ptrue] Neither True/False in top logprobs. "
+                  f"top_logprobs={top_logprobs}. Defaulting p_true=0.5")
+        else:
+            import math
+            max_lp = max(lp_true, lp_false)
+            exp_true  = math.exp(lp_true  - max_lp) if lp_true  != float("-inf") else 0.0
+            exp_false = math.exp(lp_false - max_lp) if lp_false != float("-inf") else 0.0
+            p_true = exp_true / (exp_true + exp_false) if (exp_true + exp_false) > 0 else 0.5
+
+        generated_token = choice.get("text", "?").strip()
+        usage = response.get("usage", {})
+        prompt_tokens = usage.get("prompt_tokens", 0)
+
+        print(f"\n{'─'*50}")
+        print(f"[DEBUG LLMEngine] P(True) Call #{call_num}")
+        print(f"[DEBUG LLMEngine] Generated token: '{generated_token}'")
+        print(f"[DEBUG LLMEngine] logprob(True)={lp_true:.4f}, logprob(False)={lp_false:.4f} "
+              f"→ P(True)={p_true:.4f}")
+        print(f"[DEBUG LLMEngine] Tokens: prompt={prompt_tokens} | Latency: {latency_ms:.0f}ms")
+        print(f"{'─'*50}")
+
+        result = {
+            "p_true": p_true,
+            "generated_token": generated_token,
+            "lp_true": lp_true,
+            "lp_false": lp_false,
+            "prompt_tokens": prompt_tokens,
+            "completion_tokens": 1,
+            "latency_ms": latency_ms,
+        }
+        self.call_log.append(result)
+        return result
+
 engine = LLMEngine(llm, config)
-print("✓ LLM Engine ready")
+print("\u2713 LLM Engine ready")
 
 # %% [markdown]
 # ## Cell 5: Prompts (Direct Reasoning + Confidence Assessment)
@@ -153,30 +214,31 @@ IMPORTANT:
 After reasoning, output JSON:
 {json_format}"""
 
-CONFIDENCE_ASSESSMENT_PROMPT = """You are a VERIFICATION agent. Your job is to rigorously check whether a proposed answer to a logic puzzle is correct by testing EVERY clue.
+def _get_answer_type(answer_str: str) -> str:
+    try:
+        parsed = json.loads(answer_str) if isinstance(answer_str, str) else answer_str
+        if isinstance(parsed, dict):
+            if "header" in parsed and "rows" in parsed:
+                return "grid"
+            if "answer_index" in parsed or "answer" in parsed:
+                return "label"
+    except (json.JSONDecodeError, TypeError):
+        pass
+    return "unknown"
 
+
+P_TRUE_PROMPT = """<|im_start|>system
+You are a logic reasoning verifier. Answer only True or False.<|im_end|>
+<|im_start|>user
 PUZZLE:
-{puzzle_preview}
+{puzzle_text}
 
 PROPOSED ANSWER:
-{answer_preview}
+{answer_text}
 
-INSTRUCTIONS:
-1. Go through EACH numbered clue in the puzzle one by one.
-2. For each clue, check whether it is satisfied by the proposed answer.
-3. Mark each clue as PASS or FAIL with a brief explanation.
-4. Count the total number of PASS and FAIL clues.
-5. If ANY clue fails, confidence MUST be 5 or below.
-6. Only give confidence 8+ if ALL clues pass AND you verified each one.
-
-CRITICAL: Do NOT assume the answer is correct. Actively try to find violations.
-For positional clues like "directly left of", "next to", "somewhere to the right of":
-- "directly left of" means house number is exactly 1 less
-- "next to each other" means house numbers differ by exactly 1
-- "somewhere to the right of" means higher house number
-
-Respond with ONLY valid JSON:
-{{"clue_checks": "PASS: N, FAIL: M", "failed_clues": ["clue X: reason", ...], "confidence": <1-10>, "complexity": "<SIMPLE|MEDIUM|COMPLEX>", "reason": "<summary of verification>"}}"""
+Is this proposed answer correct for the puzzle above? Answer with a single word: True or False.<|im_end|>
+<|im_start|>assistant
+"""
 
 print("✓ Prompt templates defined")
 
@@ -287,126 +349,51 @@ print("✓ System 1 Agent ready")
 
 # %%
 class MetacognitiveSwitch:
-    def __init__(self, engine: LLMEngine, confidence_threshold: int = 7):
+    def __init__(self, engine: LLMEngine, ptrue_threshold: float = 0.5):
         self.engine = engine
-        self.confidence_threshold = confidence_threshold
+        self.ptrue_threshold = ptrue_threshold
         self.switch_log = []
-        print(f"[MetacognitiveSwitch] Initialized (threshold={confidence_threshold})")
+        print(f"[MetacognitiveSwitch] Initialized with P(True) mechanism "
+              f"(escalate if p_true < {ptrue_threshold})")
 
     def assess(self, puzzle_text: str, system1_answer: str) -> Dict:
-        puzzle_preview = puzzle_text
-        answer_preview = str(system1_answer)
-
-        q_lower = puzzle_text.lower()
-        if "cannot be true" in q_lower or "can not be true" in q_lower:
-            q_type_hint = (
-                "\n\nIMPORTANT — QUESTION TYPE: This is a 'CANNOT be true' question. "
-                "The CORRECT answer is the choice that is IMPOSSIBLE given the base constraints. "
-                "Because the correct answer represents an impossible scenario, the proposed answer "
-                "will appear to violate at least one constraint — that is expected and correct. "
-                "Evaluate whether the proposed choice is indeed the one that contradicts the constraints "
-                "(i.e., is UNSAT), and give HIGH confidence if the reasoning confirms this."
-            )
-        elif "could be true" in q_lower or "can be true" in q_lower or "which one of the following is possible" in q_lower:
-            q_type_hint = (
-                "\n\nIMPORTANT — QUESTION TYPE: This is a 'could be true' question. "
-                "The correct answer only needs to be CONSISTENT with all constraints for at least one arrangement — "
-                "it does not need to be the only possibility. "
-                "Give HIGH confidence if the proposed choice does not explicitly contradict any clue."
-            )
-        elif "must be true" in q_lower or "is necessarily true" in q_lower:
-            q_type_hint = (
-                "\n\nIMPORTANT — QUESTION TYPE: This is a 'must be true' question. "
-                "The correct answer must hold in EVERY valid arrangement, not just some. "
-                "Give HIGH confidence only if you can confirm that no valid arrangement violates the proposed choice."
-            )
-        elif "acceptable order" in q_lower or "acceptable list" in q_lower or "acceptable assignment" in q_lower:
-            q_type_hint = (
-                "\n\nIMPORTANT — QUESTION TYPE: This is an 'acceptable arrangement' question. "
-                "The correct answer is simply a specific scenario that violates NONE of the constraints. "
-                "Check every clue against the proposed arrangement and give HIGH confidence if all pass."
-            )
-        else:
-            q_type_hint = ""
-
-        prompt = (CONFIDENCE_ASSESSMENT_PROMPT + q_type_hint).format(
-            puzzle_preview=puzzle_preview,
-            answer_preview=answer_preview
+        answer_type = _get_answer_type(system1_answer)
+        prompt = P_TRUE_PROMPT.format(
+            puzzle_text=puzzle_text,
+            answer_text=system1_answer,
         )
 
-        print(f"\n[DEBUG MetacognitiveSwitch] Full prompt:")
-        print(prompt)
+        print(f"[MetacognitiveSwitch] answer_type={answer_type} — querying P(True)...")
+        resp = self.engine.generate_ptrue(prompt)
 
-        resp = self.engine.generate(prompt, max_tokens=2048, temperature=0.0)
+        p_true   = resp["p_true"]
+        use_system2 = p_true < self.ptrue_threshold
+        confidence_scaled = round(p_true * 10)
 
-        print(f"[DEBUG MetacognitiveSwitch] Raw response: {resp['text']}")
-
-        failed_clues = []
-        clue_checks = ""
-
-        try:
-            text = resp["text"]
-            if '```json' in text:
-                text = text.split('```json')[1].split('```')[0].strip()
-            elif '```' in text:
-                text = text.split('```')[1].split('```')[0].strip()
-            parsed = json.loads(text)
-            confidence = int(parsed.get("confidence", 5))
-            complexity = parsed.get("complexity", "MEDIUM").upper()
-            reason = parsed.get("reason", "")
-            failed_clues = parsed.get("failed_clues", [])
-            clue_checks = parsed.get("clue_checks", "")
-        except Exception as e:
-            print(f"[DEBUG MetacognitiveSwitch] JSON parse FAILED: {e}")
-            text = resp["text"]
-            conf_match = re.search(r'"confidence"\s*:\s*(\d+)', text)
-            comp_match = re.search(r'"complexity"\s*:\s*"(SIMPLE|MEDIUM|COMPLEX)"', text, re.IGNORECASE)
-            fail_count = len(re.findall(r'FAIL', text, re.IGNORECASE))
-            if conf_match:
-                confidence = int(conf_match.group(1))
-                complexity = comp_match.group(1).upper() if comp_match else "MEDIUM"
-                reason = "Recovered from truncated JSON via regex"
-                if fail_count > 0:
-                    confidence = min(confidence, 5)
-                    reason += f" ({fail_count} FAIL mentions detected)"
-                print(f"[DEBUG MetacognitiveSwitch] Regex recovery → confidence={confidence}, complexity={complexity}")
-            else:
-                confidence = 5
-                complexity = "MEDIUM"
-                reason = "Failed to parse confidence assessment"
-
-        if failed_clues and len(failed_clues) > 0:
-            print(f"[MetacognitiveSwitch] Failed clues detected: {failed_clues}")
-            confidence = min(confidence, 3)
-            reason = f"Auto-capped: {len(failed_clues)} clue(s) failed verification. {reason}"
-
-        use_system2 = (confidence < self.confidence_threshold) or (complexity == "COMPLEX" and confidence < 8)
-
-        print(f"[DEBUG MetacognitiveSwitch] Parsed → confidence={confidence}, complexity={complexity}, reason={reason}")
-        if clue_checks:
-            print(f"[DEBUG MetacognitiveSwitch] Clue checks: {clue_checks}")
-        if failed_clues:
-            print(f"[DEBUG MetacognitiveSwitch] Failed clues: {failed_clues}")
+        action = "ESCALATE → System 2" if use_system2 else "ACCEPT System 1"
+        print(f"[MetacognitiveSwitch] P(True)={p_true:.4f} (threshold={self.ptrue_threshold}) → {action}")
 
         result = {
             "use_system2": use_system2,
-            "confidence": confidence,
-            "complexity": complexity,
-            "reason": reason,
-            "failed_clues": failed_clues,
-            "clue_checks": clue_checks,
+            "p_true": p_true,
+            "confidence": confidence_scaled,
+            "complexity": "N/A",
+            "reason": f"P(True)={p_true:.4f}",
+            "failed_clues": [],
+            "clue_checks": "",
+            "answer_type": answer_type,
+            "threshold_used": self.ptrue_threshold,
             "assessment_latency_ms": resp["latency_ms"],
-            "assessment_tokens": resp["completion_tokens"],
+            "assessment_tokens": resp["prompt_tokens"] + 1,
         }
         self.switch_log.append(result)
-
-        action = "ESCALATE → System 2" if use_system2 else "ACCEPT System 1"
-        print(f"[MetacognitiveSwitch] Confidence={confidence}/10, "
-              f"Complexity={complexity} → {action}")
         return result
 
-meta_switch = MetacognitiveSwitch(engine, config.CONFIDENCE_THRESHOLD)
-print("✓ Metacognitive Switch ready")
+meta_switch = MetacognitiveSwitch(
+    engine,
+    ptrue_threshold=config.PTRUE_THRESHOLD,
+)
+print("✓ Metacognitive Switch ready (P(True) mode)")
 
 # %% [markdown]
 # ## Cell 9: Dataset Loading (ZebraLogic + LSAT-AR)
@@ -678,6 +665,8 @@ def run_switch_experiment(puzzles: List[Dict]) -> List[SwitchResult]:
         res.switch_complexity = sw["complexity"]
         res.switch_tokens = sw["assessment_tokens"]
         res.switch_latency_ms = sw["assessment_latency_ms"]
+        print(f"[Phase 2] answer_type={sw.get('answer_type','?')}, "
+              f"threshold={sw.get('threshold_used','?')}, confidence={sw['confidence']}")
 
         # ── Compute switch label ─────────────────────────────────────
         if not res.s1_correct and res.switch_escalated:
@@ -695,7 +684,6 @@ def run_switch_experiment(puzzles: List[Dict]) -> List[SwitchResult]:
 
     return results
 
-
 # %% [markdown]
 # ## Cell 12: Run & Report
 
@@ -704,7 +692,7 @@ all_puzzles = load_all_datasets(num_per_dataset=config.NUM_PUZZLES)
 
 print(f"\n{'#'*60}")
 print(f"# SOFAI Switch Accuracy Experiment — {len(all_puzzles)} puzzles")
-print(f"# Confidence threshold: {config.CONFIDENCE_THRESHOLD}/10")
+print(f"# Switch mechanism: P(True) logprob  |  threshold={config.PTRUE_THRESHOLD}")
 print(f"{'#'*60}\n")
 
 switch_results = run_switch_experiment(all_puzzles)
