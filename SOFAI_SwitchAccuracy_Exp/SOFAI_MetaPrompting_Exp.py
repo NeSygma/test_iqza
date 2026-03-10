@@ -2,13 +2,13 @@
 # ## Cell 1: Install Dependencies
 
 # %%
-!pip install -q llama-cpp-python --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cu124
-!pip install -q "datasets>=2.18.0" "pandas>=2.0.0" "tqdm>=4.66.0"
+# !pip install -q cerebras-cloud-sdk "datasets>=2.18.0" "pandas>=2.0.0" "tqdm>=4.66.0"
 
 # %% [markdown]
 # ## Cell 2: Imports
 
 # %%
+import sys
 import os
 import json
 import re
@@ -20,7 +20,10 @@ from dataclasses import dataclass
 import numpy as np
 import pandas as pd
 from tqdm.auto import tqdm
-from llama_cpp import Llama
+from cerebras.cloud.sdk import Cerebras
+from cerebras.cloud.sdk import RateLimitError as CerebrasRateLimitError
+
+sys.stdout.reconfigure(encoding='utf-8')
 
 # %% [markdown]
 # ## Cell 3: Configuration & Model Loading
@@ -28,57 +31,47 @@ from llama_cpp import Llama
 # %%
 class Config:
     # Model Settings
-    MODEL_REPO = "unsloth/Qwen3-30B-A3B-Instruct-2507-GGUF"
-    MODEL_FILE = "Qwen3-30B-A3B-Instruct-2507-Q6_K.gguf"
-
-    N_GPU_LAYERS = -1
-    N_CTX = 32768
-    N_BATCH = 32768
+    MODEL_NAME = "gpt-oss-120b"
+    CEREBRAS_API_KEY = "csk-f4hwyffn5n99f6j83wn6njteh66m6rwkrxrn5mvp4wrh622e"
 
     # Generation settings
     MAX_NEW_TOKENS = 16384
-    TEMPERATURE = 0.3
-    TOP_P = 0.8
-    TOP_K = 20
-    REPEAT_PENALTY = 1.05
+    TEMPERATURE = 1.0
+    TOP_P = 1.0
 
     # Benchmark settings
-    NUM_PUZZLES = 3
+    NUM_PUZZLES = 5
     SEED = 42
-    PTRUE_THRESHOLD = 0.5
+    CONFIDENCE_THRESHOLD = 0.9
+
+    # Rate-limit handling
+    CALL_DELAY_S = 2.0
+    MAX_RETRIES  = 9999
 
 config = Config()
 
-print(f'Loading model from {config.MODEL_REPO}...')
-llm = Llama.from_pretrained(
-    repo_id=config.MODEL_REPO,
-    filename=config.MODEL_FILE,
-    n_gpu_layers=config.N_GPU_LAYERS,
-    n_ctx=config.N_CTX,
-    n_batch=config.N_BATCH,
-    flash_attn=True,
-    offload_kqv=True,
-    use_mlock=False,
-    use_mmap=True,
-    verbose=True,
-    seed=config.SEED,
-    logits_all=True,
-)
-print('Model loaded successfully!')
+client = Cerebras(api_key=config.CEREBRAS_API_KEY)
+print(f'Cerebras client ready — model: {config.MODEL_NAME}')
 
 # %% [markdown]
 # ## Cell 4: LLM Engine with Token Tracking
 
 # %%
+_total_input_tokens  = 0
+_total_output_tokens = 0
+_total_elapsed_ms    = 0.0
+
+
 class LLMEngine:
-    def __init__(self, llm_instance, config):
-        self.llm = llm_instance
+    def __init__(self, openai_client, config):
+        self.client = openai_client
         self.config = config
         self.call_log = []
         print("[LLMEngine] Initialized with token+latency tracking")
 
     def generate(self, prompt: str, max_tokens: int = None,
                  temperature: float = None, system_prompt: str = None) -> Dict:
+        global _total_input_tokens, _total_output_tokens, _total_elapsed_ms
         if max_tokens is None:
             max_tokens = self.config.MAX_NEW_TOKENS
         if temperature is None:
@@ -90,25 +83,40 @@ class LLMEngine:
         messages.append({"role": "user", "content": prompt})
 
         start = time.perf_counter()
-        response = self.llm.create_chat_completion(
-            messages=messages,
-            max_tokens=max_tokens,
-            temperature=temperature,
-            top_p=self.config.TOP_P,
-            top_k=self.config.TOP_K,
-            repeat_penalty=self.config.REPEAT_PENALTY,
-        )
+        for attempt in range(self.config.MAX_RETRIES):
+            try:
+                response = self.client.chat.completions.create(
+                    model=self.config.MODEL_NAME,
+                    messages=messages,
+                    max_completion_tokens=max_tokens,
+                    temperature=temperature,
+                    top_p=self.config.TOP_P,
+                    reasoning_effort="low",
+                )
+                break
+            except CerebrasRateLimitError as e:
+                wait = 2 ** attempt
+                print(f"[LLMEngine] 429 RateLimitError (attempt {attempt+1}/{self.config.MAX_RETRIES}). "
+                      f"Waiting {wait}s before retry...")
+                time.sleep(wait)
+                if attempt == self.config.MAX_RETRIES - 1:
+                    raise
         latency_ms = (time.perf_counter() - start) * 1000
 
-        raw_text = response["choices"][0]["message"]["content"].strip()
+        raw_text = response.choices[0].message.content or ""
+        raw_text = raw_text.strip()
 
         text = raw_text
         if "</think>" in text:
             text = text.split("</think>")[-1].strip()
 
-        usage = response.get("usage", {})
-        prompt_tokens = usage.get("prompt_tokens", 0)
-        completion_tokens = usage.get("completion_tokens", 0)
+        usage = response.usage
+        prompt_tokens     = usage.prompt_tokens     if usage else 0
+        completion_tokens = usage.completion_tokens if usage else 0
+
+        _total_input_tokens  += prompt_tokens
+        _total_output_tokens += completion_tokens
+        _total_elapsed_ms    += latency_ms
 
         # ===== DEBUG: Show prompt and response =====
         call_num = len(self.call_log) + 1
@@ -116,7 +124,11 @@ class LLMEngine:
         print(f"[DEBUG LLMEngine] Call #{call_num}")
         print(f"[DEBUG LLMEngine] Prompt:\n  {prompt}")
         print(f"[DEBUG LLMEngine] Raw response:\n  {raw_text}")
-        print(f"[DEBUG LLMEngine] Tokens: prompt={prompt_tokens}, completion={completion_tokens} | Latency: {latency_ms:.0f}ms")
+        print(f"[DEBUG LLMEngine] Tokens: input={prompt_tokens}, output={completion_tokens} "
+              f"| Latency: {latency_ms:.0f}ms")
+        print(f"[DEBUG LLMEngine] Running totals: input={_total_input_tokens}, "
+              f"output={_total_output_tokens}, total={_total_input_tokens+_total_output_tokens} "
+              f"| Elapsed: {_total_elapsed_ms/1000:.1f}s")
         print(f"{'─'*50}")
         # ===== END DEBUG =====
 
@@ -129,90 +141,38 @@ class LLMEngine:
             "latency_ms": latency_ms,
         }
         self.call_log.append(result)
+        time.sleep(self.config.CALL_DELAY_S)
         return result
 
-    def generate_ptrue(self, prompt: str) -> Dict:
-        """Return P(True) by reading the logprob of the first generated token.
-
-        The model is asked to produce a single token; we read logprobs for 'True'/'False' variants
-        from the top-k list and compute p_true = softmax over those two.
-        """
-        call_num = len(self.call_log) + 1
-        start = time.perf_counter()
-
-        response = self.llm.create_completion(
-            prompt=prompt,
-            max_tokens=1,
-            temperature=0.0,
-            logprobs=20,
-            echo=False,
-        )
-        latency_ms = (time.perf_counter() - start) * 1000
-
-        choice = response["choices"][0]
-        logprobs_data = choice.get("logprobs", {})
-        top_logprobs = logprobs_data.get("top_logprobs", [{}])[0] if logprobs_data else {}
-
-        TRUE_TOKENS  = {"True", "true", " True", " true", "TRUE"}
-        FALSE_TOKENS = {"False", "false", " False", " false", "FALSE"}
-
-        lp_true  = max((top_logprobs.get(t, float("-inf")) for t in TRUE_TOKENS),  default=float("-inf"))
-        lp_false = max((top_logprobs.get(t, float("-inf")) for t in FALSE_TOKENS), default=float("-inf"))
-
-        if lp_true == float("-inf") and lp_false == float("-inf"):
-            p_true = 0.5
-            print(f"[DEBUG LLMEngine.generate_ptrue] Neither True/False in top logprobs. "
-                  f"top_logprobs={top_logprobs}. Defaulting p_true=0.5")
-        else:
-            import math
-            max_lp = max(lp_true, lp_false)
-            exp_true  = math.exp(lp_true  - max_lp) if lp_true  != float("-inf") else 0.0
-            exp_false = math.exp(lp_false - max_lp) if lp_false != float("-inf") else 0.0
-            p_true = exp_true / (exp_true + exp_false) if (exp_true + exp_false) > 0 else 0.5
-
-        generated_token = choice.get("text", "?").strip()
-        usage = response.get("usage", {})
-        prompt_tokens = usage.get("prompt_tokens", 0)
-
-        print(f"\n{'─'*50}")
-        print(f"[DEBUG LLMEngine] P(True) Call #{call_num}")
-        print(f"[DEBUG LLMEngine] Generated token: '{generated_token}'")
-        print(f"[DEBUG LLMEngine] logprob(True)={lp_true:.4f}, logprob(False)={lp_false:.4f} "
-              f"→ P(True)={p_true:.4f}")
-        print(f"[DEBUG LLMEngine] Tokens: prompt={prompt_tokens} | Latency: {latency_ms:.0f}ms")
-        print(f"{'─'*50}")
-
-        result = {
-            "p_true": p_true,
-            "generated_token": generated_token,
-            "lp_true": lp_true,
-            "lp_false": lp_false,
-            "prompt_tokens": prompt_tokens,
-            "completion_tokens": 1,
-            "latency_ms": latency_ms,
-        }
-        self.call_log.append(result)
-        return result
-
-engine = LLMEngine(llm, config)
-print("\u2713 LLM Engine ready")
+engine = LLMEngine(client, config)
+print("✓ LLM Engine ready")
 
 # %% [markdown]
-# ## Cell 5: Prompts (Direct Reasoning + Confidence Assessment)
+# ## Cell 5: Prompts (Metacognitive Prompting — Combined Solve + Self-Assessment)
 
 # %%
-DIRECT_REASONING_PROMPT = """Solve this logic puzzle step by step, then output your answer.
+MP_COMBINED_PROMPT = """Solve the following logical reasoning problem step by step and evaluate your confidence in your own answer — all in one response.
 
+PROBLEM:
 {puzzle_text}
 
-IMPORTANT:
-- Think through the problem carefully
-- For grid/zebra puzzles: output JSON with "header" and "rows" keys. CRITICAL: You MUST copy all attribute values EXACTLY as shown in backticks. Do NOT abbreviate or modify them in any way.
-- For multiple choice: output JSON with "answer" and "answer_index" keys
-- Copy all attribute values EXACTLY as shown
+As you perform this task, follow these steps:
 
-After reasoning, output JSON:
-{json_format}"""
+1. Understand the context and key elements of the problem.
+
+2. Think step by step. Make a preliminary judgment / solve the problem step by step.
+
+3. Critically assess your preliminary analysis. If you are unsure about your initial answer, reassess it by re-examining the problem constraints more carefully.
+
+4. Confirm your final answer and provide the reasoning for your decision.
+
+5. Evaluate your confidence (0-100%) in your final answer and provide an explanation for this confidence level.
+
+After completing all five stages, output your final answer as JSON:
+{json_format}
+
+Then on a new line output your confidence score in exactly this format:
+Confidence: <number between 0 and 100>%"""
 
 def _get_answer_type(answer_str: str) -> str:
     try:
@@ -225,20 +185,6 @@ def _get_answer_type(answer_str: str) -> str:
     except (json.JSONDecodeError, TypeError):
         pass
     return "unknown"
-
-
-P_TRUE_PROMPT = """<|im_start|>system
-You are a logic reasoning verifier. Answer only True or False.<|im_end|>
-<|im_start|>user
-PUZZLE:
-{puzzle_text}
-
-PROPOSED ANSWER:
-{answer_text}
-
-Is this proposed answer correct for the puzzle above? Answer with a single word: True or False.<|im_end|>
-<|im_start|>assistant
-"""
 
 print("✓ Prompt templates defined")
 
@@ -276,13 +222,13 @@ def extract_house_count(puzzle_text: str) -> int:
 print("✓ JSON format helpers ready")
 
 # %% [markdown]
-# ## Cell 7: System 1 — Fast LLM Reasoning Agent (Direct)
+# ## Cell 7: System 1 — MP Combined Agent (Solve + Self-Assess in One Call)
 
 # %%
 class System1Agent:
     def __init__(self, engine: LLMEngine):
         self.engine = engine
-        print("[System1Agent] Initialized")
+        print("[System1Agent] Initialized (MP combined: solve + self-assess)")
 
     def solve(self, puzzle_text: str, domain: str = "CSP", json_format: str = None) -> Dict:
         if json_format is None:
@@ -291,18 +237,20 @@ class System1Agent:
             else:
                 json_format = '{"header": ["attr1", "attr2", ...], "rows": [["val1", "val2", ...], ...]}'
 
-        prompt = DIRECT_REASONING_PROMPT.format(
+        prompt = MP_COMBINED_PROMPT.format(
             puzzle_text=puzzle_text,
             json_format=json_format
         )
 
-        print(f"\n{'▸'*40} SYSTEM 1 PROMPT {'◂'*40}")
+        _arrow_r = "\u25b8" * 40
+        _arrow_l = "\u25c2" * 40
+        print(f"\n{_arrow_r} MP COMBINED PROMPT {_arrow_l}")
         print(prompt)
-        print(f"{'▸'*40} END PROMPT {'◂'*40}")
+        print(f"{_arrow_r} END PROMPT {_arrow_l}")
 
         resp = self.engine.generate(prompt, max_tokens=self.engine.config.MAX_NEW_TOKENS)
-
         text = resp["text"]
+
         answer = None
         try:
             json_match = re.search(r'```(?:json)?\s*(\{.*?})\s*```', text, re.DOTALL)
@@ -330,70 +278,89 @@ class System1Agent:
         except Exception as e:
             print(f"[DEBUG System1] JSON parse error: {e}")
 
+        confidence = _parse_mp_confidence(text)
         print(f"\n[DEBUG System1] Parsed answer: {json.dumps(answer, indent=2, default=str) if answer else 'None (FAILED TO PARSE)'}")
         print(f"[DEBUG System1] Parse success: {answer is not None}")
+        print(f"[DEBUG System1] MP confidence: {confidence:.1%}")
 
         return {
             "answer": answer,
             "raw_response": text,
             "tokens": resp["completion_tokens"],
+            "prompt_tokens": resp["prompt_tokens"],
             "latency_ms": resp["latency_ms"],
             "success": answer is not None,
+            "mp_confidence": confidence,
         }
 
 system1 = System1Agent(engine)
-print("✓ System 1 Agent ready")
+print("✓ System 1 MP Agent ready")
 
 # %% [markdown]
-# ## Cell 8: Metacognitive Evaluator (Switch Decision)
+# ## Cell 8: Metacognitive Evaluator (Switch Decision — zero extra API call)
 
 # %%
+def _parse_mp_confidence(mp_text: str) -> float:
+    stage5_match = re.search(
+        r'(?:Stage\s*5[^\n]*|Confidence)[^\n]*:\s*(\d{1,3})\s*%',
+        mp_text, re.IGNORECASE
+    )
+    if stage5_match:
+        raw = int(stage5_match.group(1))
+        return max(0.0, min(100.0, raw)) / 100.0
+
+    all_pcts = re.findall(r'\b(\d{1,3})\s*%', mp_text)
+    if all_pcts:
+        return max(0.0, min(100.0, int(all_pcts[-1]))) / 100.0
+
+    return 0.5
+
+
 class MetacognitiveSwitch:
-    def __init__(self, engine: LLMEngine, ptrue_threshold: float = 0.5):
+    def __init__(self, engine: LLMEngine, confidence_threshold: float = 0.5):
         self.engine = engine
-        self.ptrue_threshold = ptrue_threshold
+        self.confidence_threshold = confidence_threshold
         self.switch_log = []
-        print(f"[MetacognitiveSwitch] Initialized with P(True) mechanism "
-              f"(escalate if p_true < {ptrue_threshold})")
+        print(f"[MetacognitiveSwitch] Initialized (no extra API call) "
+              f"| escalate if confidence < {confidence_threshold:.0%}")
 
-    def assess(self, puzzle_text: str, system1_answer: str) -> Dict:
+    def assess(self, puzzle_text: str, system1_answer: str,
+               precomputed_confidence: float = None) -> Dict:
         answer_type = _get_answer_type(system1_answer)
-        prompt = P_TRUE_PROMPT.format(
-            puzzle_text=puzzle_text,
-            answer_text=system1_answer,
-        )
 
-        print(f"[MetacognitiveSwitch] answer_type={answer_type} — querying P(True)...")
-        resp = self.engine.generate_ptrue(prompt)
+        if precomputed_confidence is not None:
+            confidence = precomputed_confidence
+        else:
+            confidence = _parse_mp_confidence(system1_answer)
 
-        p_true   = resp["p_true"]
-        use_system2 = p_true < self.ptrue_threshold
-        confidence_scaled = round(p_true * 10)
+        use_system2 = confidence < self.confidence_threshold
+        confidence_scaled = round(confidence * 10)
 
-        action = "ESCALATE → System 2" if use_system2 else "ACCEPT System 1"
-        print(f"[MetacognitiveSwitch] P(True)={p_true:.4f} (threshold={self.ptrue_threshold}) → {action}")
+        action = "ESCALATE \u2192 System 2" if use_system2 else "ACCEPT System 1"
+        print(f"[MetacognitiveSwitch] MP confidence={confidence:.1%} "
+              f"(threshold={self.confidence_threshold:.1%}) \u2192 {action}")
 
         result = {
             "use_system2": use_system2,
-            "p_true": p_true,
+            "mp_confidence": confidence,
             "confidence": confidence_scaled,
             "complexity": "N/A",
-            "reason": f"P(True)={p_true:.4f}",
+            "reason": f"MP confidence={confidence:.1%}",
             "failed_clues": [],
             "clue_checks": "",
             "answer_type": answer_type,
-            "threshold_used": self.ptrue_threshold,
-            "assessment_latency_ms": resp["latency_ms"],
-            "assessment_tokens": resp["prompt_tokens"] + 1,
+            "threshold_used": self.confidence_threshold,
+            "assessment_latency_ms": 0.0,
+            "assessment_tokens": 0,
         }
         self.switch_log.append(result)
         return result
 
 meta_switch = MetacognitiveSwitch(
     engine,
-    ptrue_threshold=config.PTRUE_THRESHOLD,
+    confidence_threshold=config.CONFIDENCE_THRESHOLD,
 )
-print("✓ Metacognitive Switch ready (P(True) mode)")
+print("✓ Metacognitive Switch ready (MP combined mode — 0 extra API calls)")
 
 # %% [markdown]
 # ## Cell 9: Dataset Loading (ZebraLogic + LSAT-AR)
@@ -498,9 +465,50 @@ def load_lsat_ar(num_puzzles: int = None) -> List[Dict]:
     return puzzles
 
 
+def load_folio(path: str = None, num_puzzles: int = None) -> List[Dict]:
+    print(f"[Dataset] Loading FOLIO from {path}...")
+    df = pd.read_json(path, lines=True)
+
+    puzzles = []
+    for idx, row in df.iterrows():
+        premises = row.get("premises", "")
+        if isinstance(premises, str):
+            premises = [p.strip() for p in premises.split("\n") if p.strip()]
+        conclusion = str(row.get("conclusion", ""))
+        label = str(row.get("label", "")).strip()
+
+        if isinstance(premises, list):
+            premises_text = "\n".join(f"- {p}" for p in premises)
+        else:
+            premises_text = str(premises)
+
+        puzzle_text = (
+            f"Given the following premises:\n{premises_text}\n\n"
+            f"Conclusion: {conclusion}\n\n"
+            f"Based on the premises, is the conclusion True, False, or Uncertain?"
+        )
+
+        puzzles.append({
+            "id": f"folio_{idx}",
+            "puzzle_text": puzzle_text,
+            "solution": label,
+            "domain": "NLI",
+            "dataset": "FOLIO",
+            "json_format": '{"answer": "<True/False/Uncertain>"}',
+        })
+
+    if num_puzzles:
+        np.random.seed(config.SEED)
+        indices = np.random.choice(len(puzzles), min(num_puzzles, len(puzzles)), replace=False)
+        puzzles = [puzzles[i] for i in sorted(indices)]
+
+    print(f"[Dataset] Loaded {len(puzzles)} FOLIO puzzles")
+    return puzzles
+
+
 def load_all_datasets(num_per_dataset: int = None) -> List[Dict]:
     all_puzzles = []
-    zebra_path = "/kaggle/input/datasets/iqzaardiansyah/zebralogicbench/ZebraLogicBench/ZebraLogicBench/grid_mode/test-00000-of-00001.parquet"
+    zebra_path = "data/test-00000-of-00001.parquet"
     if os.path.exists(zebra_path):
         all_puzzles.extend(load_zebralogic(zebra_path, num_per_dataset))
     else:
@@ -509,6 +517,11 @@ def load_all_datasets(num_per_dataset: int = None) -> List[Dict]:
         all_puzzles.extend(load_lsat_ar(num_per_dataset))
     except Exception as e:
         print(f"[WARNING] Failed to load LSAT-AR: {e}")
+    folio_path = "data/folio_v2_validation.jsonl"
+    if os.path.exists(folio_path):
+        all_puzzles.extend(load_folio(folio_path, num_per_dataset))
+    else:
+        print(f"[WARNING] FOLIO not found at {folio_path}")
     np.random.seed(config.SEED)
     np.random.shuffle(all_puzzles)
     print(f"\n[Dataset] Total puzzles loaded: {len(all_puzzles)}")
@@ -552,6 +565,13 @@ def check_correctness(predicted: Any, expected: Any, domain: str) -> bool:
         if isinstance(predicted, (int, float)):
             return int(predicted) == expected
         return False
+
+    elif domain == "NLI":
+        if isinstance(predicted, dict):
+            pred_label = str(predicted.get("answer", "")).strip().lower()
+        else:
+            pred_label = str(predicted).strip().lower()
+        return pred_label == str(expected).strip().lower()
 
     elif domain == "CSP":
         if isinstance(expected, str):
@@ -646,8 +666,7 @@ def run_switch_experiment(puzzles: List[Dict]) -> List[SwitchResult]:
 
         res = SwitchResult(puzzle_id=puzzle_id, dataset=dataset, domain=domain)
 
-        # ── Phase 1: System 1 direct solve ──────────────────────────
-        print("\n[Phase 1] System 1 reasoning...")
+        print("\n[Phase 1+2] MP combined: solving + confidence self-assessment...")
         s1 = system1.solve(puzzle_text, domain=domain, json_format=json_format)
         res.s1_parse_success = s1["success"]
         res.s1_tokens = s1["tokens"]
@@ -656,10 +675,11 @@ def run_switch_experiment(puzzles: List[Dict]) -> List[SwitchResult]:
 
         print(f"[Phase 1] S1 parse_success={res.s1_parse_success}, correct={res.s1_correct}")
 
-        # ── Phase 2: Evaluator assesses the S1 answer ───────────────
-        print("\n[Phase 2] Evaluator assessing confidence...")
         answer_str = json.dumps(s1["answer"]) if s1["answer"] else s1["raw_response"]
-        sw = meta_switch.assess(puzzle_text, answer_str)
+        sw = meta_switch.assess(
+            puzzle_text, answer_str,
+            precomputed_confidence=s1["mp_confidence"],
+        )
         res.switch_escalated = sw["use_system2"]
         res.switch_confidence = sw["confidence"]
         res.switch_complexity = sw["complexity"]
@@ -668,15 +688,14 @@ def run_switch_experiment(puzzles: List[Dict]) -> List[SwitchResult]:
         print(f"[Phase 2] answer_type={sw.get('answer_type','?')}, "
               f"threshold={sw.get('threshold_used','?')}, confidence={sw['confidence']}")
 
-        # ── Compute switch label ─────────────────────────────────────
         if not res.s1_correct and res.switch_escalated:
-            res.switch_label = "TP"   # correctly escalated
+            res.switch_label = "TP"
         elif res.s1_correct and not res.switch_escalated:
-            res.switch_label = "TN"   # correctly kept
+            res.switch_label = "TN"
         elif res.s1_correct and res.switch_escalated:
-            res.switch_label = "FP"   # unnecessary escalation
-        else:  # not s1_correct and not escalated
-            res.switch_label = "FN"   # missed escalation
+            res.switch_label = "FP"
+        else:
+            res.switch_label = "FN"
 
         print(f"[Phase 2] escalated={res.switch_escalated}, label={res.switch_label}")
         results.append(res)
@@ -692,12 +711,12 @@ all_puzzles = load_all_datasets(num_per_dataset=config.NUM_PUZZLES)
 
 print(f"\n{'#'*60}")
 print(f"# SOFAI Switch Accuracy Experiment — {len(all_puzzles)} puzzles")
-print(f"# Switch mechanism: P(True) logprob  |  threshold={config.PTRUE_THRESHOLD}")
+print(f"# Switch mechanism: Metacognitive Prompting (MP)  |  threshold={config.CONFIDENCE_THRESHOLD:.0%}")
+print(f"# Reference: Wang & Zhao, NAACL 2024")
 print(f"{'#'*60}\n")
 
 switch_results = run_switch_experiment(all_puzzles)
 
-# ── Build results dataframe ──────────────────────────────────────
 records = []
 for r in switch_results:
     records.append({
@@ -722,7 +741,6 @@ os.makedirs("./output", exist_ok=True)
 df.to_csv("./output/switch_accuracy_results.csv", index=False)
 print(f"\n✓ Results saved to ./output/switch_accuracy_results.csv")
 
-# ── Summary ──────────────────────────────────────────────────────
 n = len(df)
 tp = (df["switch_label"] == "TP").sum()
 tn = (df["switch_label"] == "TN").sum()
@@ -750,7 +768,6 @@ print(f"\nSystem 1 accuracy: {df['s1_correct'].mean():.1%}")
 print(f"Escalation rate:   {df['switch_escalated'].mean():.1%}")
 print(f"Avg confidence:    {df['switch_confidence'].mean():.1f}/10")
 
-# ── Per-dataset breakdown ─────────────────────────────────────────
 print(f"\n--- Per-Dataset ---")
 for ds in df["dataset"].unique():
     sub = df[df["dataset"] == ds]
@@ -762,8 +779,18 @@ for ds in df["dataset"].unique():
     print(f"  {ds}: switch_acc={acc_d:.1%}  TP={tp_d} TN={tn_d} FP={fp_d} FN={fn_d}  "
           f"s1_acc={sub['s1_correct'].mean():.1%}")
 
-# ── Save summary JSON ─────────────────────────────────────────────
+print(f"\n{'='*60}")
+print("TOKEN & TIME SUMMARY")
+print(f"{'='*60}")
+print(f"  Model:              {config.MODEL_NAME}")
+print(f"  Total input tokens: {_total_input_tokens:,}")
+print(f"  Total output tokens:{_total_output_tokens:,}")
+print(f"  Total tokens:       {_total_input_tokens + _total_output_tokens:,}")
+print(f"  Total elapsed time: {_total_elapsed_ms/1000:.1f}s  "
+      f"({_total_elapsed_ms/60000:.2f} min)")
+
 summary = {
+    "model": config.MODEL_NAME,
     "total": n,
     "TP": int(tp), "TN": int(tn), "FP": int(fp), "FN": int(fn),
     "switch_accuracy": float(switch_accuracy),
@@ -773,6 +800,10 @@ summary = {
     "s1_accuracy": float(df["s1_correct"].mean()),
     "escalation_rate": float(df["switch_escalated"].mean()),
     "avg_confidence": float(df["switch_confidence"].mean()),
+    "total_input_tokens": _total_input_tokens,
+    "total_output_tokens": _total_output_tokens,
+    "total_tokens": _total_input_tokens + _total_output_tokens,
+    "total_elapsed_s": round(_total_elapsed_ms / 1000, 2),
 }
 with open("./output/switch_accuracy_summary.json", "w") as f:
     json.dump(summary, f, indent=2)
@@ -781,6 +812,3 @@ print("\n✓ Summary saved to ./output/switch_accuracy_summary.json")
 print("\n" + "="*60)
 print("SWITCH ACCURACY EXPERIMENT COMPLETE")
 print("="*60)
-
-# %%
-!zip -r output.zip /kaggle/working/output
