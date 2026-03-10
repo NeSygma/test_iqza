@@ -32,7 +32,7 @@ sys.stdout.reconfigure(encoding='utf-8')
 class Config:
     # Model Settings
     MODEL_NAME = "gpt-oss-120b"
-    CEREBRAS_API_KEY = "csk-f4hwyffn5n99f6j83wn6njteh66m6rwkrxrn5mvp4wrh622e"
+    CEREBRAS_API_KEY = "csk-9m2xdh2wvj4fykpkhe4f64d85pk3exjhrrccf9n4pjprrkmv"
 
     # Generation settings
     MAX_NEW_TOKENS = 16384
@@ -151,27 +151,65 @@ print("✓ LLM Engine ready")
 # ## Cell 5: Prompts (Metacognitive Prompting — Combined Solve + Self-Assessment)
 
 # %%
-MP_COMBINED_PROMPT = """Solve the following logical reasoning problem step by step and evaluate your confidence in your own answer — all in one response.
+SYSTEM_PROMPT = """You are a Pure Logical Reasoning Specialist Agent.
+You solve formal logic problems via strict, zero-shot, step-by-step deductive reasoning.
 
-PROBLEM:
+## CRITICAL INSTRUCTIONS
+- Do NOT generate excessive whitespace, double line breaks, or padding in your output. Keep your reasoning dense, readable, and structured.
+
+## Logical Reasoning Protocol
+You must follow these five stages of rigorous metacognitive reflection to derive your answer.
+
+Stage 1 — Comprehension & Formalization:
+  - Clarify your understanding of the question. Restate what is being asked in precise logical terms.
+  - Formally identify all provided premises and distinguish them from the conclusion to be evaluated.
+  - Evaluate the overall complexity of the problem. If there are many interlocking rules, deeply nested logic, or it just feels intuitively complex, acknowledge this explicitly.
+  - Acknowledge that you cannot introduce external logic, common sense, or real-world assumptions.
+
+Stage 2 — Preliminary Logical Modeling:
+  - Construct an initial mental model of the premises. 
+  - Note any strict rules (implications) versus factual states.
+  - If the premises contain disjunctions (OR), immediately recognize that multiple exhaustive cases must be evaluated.
+  - Remember that the Closed World principle does not strictly apply: truth values not explicitly mandated true or false are unknown.
+  - Make a preliminary judgment on the conclusion based on this first pass. If the problem is highly complex, state that preliminary judgment is difficult.
+
+Stage 3 — Critical Deductive Evaluation:
+  - Critically assess your preliminary modeling. Attempt to construct a formal proof or identify a contradiction.
+  - Challenge your initial reasoning: look for logical fallacies (like affirming the consequent), gaps, or alternative interpretations.
+  - Actively try to find a counter-example (a valid state where premises are true but conclusion is false).
+  - If you are unsure about any deduction, explicitly re-examine the rule applications.
+
+Stage 4 — Decision Confirmation:
+  - Formulate your final logical decision.
+  - Provide the definitive, step-by-step reasoning chain that proves why this is the logically correct answer.
+  - Compare this against your preliminary judgment. If it changed, explain the exact deductive step that caused the revision.
+
+Stage 5 — Confidence & Soundness Assessment:
+  - Evaluate your confidence in the derivation. **BEWARE OF OVERCONFIDENCE BIAS.** You naturally tend to overestimate your logical correctness. Consciously discount your confidence score if the problem is complex.
+  - Verify if every step strictly entails the next, backed ONLY by the provided text.
+  - CRITICAL HYBRID-SYSTEM INSTRUCTION: We have downstream symbolic solvers (like Z3 or Vampire) ready to take over. If you feel even slightly uncertain, conflicted, if you don't know the answer, or if you feel like you are just guessing, you MUST explicitly lower your confidence score (e.g., below 50%). Never guess confidently. It is a massive failure to confidently guess incorrectly; it is a success to recognize ambiguity.
+
+Write out your reasoning clearly, following these stages naturally, before providing the final answer format.
+
+## Output Format (STRICT)
+Metacognitive trace for the Normal persona. Record all five MP stages:
+(1) Comprehension Clarification, (2) Preliminary Judgment, 
+(3) Critical Evaluation, (4) Decision Confirmation, 
+(5) Confidence Assessment (0-100% with justification).
+
+STOP RULES:
+- Once you have output the final JSON answer and confidence score according to the User prompt instructions, STOP IMMEDIATELY. Do not write anything else.
+- Do NOT pad output with filler, empty spaces, or pleasantries.
+"""
+
+USER_PROMPT = """PROBLEM:
 {puzzle_text}
 
-As you perform this task, follow these steps:
-
-1. Understand the context and key elements of the problem.
-
-2. Think step by step. Make a preliminary judgment / solve the problem step by step.
-
-3. Critically assess your preliminary analysis. If you are unsure about your initial answer, reassess it by re-examining the problem constraints more carefully.
-
-4. Confirm your final answer and provide the reasoning for your decision.
-
-5. Evaluate your confidence (0-100%) in your final answer and provide an explanation for this confidence level.
-
-After completing all five stages, output your final answer as JSON:
+Follow your system instructions to complete the 5 Metacognitive stages. 
+After completing all stages, you MUST output your final answer as EXACTLY this JSON format (and nothing else after the JSON except the confidence score):
 {json_format}
 
-Then on a new line output your confidence score in exactly this format:
+Then, on a new line immediately after the JSON, output your confidence score in EXACTLY this format:
 Confidence: <number between 0 and 100>%"""
 
 def _get_answer_type(answer_str: str) -> str:
@@ -237,27 +275,23 @@ class System1Agent:
             else:
                 json_format = '{"header": ["attr1", "attr2", ...], "rows": [["val1", "val2", ...], ...]}'
 
-        prompt = MP_COMBINED_PROMPT.format(
-            puzzle_text=puzzle_text,
-            json_format=json_format
-        )
+        prompt = USER_PROMPT.format(puzzle_text=puzzle_text, json_format=json_format)
+        
+        engine_out = self.engine.generate(prompt=prompt, system_prompt=SYSTEM_PROMPT)
+        raw_text = engine_out["text"]
 
         _arrow_r = "\u25b8" * 40
         _arrow_l = "\u25c2" * 40
         print(f"\n{_arrow_r} MP COMBINED PROMPT {_arrow_l}")
         print(prompt)
         print(f"{_arrow_r} END PROMPT {_arrow_l}")
-
-        resp = self.engine.generate(prompt, max_tokens=self.engine.config.MAX_NEW_TOKENS)
-        text = resp["text"]
-
         answer = None
         try:
-            json_match = re.search(r'```(?:json)?\s*(\{.*?})\s*```', text, re.DOTALL)
+            json_match = re.search(r'```(?:json)?\s*(\{.*?})\s*```', raw_text, re.DOTALL)
             if json_match:
                 answer = json.loads(json_match.group(1))
             else:
-                json_objects = list(re.finditer(r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}', text, re.DOTALL))
+                json_objects = list(re.finditer(r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}', raw_text, re.DOTALL))
                 if json_objects:
                     for match in reversed(json_objects):
                         try:
@@ -268,27 +302,20 @@ class System1Agent:
                                 break
                         except json.JSONDecodeError:
                             continue
-                    if answer is None and json_objects:
-                        for match in reversed(json_objects):
-                            try:
-                                answer = json.loads(match.group())
-                                break
-                            except json.JSONDecodeError:
-                                continue
         except Exception as e:
             print(f"[DEBUG System1] JSON parse error: {e}")
 
-        confidence = _parse_mp_confidence(text)
+        confidence = _parse_mp_confidence(raw_text)
         print(f"\n[DEBUG System1] Parsed answer: {json.dumps(answer, indent=2, default=str) if answer else 'None (FAILED TO PARSE)'}")
         print(f"[DEBUG System1] Parse success: {answer is not None}")
         print(f"[DEBUG System1] MP confidence: {confidence:.1%}")
 
         return {
             "answer": answer,
-            "raw_response": text,
-            "tokens": resp["completion_tokens"],
-            "prompt_tokens": resp["prompt_tokens"],
-            "latency_ms": resp["latency_ms"],
+            "raw_response": raw_text,
+            "tokens": engine_out["completion_tokens"],
+            "prompt_tokens": engine_out["prompt_tokens"],
+            "latency_ms": engine_out["latency_ms"],
             "success": answer is not None,
             "mp_confidence": confidence,
         }
