@@ -205,11 +205,18 @@ STOP RULES:
 USER_PROMPT = """PROBLEM:
 {puzzle_text}
 
-Follow your system instructions to complete the 5 Metacognitive stages. 
-After completing all stages, you MUST output your final answer as EXACTLY this JSON format (and nothing else after the JSON except the confidence score):
-{json_format}
+Solve the logical reasoning problem above. Think step by step to derive your answer.
+After you finish your reasoning, you MUST output your final answer as EXACTLY this JSON format (and nothing else after the JSON):
+{json_format}"""
 
-Then, on a new line immediately after the JSON, output your confidence score in EXACTLY this format:
+EVALUATOR_USER_PROMPT = """PROBLEM:
+{puzzle_text}
+
+SYSTEM 1 ANSWER (For Evaluation):
+{system1_answer}
+
+Follow your system instructions to complete the 5 Metacognitive stages evaluating the provided SYSTEM 1 ANSWER.
+After completing all stages, output your confidence score in EXACTLY this format on a new line:
 Confidence: <number between 0 and 100>%"""
 
 def _get_answer_type(answer_str: str) -> str:
@@ -266,7 +273,7 @@ print("✓ JSON format helpers ready")
 class System1Agent:
     def __init__(self, engine: LLMEngine):
         self.engine = engine
-        print("[System1Agent] Initialized (MP combined: solve + self-assess)")
+        print("[System1Agent] Initialized (Standard CoT solver)")
 
     def solve(self, puzzle_text: str, domain: str = "CSP", json_format: str = None) -> Dict:
         if json_format is None:
@@ -277,14 +284,15 @@ class System1Agent:
 
         prompt = USER_PROMPT.format(puzzle_text=puzzle_text, json_format=json_format)
         
-        engine_out = self.engine.generate(prompt=prompt, system_prompt=SYSTEM_PROMPT)
+        engine_out = self.engine.generate(prompt=prompt)
         raw_text = engine_out["text"]
 
         _arrow_r = "\u25b8" * 40
         _arrow_l = "\u25c2" * 40
-        print(f"\n{_arrow_r} MP COMBINED PROMPT {_arrow_l}")
+        print(f"\n{_arrow_r} SYSTEM 1 PROMPT {_arrow_l}")
         print(prompt)
         print(f"{_arrow_r} END PROMPT {_arrow_l}")
+
         answer = None
         try:
             json_match = re.search(r'```(?:json)?\s*(\{.*?})\s*```', raw_text, re.DOTALL)
@@ -305,10 +313,8 @@ class System1Agent:
         except Exception as e:
             print(f"[DEBUG System1] JSON parse error: {e}")
 
-        confidence = _parse_mp_confidence(raw_text)
         print(f"\n[DEBUG System1] Parsed answer: {json.dumps(answer, indent=2, default=str) if answer else 'None (FAILED TO PARSE)'}")
         print(f"[DEBUG System1] Parse success: {answer is not None}")
-        print(f"[DEBUG System1] MP confidence: {confidence:.1%}")
 
         return {
             "answer": answer,
@@ -317,7 +323,6 @@ class System1Agent:
             "prompt_tokens": engine_out["prompt_tokens"],
             "latency_ms": engine_out["latency_ms"],
             "success": answer is not None,
-            "mp_confidence": confidence,
         }
 
 system1 = System1Agent(engine)
@@ -348,17 +353,27 @@ class MetacognitiveSwitch:
         self.engine = engine
         self.confidence_threshold = confidence_threshold
         self.switch_log = []
-        print(f"[MetacognitiveSwitch] Initialized (no extra API call) "
+        print(f"[MetacognitiveSwitch] Initialized (MP Evaluator API call) "
               f"| escalate if confidence < {confidence_threshold:.0%}")
 
-    def assess(self, puzzle_text: str, system1_answer: str,
-               precomputed_confidence: float = None) -> Dict:
+    def assess(self, puzzle_text: str, system1_answer: str) -> Dict:
         answer_type = _get_answer_type(system1_answer)
 
-        if precomputed_confidence is not None:
-            confidence = precomputed_confidence
-        else:
-            confidence = _parse_mp_confidence(system1_answer)
+        prompt = EVALUATOR_USER_PROMPT.format(
+            puzzle_text=puzzle_text,
+            system1_answer=system1_answer
+        )
+        
+        _arrow_r = "\u25b8" * 40
+        _arrow_l = "\u25c2" * 40
+        print(f"\n{_arrow_r} MP EVALUATOR PROMPT {_arrow_l}")
+        print(prompt)
+        print(f"{_arrow_r} END PROMPT {_arrow_l}")
+
+        engine_out = self.engine.generate(prompt=prompt, system_prompt=SYSTEM_PROMPT)
+        raw_text = engine_out["text"]
+        
+        confidence = _parse_mp_confidence(raw_text)
 
         use_system2 = confidence < self.confidence_threshold
         confidence_scaled = round(confidence * 10)
@@ -377,8 +392,9 @@ class MetacognitiveSwitch:
             "clue_checks": "",
             "answer_type": answer_type,
             "threshold_used": self.confidence_threshold,
-            "assessment_latency_ms": 0.0,
-            "assessment_tokens": 0,
+            "assessment_latency_ms": engine_out["latency_ms"],
+            "assessment_tokens": engine_out["completion_tokens"],
+            "prompt_tokens": engine_out["prompt_tokens"],
         }
         self.switch_log.append(result)
         return result
@@ -387,7 +403,7 @@ meta_switch = MetacognitiveSwitch(
     engine,
     confidence_threshold=config.CONFIDENCE_THRESHOLD,
 )
-print("✓ Metacognitive Switch ready (MP combined mode — 0 extra API calls)")
+print("✓ Metacognitive Switch ready")
 
 # %% [markdown]
 # ## Cell 9: Dataset Loading (ZebraLogic + LSAT-AR)
@@ -693,7 +709,7 @@ def run_switch_experiment(puzzles: List[Dict]) -> List[SwitchResult]:
 
         res = SwitchResult(puzzle_id=puzzle_id, dataset=dataset, domain=domain)
 
-        print("\n[Phase 1+2] MP combined: solving + confidence self-assessment...")
+        print("\n[Phase 1] Standard CoT solving...")
         s1 = system1.solve(puzzle_text, domain=domain, json_format=json_format)
         res.s1_parse_success = s1["success"]
         res.s1_tokens = s1["tokens"]
@@ -702,11 +718,9 @@ def run_switch_experiment(puzzles: List[Dict]) -> List[SwitchResult]:
 
         print(f"[Phase 1] S1 parse_success={res.s1_parse_success}, correct={res.s1_correct}")
 
+        print("\n[Phase 2] MP Evaluator assessing confidence...")
         answer_str = json.dumps(s1["answer"]) if s1["answer"] else s1["raw_response"]
-        sw = meta_switch.assess(
-            puzzle_text, answer_str,
-            precomputed_confidence=s1["mp_confidence"],
-        )
+        sw = meta_switch.assess(puzzle_text, answer_str)
         res.switch_escalated = sw["use_system2"]
         res.switch_confidence = sw["confidence"]
         res.switch_complexity = sw["complexity"]
