@@ -32,7 +32,7 @@ sys.stdout.reconfigure(encoding='utf-8')
 class Config:
     # Model Settings
     MODEL_NAME = "gpt-oss-120b"
-    CEREBRAS_API_KEY = "csk-9m2xdh2wvj4fykpkhe4f64d85pk3exjhrrccf9n4pjprrkmv"
+    CEREBRAS_API_KEY = "<CEREBRAS_API_KEY>"
 
     # Generation settings
     MAX_NEW_TOKENS = 16384

@@ -42,7 +42,7 @@ from cerebras.cloud.sdk import Cerebras
 # %%
 class Config:
     # Cerebras API settings
-    CEREBRAS_API_KEY = "csk-d3j2k6mdkp2djh9r8e3ywry2wptd3exw69yrhdfywwwyepdv"
+    CEREBRAS_API_KEY = "<CEREBRAS_API_KEY>"
     MODEL_NAME = "gpt-oss-120b"
 
     # Generation settings
