@@ -1,0 +1,191 @@
+=== PUZZLE ID: folio_3 (FOLIO - NLI) ===
+Question / Context:
+Given the following premises:
+- All employees who schedule a meeting with their customers will go to the company building today.
+- Everyone who has lunch in the company building schedules meetings with their customers.
+- Employees have lunch either in the company building or at home.
+- If an employee has lunch at home, they are working remotely from home.
+- All employees who are in other countries work remotely from home.
+- No managers work remotely from home.
+- James will appear in the company today if and only if he is a manager.
+
+Conclusion: James has lunch in the company.
+
+Based on the premises, is the conclusion True, False, or Uncertain?
+---
+Ground Truth Solution: Uncertain
+
+============================================================
+=== SYSTEM 1 (STANDARD CoT) ===
+--- S1 PROMPT ---
+PROBLEM:
+Given the following premises:
+- All employees who schedule a meeting with their customers will go to the company building today.
+- Everyone who has lunch in the company building schedules meetings with their customers.
+- Employees have lunch either in the company building or at home.
+- If an employee has lunch at home, they are working remotely from home.
+- All employees who are in other countries work remotely from home.
+- No managers work remotely from home.
+- James will appear in the company today if and only if he is a manager.
+
+Conclusion: James has lunch in the company.
+
+Based on the premises, is the conclusion True, False, or Uncertain?
+
+Solve the logical reasoning problem above. Think step by step to derive your answer.
+After you finish your reasoning, you MUST output your final answer as EXACTLY this JSON format (and nothing else after the JSON):
+{"answer": "<True/False/Uncertain>"}
+
+--- S1 RESPONSE ---
+We need see if conclusion follows. Let's formalize.
+
+Let E(x): x is employee. Let M(x): x schedules meeting with customers. Let B(x): x goes to company building today. Let Lc(x): x has lunch in company building. Let Lh(x): x has lunch at home. (Employees have lunch either in the building or at home, exclusive? says either - likely exclusive.)
+
+If Lh(x) then Remote(x). Also All employees who are in other countries work remotely from home. Not needed.
+
+No managers work remotely from home. So Manager -> not Remote.
+
+James will appear in the company today iff he is a manager. Appear in company today = B(James). So B(J) ↔ Manager(J).
+
+We need to deduce Lc(J).
+
+We have premises:
+
+1. ∀x (M(x) → B(x)).
+2. ∀x (L_c(x) → M(x)). (Everyone who has lunch in building schedules meetings.)
+3. ∀x (L_c(x) ∨ L_h(x)) and maybe exclusive.
+4. L_h(x) → Remote(x).
+5. All employees who are in other countries work remotely from home. Not used.
+6. No managers work remotely from home: Manager(x) → ¬Remote(x).
+7. B(J) ↔ Manager(J).
+
+Goal: L_c(J).
+
+Reason: Suppose J is manager. Then by 6, not Remote. If not Remote, could he have lunch at home? L_h → Remote, so not Remote implies not L_h, so must have lunch in building (given either). Thus L_c.
+
+If J is not manager, then by 7, B(J) false. Not B. We need to see if that forces L_c? If B false, could still have lunch in building? From 1 and 2: If L_c then M then B. So L_c → B. Contrapositive: ¬B → ¬L_c assuming classical? Actually from L_c → B, we get ¬B → ¬L_c (contrapositive). So if B false, then L_c false, so L_h true. Then L_h → Remote, so Remote true. But No managers work remotely from home, but he's not manager, okay. So in non-manager case, L_c false.
+
+Thus L_c depends on whether J is manager. Do we know? From 7 we have equivalence but no other info about manager status. No premise tells whether James is manager. So uncertain.
+
+Thus conclusion uncertain.
+
+Return JSON.{"answer": "Uncertain"}
+---
+S1 Parsed Answer: {'answer': 'Uncertain'}
+S1 Valid/Parse Success: True
+S1 Correct: True
+S1 Tokens: 486 | Latency: 4366.8ms
+
+============================================================
+=== SYSTEM 2 (MP EVALUATOR / JUDGE) ===
+--- S2 PROMPT ---
+PROBLEM:
+Given the following premises:
+- All employees who schedule a meeting with their customers will go to the company building today.
+- Everyone who has lunch in the company building schedules meetings with their customers.
+- Employees have lunch either in the company building or at home.
+- If an employee has lunch at home, they are working remotely from home.
+- All employees who are in other countries work remotely from home.
+- No managers work remotely from home.
+- James will appear in the company today if and only if he is a manager.
+
+Conclusion: James has lunch in the company.
+
+Based on the premises, is the conclusion True, False, or Uncertain?
+
+SYSTEM 1 ANSWER (For Evaluation):
+We need see if conclusion follows. Let's formalize.
+
+Let E(x): x is employee. Let M(x): x schedules meeting with customers. Let B(x): x goes to company building today. Let Lc(x): x has lunch in company building. Let Lh(x): x has lunch at home. (Employees have lunch either in the building or at home, exclusive? says either - likely exclusive.)
+
+If Lh(x) then Remote(x). Also All employees who are in other countries work remotely from home. Not needed.
+
+No managers work remotely from home. So Manager -> not Remote.
+
+James will appear in the company today iff he is a manager. Appear in company today = B(James). So B(J) ↔ Manager(J).
+
+We need to deduce Lc(J).
+
+We have premises:
+
+1. ∀x (M(x) → B(x)).
+2. ∀x (L_c(x) → M(x)). (Everyone who has lunch in building schedules meetings.)
+3. ∀x (L_c(x) ∨ L_h(x)) and maybe exclusive.
+4. L_h(x) → Remote(x).
+5. All employees who are in other countries work remotely from home. Not used.
+6. No managers work remotely from home: Manager(x) → ¬Remote(x).
+7. B(J) ↔ Manager(J).
+
+Goal: L_c(J).
+
+Reason: Suppose J is manager. Then by 6, not Remote. If not Remote, could he have lunch at home? L_h → Remote, so not Remote implies not L_h, so must have lunch in building (given either). Thus L_c.
+
+If J is not manager, then by 7, B(J) false. Not B. We need to see if that forces L_c? If B false, could still have lunch in building? From 1 and 2: If L_c then M then B. So L_c → B. Contrapositive: ¬B → ¬L_c assuming classical? Actually from L_c → B, we get ¬B → ¬L_c (contrapositive). So if B false, then L_c false, so L_h true. Then L_h → Remote, so Remote true. But No managers work remotely from home, but he's not manager, okay. So in non-manager case, L_c false.
+
+Thus L_c depends on whether J is manager. Do we know? From 7 we have equivalence but no other info about manager status. No premise tells whether James is manager. So uncertain.
+
+Thus conclusion uncertain.
+
+Return JSON.{"answer": "Uncertain"}
+
+Follow your system instructions to complete the 5 Metacognitive stages evaluating the provided SYSTEM 1 ANSWER.
+After completing all stages, output your confidence score in EXACTLY this format on a new line:
+Confidence: <number between 0 and 100>%
+
+--- S2 RESPONSE ---
+We need evaluate system1 answer. It seems correct reasoning. No hidden assumptions. So answer Uncertain is correct. Confidence high maybe 90%.**Stage 1 — Comprehension & Formalization**
+
+- **Premises restated formally**
+  1. ∀x [ ScheduleMeeting(x) → GoToBuilding(x) ]  
+  2. ∀x [ LunchInBuilding(x) → ScheduleMeeting(x) ]  
+  3. ∀x [ LunchInBuilding(x) ∨ LunchAtHome(x) ]  (exclusive disjunction is not stated, only “either … or”, so we treat it as at least one of the two)  
+  4. ∀x [ LunchAtHome(x) → Remote(x) ]  
+  5. ∀x [ InOtherCountry(x) → Remote(x) ] (not used further)  
+  6. ∀x [ Manager(x) → ¬Remote(x) ] (no managers work remotely)  
+  7. GoToBuilding(James) ↔ Manager(James)  
+
+- **Conclusion to test**: LunchInBuilding(James).
+
+- **System 1’s core deductive path**
+  1. From (7) we have a biconditional linking “go to building today” with “being a manager”.  
+  2. Consider the two possibilities for James: manager or not manager.  
+  3. If James is a manager, then by (6) he is not remote; using (4) contrapositive we get ¬LunchAtHome(James) → therefore LunchInBuilding(James) (since at least one lunch location holds).  
+  4. If James is *not* a manager, then by the ↔ in (7) he does not go to the building, i.e. ¬GoToBuilding(James). Using (2) contrapositive of (1) (LunchInBuilding → GoToBuilding) we infer ¬LunchInBuilding(James) → LunchAtHome(James) → Remote(James). This is consistent with him not being a manager (no contradiction).  
+  5. Because the premises give no information fixing James’s managerial status, both branches are compatible with the premises.  
+  6. Hence the conclusion “James has lunch in the company” is **not forced**; it is *Uncertain*.
+
+- **Unstated assumptions / hallucinations**  
+  The answer assumes the contrapositive of “LunchInBuilding → GoToBuilding” is valid, which is permissible in classical logic. No extra facts (e.g., exclusivity of lunch locations) are introduced beyond what is given.  
+
+**Stage 2 — Preliminary Logical Modeling**
+
+Construct a model:
+
+- Domain includes James and any other employees.  
+- Assign **Manager(James) = true** → then by (7) GoToBuilding true, by (1) ScheduleMeeting true, by (2) LunchInBuilding true. This satisfies all premises.  
+- Assign **Manager(James) = false** → then GoToBuilding false, LunchInBuilding false, LunchAtHome true, Remote true. This also satisfies all premises (no premise contradicts a non‑manager being remote).  
+
+Both models are viable; the conclusion holds in only one model. Therefore the truth value is **Uncertain**.
+
+**Stage 3 — Critical Deductive Evaluation**
+
+- **Comparison**: System 1’s reasoning matches the independent model above.  
+- **Confirmation bias**: No bias detected; the answer does not force a truth value.  
+- **Fallacies**: None observed. The contrapositive step is valid; all disjunctions are considered (the “either … or” clause).  
+
+**Stage 4 — Decision Confirmation**
+
+The conclusion is not entailed; the base LLM correctly classifies it as *Uncertain*. No deductive error is found.
+
+**Stage 5 — Confidence & Soundness Assessment**
+
+The reasoning chain is short, clear, and all steps are justified directly from the premises. No ambiguity remains about the evaluation. Confidence that the base answer is correct is high.
+
+**Final confidence assessment**: 92%
+
+Confidence: 92%
+---
+S2 Parsed Confidence: 92.0%
+S2 Escalate Decision: False (Threshold: 80.0%)
+S2 Label Assignment: TN
+S2 Tokens: 830 | Latency: 7275.5ms

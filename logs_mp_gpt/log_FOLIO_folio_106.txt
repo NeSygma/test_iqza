@@ -1,0 +1,123 @@
+=== PUZZLE ID: folio_106 (FOLIO - NLI) ===
+Question / Context:
+Given the following premises:
+- It costs $205 to take the GRE test, which is cheaper than $300.
+- ETS provides financial aid to those GRE applicants who prove economic hardship.
+- Those living in single-parent families or having few resources available to them can prove economic hardship.
+- Tom lives in a single-parent family.
+- Tom's dad has been out of work, and Tom has few resources available to them.
+- Tom is applying to take the GRE test.
+
+Conclusion: No one taking the GRE test has financial aid provided to them by something.
+
+Based on the premises, is the conclusion True, False, or Uncertain?
+---
+Ground Truth Solution: False
+
+============================================================
+=== SYSTEM 1 (STANDARD CoT) ===
+--- S1 PROMPT ---
+PROBLEM:
+Given the following premises:
+- It costs $205 to take the GRE test, which is cheaper than $300.
+- ETS provides financial aid to those GRE applicants who prove economic hardship.
+- Those living in single-parent families or having few resources available to them can prove economic hardship.
+- Tom lives in a single-parent family.
+- Tom's dad has been out of work, and Tom has few resources available to them.
+- Tom is applying to take the GRE test.
+
+Conclusion: No one taking the GRE test has financial aid provided to them by something.
+
+Based on the premises, is the conclusion True, False, or Uncertain?
+
+Solve the logical reasoning problem above. Think step by step to derive your answer.
+After you finish your reasoning, you MUST output your final answer as EXACTLY this JSON format (and nothing else after the JSON):
+{"answer": "<True/False/Uncertain>"}
+
+--- S1 RESPONSE ---
+We need evaluate conclusion: "No one taking the GRE test has financial aid provided to them by something." Means: there is no person taking GRE who receives financial aid. From premises, we have that ETS provides financial aid to those who prove economic hardship. Tom proves hardship (single-parent family, few resources). Tom is applying to take GRE. So Tom is taking GRE and gets aid. Therefore conclusion false. So answer False.{"answer": "False"}
+---
+S1 Parsed Answer: {'answer': 'False'}
+S1 Valid/Parse Success: True
+S1 Correct: True
+S1 Tokens: 112 | Latency: 2058.9ms
+
+============================================================
+=== SYSTEM 2 (MP EVALUATOR / JUDGE) ===
+--- S2 PROMPT ---
+PROBLEM:
+Given the following premises:
+- It costs $205 to take the GRE test, which is cheaper than $300.
+- ETS provides financial aid to those GRE applicants who prove economic hardship.
+- Those living in single-parent families or having few resources available to them can prove economic hardship.
+- Tom lives in a single-parent family.
+- Tom's dad has been out of work, and Tom has few resources available to them.
+- Tom is applying to take the GRE test.
+
+Conclusion: No one taking the GRE test has financial aid provided to them by something.
+
+Based on the premises, is the conclusion True, False, or Uncertain?
+
+SYSTEM 1 ANSWER (For Evaluation):
+We need evaluate conclusion: "No one taking the GRE test has financial aid provided to them by something." Means: there is no person taking GRE who receives financial aid. From premises, we have that ETS provides financial aid to those who prove economic hardship. Tom proves hardship (single-parent family, few resources). Tom is applying to take GRE. So Tom is taking GRE and gets aid. Therefore conclusion false. So answer False.{"answer": "False"}
+
+Follow your system instructions to complete the 5 Metacognitive stages evaluating the provided SYSTEM 1 ANSWER.
+After completing all stages, output your confidence score in EXACTLY this format on a new line:
+Confidence: <number between 0 and 100>%
+
+--- S2 RESPONSE ---
+We evaluate. Premises: cost etc irrelevant. ETS provides aid to those who prove economic hardship. Tom lives in single-parent family and has few resources -> can prove hardship. Tom is applying to take GRE. Does that imply he takes GRE? Assuming taking = applying. He qualifies, so financial aid is provided to him. Thus conclusion "No one taking the GRE test has financial aid provided to them by something" is false. No hidden assumptions? Need assumption that proving hardship => ETS provides aid (premise says ETS provides aid to those who prove hardship). So Tom gets aid. So conclusion false. System 1 answer false is correct.
+
+Check for any ambiguity: Might need that Tom actually receives aid, not just eligible. Premise: "ETS provides financial aid to those GRE applicants who prove economic hardship." That is a universal statement: for any applicant who proves hardship, ETS provides aid. So Tom qualifies, thus gets aid. So false.
+
+Thus evaluation: correct.
+
+Assign confidence maybe 80%? High certainty. Slight uncertainty about "taking the GRE test" vs "applying". But likely intended. So moderate high confidence 70%.
+
+**Stage 1 — Comprehension & Formalization**  
+- Premises  
+  1. GRE cost = $205 (cheaper than $300).  
+  2. ETS provides financial aid to any GRE applicant who proves economic hardship.  
+  3. Living in a single‑parent family or having few resources suffices to prove economic hardship.  
+  4. Tom lives in a single‑parent family.  
+  5. Tom’s dad is out of work and Tom has few resources.  
+  6. Tom is applying to take the GRE test.  
+
+- Conclusion to test: “No one taking the GRE test has financial aid provided to them by something.” (i.e., ∀x (GRE‑taker(x) → ¬FinancialAid(x))).  
+
+- System 1’s core deductive path:  
+  * From (3)–(5) Tom can prove economic hardship.  
+  * From (2) any applicant who proves hardship receives aid.  
+  * From (6) Tom is a GRE‑applicant, thus a GRE‑taker.  
+  * Therefore at least one GRE‑taker (Tom) receives aid, contradicting the universal negative conclusion.  
+  * Hence the conclusion is **False**.  
+
+- No unstated assumptions beyond the meaning of “applying” ⇒ “taking” and the universal nature of premise 2, both plainly expressed.
+
+**Stage 2 — Preliminary Logical Modeling**  
+Construct independent model:  
+- Let A(x) = “x takes the GRE”.  
+- Let H(x) = “x proves economic hardship”.  
+- Let F(x) = “x receives financial aid”.  
+Premises give: ∀x (H(x) → F(x)); (single‑parent ∨ few resources) → H(x); Tom satisfies both hardship conditions; Tom applies ⇒ A(Tom). Thus H(Tom) holds, so F(Tom) holds, and A(Tom) holds. Hence ∃x (A(x) ∧ F(x)). This directly falsifies the universal negative conclusion. The premises force the conclusion to be **False**. No ambiguity remains.
+
+**Stage 3 — Critical Deductive Evaluation**  
+- Comparison: System 1’s reasoning matches the independent model.  
+- No confirmation bias: the answer is not forced without justification.  
+- No formal fallacy detected; the argument correctly uses modus ponens and universal instantiation.  
+- All disjunctive conditions (single‑parent OR few resources) are satisfied for Tom, so the hardship condition is met.
+
+**Stage 4 — Decision Confirmation**  
+The base LLM’s conclusion (**False**) is strictly entailed by the premises. No erroneous step is found.
+
+**Stage 5 — Confidence & Soundness Assessment**  
+The deduction is short, direct, and leaves negligible room for alternative interpretations. Slight residual doubt could arise from the interpretation of “applying” as equivalent to “taking,” but the natural reading in the context of GRE testing treats an applicant as a prospective taker, which the premises intend. Hence confidence remains high but not absolute.
+
+**Final Judgment**: The base LLM’s answer is correct.
+
+Confidence: 72%
+---
+S2 Parsed Confidence: 72.0%
+S2 Escalate Decision: True (Threshold: 80.0%)
+S2 Label Assignment: FP
+S2 Tokens: 948 | Latency: 5570.8ms

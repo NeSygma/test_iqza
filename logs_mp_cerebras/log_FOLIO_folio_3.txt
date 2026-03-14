@@ -1,0 +1,607 @@
+=== PUZZLE ID: folio_3 (FOLIO - NLI) ===
+Question / Context:
+Given the following premises:
+- All employees who schedule a meeting with their customers will go to the company building today.
+- Everyone who has lunch in the company building schedules meetings with their customers.
+- Employees have lunch either in the company building or at home.
+- If an employee has lunch at home, they are working remotely from home.
+- All employees who are in other countries work remotely from home.
+- No managers work remotely from home.
+- James will appear in the company today if and only if he is a manager.
+
+Conclusion: James has lunch in the company.
+
+Based on the premises, is the conclusion True, False, or Uncertain?
+---
+Ground Truth Solution: Uncertain
+
+============================================================
+=== SYSTEM 1 (STANDARD CoT) ===
+--- S1 PROMPT ---
+PROBLEM:
+Given the following premises:
+- All employees who schedule a meeting with their customers will go to the company building today.
+- Everyone who has lunch in the company building schedules meetings with their customers.
+- Employees have lunch either in the company building or at home.
+- If an employee has lunch at home, they are working remotely from home.
+- All employees who are in other countries work remotely from home.
+- No managers work remotely from home.
+- James will appear in the company today if and only if he is a manager.
+
+Conclusion: James has lunch in the company.
+
+Based on the premises, is the conclusion True, False, or Uncertain?
+
+Solve the logical reasoning problem above. Think step by step to derive your answer.
+After you finish your reasoning, you MUST output your final answer as EXACTLY this JSON format (and nothing else after the JSON):
+{"answer": "<True/False/Uncertain>"}
+
+--- S1 RESPONSE ---
+Let's analyze the premises step by step to determine whether the conclusion "James has lunch in the company" is True, False, or Uncertain.
+
+---
+
+**Premise 1:** All employees who schedule a meeting with their customers will go to the company building today.  
+Formally:  
+If an employee schedules a meeting → they go to the company building.
+
+**Premise 2:** Everyone who has lunch in the company building schedules meetings with their customers.  
+Formally:  
+If an employee has lunch in the company building → they schedule meetings with customers.
+
+**Premise 3:** Employees have lunch either in the company building or at home.  
+So, for any employee, lunch is either in the building or at home (no other options).
+
+**Premise 4:** If an employee has lunch at home, they are working remotely from home.  
+Formally:  
+Lunch at home → working remotely from home.
+
+**Premise 5:** All employees who are in other countries work remotely from home.  
+This may not directly apply unless we know James's location.
+
+**Premise 6:** No managers work remotely from home.  
+Formally:  
+If someone is a manager → they do NOT work remotely from home.  
+Contrapositive: If someone works remotely from home → they are NOT a manager.
+
+**Premise 7:** James will appear in the company today if and only if he is a manager.  
+Formally:  
+James appears in company ↔ James is a manager.
+
+We are to evaluate:  
+**Conclusion:** James has lunch in the company building.
+
+---
+
+Let’s suppose for contradiction that **James does not have lunch in the company building**.
+
+From **Premise 3**, if he doesn’t have lunch in the company, then he has lunch at home.
+
+From **Premise 4**, if he has lunch at home → he is working remotely from home.
+
+So: James is working remotely from home.
+
+From **Premise 6**, no managers work remotely from home. So if James is working remotely, then he is **not** a manager.
+
+So James is **not a manager**.
+
+Now, from **Premise 7**: James appears in company ↔ James is a manager.
+
+Since James is **not** a manager, he does **not** appear in the company today.
+
+So James will **not** appear in the company.
+
+Now, let’s consider the chain of reasoning backward.
+
+We want to see if James **has** lunch in the company.
+
+Suppose instead that James **does** have lunch in the company.
+
+Then from **Premise 2**, he schedules meetings with customers.
+
+Then from **Premise 1**, he will go to the company building today.
+
+So if James has lunch in the company → he goes to the building → he appears in the company.
+
+From **Premise 7**, James appears in the company ↔ he is a manager.
+
+So if James appears in the company, then he is a manager.
+
+So if James has lunch in the company → he appears in company → he is a manager.
+
+But we don’t yet know whether he is a manager.
+
+Let’s go back to the earlier assumption.
+
+We assumed James does **not** have lunch in the company → leads to:  
+→ lunch at home → working remotely → not a manager → from Premise 7, does **not** appear in company.
+
+Is that consistent?
+
+Yes, so far.
+
+But now, can we determine which case actually holds?
+
+We need to find out whether James appears in the company or not.
+
+But we are not told directly.
+
+Wait — let's consider the contrapositive chain.
+
+From Premise 6: No managers work remotely → all managers are **not** working remotely → so they are working **in** the office?
+
+But not necessarily — they could be in the office without working remotely, but we don’t know.
+
+But from Premise 4: lunch at home → working remotely.
+
+So if someone is **not** working remotely, then they do **not** have lunch at home → so they have lunch in the company.
+
+So:  
+Not working remotely → lunch in company building.
+
+And from Premise 6: managers do **not** work remotely → so managers have lunch in the company.
+
+So: **All managers have lunch in the company building.**
+
+Now, from Premise 7: James appears in company ↔ James is a manager.
+
+Suppose James **is** a manager.
+
+Then he appears in company → so he goes to the building.
+
+Also, since he is a manager, he does not work remotely → so he does not have lunch at home → so he has lunch in the company.
+
+So: if James is a manager → he has lunch in the company.
+
+Suppose James is **not** a manager.
+
+Then from Premise 7, he does **not** appear in the company.
+
+So James does **not** go to the building.
+
+Now, if he had lunch in the company building, then from Premise 2, he schedules meetings, and from Premise 1, he would go to the building.
+
+But we just said he does **not** go to the building.
+
+So he **cannot** have lunch in the company building (because that would imply he goes to the building).
+
+Therefore, if James is not a manager → he does not go to building → he cannot have lunch in the building → so he has lunch at home.
+
+But then from Premise 4, he is working remotely.
+
+And from Premise 6: no managers work remotely → but James is not a manager, so that’s fine.
+
+So both cases seem logically possible?
+
+Wait — is there any contradiction?
+
+Let’s check:
+
+Case 1: James is a manager.
+
+Then:
+- He is not working remotely (Premise 6)
+- So he does not have lunch at home (Premise 4: lunch at home → remote)
+- So he has lunch in the company (Premise 3)
+- And from Premise 7, he appears in company — consistent.
+
+Case 2: James is not a manager.
+
+Then:
+- From Premise 7, he does **not** appear in the company.
+- So he does **not** go to the building.
+- Therefore, he cannot have lunch in the building (since that would require being in the building).
+- So he has lunch at home.
+- Then from Premise 4, he is working remotely.
+- But Premise 6 says no managers work remotely — but James is not a manager, so this is acceptable.
+
+So both cases are logically consistent with the premises?
+
+But the conclusion is: "James has lunch in the company."
+
+In Case 1: True  
+In Case 2: False
+
+So depending on whether James is a manager or not, the conclusion could be true or false.
+
+But do we know whether James is a manager?
+
+Premise 7 says: James appears in company **if and only if** he is a manager.
+
+But we are **not told** whether James appears in the company.
+
+So we don’t know if he is a manager.
+
+Therefore, we cannot determine whether he has lunch in the company.
+
+Wait — but let’s see if there’s a hidden contradiction.
+
+Suppose James has lunch in the company.
+
+Then from Premise 2: he schedules meetings.
+
+Then from Premise 1: he goes to the company building → so he appears in company.
+
+Then from Premise 7: he appears in company ↔ he is a manager → so he is a manager.
+
+So: lunch in company → James is a manager.
+
+Now, suppose James does **not** have lunch in the company.
+
+Then he has lunch at home → working remotely → not a manager (from Premise 6) → and from Premise 7, does not appear in company.
+
+No contradiction.
+
+So both possibilities are consistent.
+
+But is there any premise that forces James to appear in the company or not?
+
+No — we are not told.
+
+Therefore, we cannot determine whether James has lunch in the company.
+
+It depends on whether he is a manager, which is not specified.
+
+But wait — could we use the biconditional to infer something?
+
+No — without knowing one side, we can’t infer the other.
+
+So the truth of "James has lunch in the company" depends on unknown information.
+
+Therefore, the conclusion is **uncertain**.
+
+But let’s double-check.
+
+Is there any way the premises **force** James to be a manager or not?
+
+Suppose James has lunch in the company → then he is a manager.
+
+Suppose he doesn’t → he is not a manager.
+
+But nothing in the premises tells us about James's lunch, appearance, or managerial status.
+
+So all are consistent with both scenarios.
+
+Hence, we cannot determine the truth of the conclusion.
+
+Final answer: **Uncertain**
+
+{"answer": "Uncertain"}
+---
+S1 Parsed Answer: {'answer': 'Uncertain'}
+S1 Valid/Parse Success: True
+S1 Correct: True
+S1 Tokens: 1824 | Latency: 2040.3ms
+
+============================================================
+=== SYSTEM 2 (MP EVALUATOR / JUDGE) ===
+--- S2 PROMPT ---
+PROBLEM:
+Given the following premises:
+- All employees who schedule a meeting with their customers will go to the company building today.
+- Everyone who has lunch in the company building schedules meetings with their customers.
+- Employees have lunch either in the company building or at home.
+- If an employee has lunch at home, they are working remotely from home.
+- All employees who are in other countries work remotely from home.
+- No managers work remotely from home.
+- James will appear in the company today if and only if he is a manager.
+
+Conclusion: James has lunch in the company.
+
+Based on the premises, is the conclusion True, False, or Uncertain?
+
+SYSTEM 1 ANSWER (For Evaluation):
+Let's analyze the premises step by step to determine whether the conclusion "James has lunch in the company" is True, False, or Uncertain.
+
+---
+
+**Premise 1:** All employees who schedule a meeting with their customers will go to the company building today.  
+Formally:  
+If an employee schedules a meeting → they go to the company building.
+
+**Premise 2:** Everyone who has lunch in the company building schedules meetings with their customers.  
+Formally:  
+If an employee has lunch in the company building → they schedule meetings with customers.
+
+**Premise 3:** Employees have lunch either in the company building or at home.  
+So, for any employee, lunch is either in the building or at home (no other options).
+
+**Premise 4:** If an employee has lunch at home, they are working remotely from home.  
+Formally:  
+Lunch at home → working remotely from home.
+
+**Premise 5:** All employees who are in other countries work remotely from home.  
+This may not directly apply unless we know James's location.
+
+**Premise 6:** No managers work remotely from home.  
+Formally:  
+If someone is a manager → they do NOT work remotely from home.  
+Contrapositive: If someone works remotely from home → they are NOT a manager.
+
+**Premise 7:** James will appear in the company today if and only if he is a manager.  
+Formally:  
+James appears in company ↔ James is a manager.
+
+We are to evaluate:  
+**Conclusion:** James has lunch in the company building.
+
+---
+
+Let’s suppose for contradiction that **James does not have lunch in the company building**.
+
+From **Premise 3**, if he doesn’t have lunch in the company, then he has lunch at home.
+
+From **Premise 4**, if he has lunch at home → he is working remotely from home.
+
+So: James is working remotely from home.
+
+From **Premise 6**, no managers work remotely from home. So if James is working remotely, then he is **not** a manager.
+
+So James is **not a manager**.
+
+Now, from **Premise 7**: James appears in company ↔ James is a manager.
+
+Since James is **not** a manager, he does **not** appear in the company today.
+
+So James will **not** appear in the company.
+
+Now, let’s consider the chain of reasoning backward.
+
+We want to see if James **has** lunch in the company.
+
+Suppose instead that James **does** have lunch in the company.
+
+Then from **Premise 2**, he schedules meetings with customers.
+
+Then from **Premise 1**, he will go to the company building today.
+
+So if James has lunch in the company → he goes to the building → he appears in the company.
+
+From **Premise 7**, James appears in the company ↔ he is a manager.
+
+So if James appears in the company, then he is a manager.
+
+So if James has lunch in the company → he appears in company → he is a manager.
+
+But we don’t yet know whether he is a manager.
+
+Let’s go back to the earlier assumption.
+
+We assumed James does **not** have lunch in the company → leads to:  
+→ lunch at home → working remotely → not a manager → from Premise 7, does **not** appear in company.
+
+Is that consistent?
+
+Yes, so far.
+
+But now, can we determine which case actually holds?
+
+We need to find out whether James appears in the company or not.
+
+But we are not told directly.
+
+Wait — let's consider the contrapositive chain.
+
+From Premise 6: No managers work remotely → all managers are **not** working remotely → so they are working **in** the office?
+
+But not necessarily — they could be in the office without working remotely, but we don’t know.
+
+But from Premise 4: lunch at home → working remotely.
+
+So if someone is **not** working remotely, then they do **not** have lunch at home → so they have lunch in the company.
+
+So:  
+Not working remotely → lunch in company building.
+
+And from Premise 6: managers do **not** work remotely → so managers have lunch in the company.
+
+So: **All managers have lunch in the company building.**
+
+Now, from Premise 7: James appears in company ↔ James is a manager.
+
+Suppose James **is** a manager.
+
+Then he appears in company → so he goes to the building.
+
+Also, since he is a manager, he does not work remotely → so he does not have lunch at home → so he has lunch in the company.
+
+So: if James is a manager → he has lunch in the company.
+
+Suppose James is **not** a manager.
+
+Then from Premise 7, he does **not** appear in the company.
+
+So James does **not** go to the building.
+
+Now, if he had lunch in the company building, then from Premise 2, he schedules meetings, and from Premise 1, he would go to the building.
+
+But we just said he does **not** go to the building.
+
+So he **cannot** have lunch in the company building (because that would imply he goes to the building).
+
+Therefore, if James is not a manager → he does not go to building → he cannot have lunch in the building → so he has lunch at home.
+
+But then from Premise 4, he is working remotely.
+
+And from Premise 6: no managers work remotely → but James is not a manager, so that’s fine.
+
+So both cases seem logically possible?
+
+Wait — is there any contradiction?
+
+Let’s check:
+
+Case 1: James is a manager.
+
+Then:
+- He is not working remotely (Premise 6)
+- So he does not have lunch at home (Premise 4: lunch at home → remote)
+- So he has lunch in the company (Premise 3)
+- And from Premise 7, he appears in company — consistent.
+
+Case 2: James is not a manager.
+
+Then:
+- From Premise 7, he does **not** appear in the company.
+- So he does **not** go to the building.
+- Therefore, he cannot have lunch in the building (since that would require being in the building).
+- So he has lunch at home.
+- Then from Premise 4, he is working remotely.
+- But Premise 6 says no managers work remotely — but James is not a manager, so this is acceptable.
+
+So both cases are logically consistent with the premises?
+
+But the conclusion is: "James has lunch in the company."
+
+In Case 1: True  
+In Case 2: False
+
+So depending on whether James is a manager or not, the conclusion could be true or false.
+
+But do we know whether James is a manager?
+
+Premise 7 says: James appears in company **if and only if** he is a manager.
+
+But we are **not told** whether James appears in the company.
+
+So we don’t know if he is a manager.
+
+Therefore, we cannot determine whether he has lunch in the company.
+
+Wait — but let’s see if there’s a hidden contradiction.
+
+Suppose James has lunch in the company.
+
+Then from Premise 2: he schedules meetings.
+
+Then from Premise 1: he goes to the company building → so he appears in company.
+
+Then from Premise 7: he appears in company ↔ he is a manager → so he is a manager.
+
+So: lunch in company → James is a manager.
+
+Now, suppose James does **not** have lunch in the company.
+
+Then he has lunch at home → working remotely → not a manager (from Premise 6) → and from Premise 7, does not appear in company.
+
+No contradiction.
+
+So both possibilities are consistent.
+
+But is there any premise that forces James to appear in the company or not?
+
+No — we are not told.
+
+Therefore, we cannot determine whether James has lunch in the company.
+
+It depends on whether he is a manager, which is not specified.
+
+But wait — could we use the biconditional to infer something?
+
+No — without knowing one side, we can’t infer the other.
+
+So the truth of "James has lunch in the company" depends on unknown information.
+
+Therefore, the conclusion is **uncertain**.
+
+But let’s double-check.
+
+Is there any way the premises **force** James to be a manager or not?
+
+Suppose James has lunch in the company → then he is a manager.
+
+Suppose he doesn’t → he is not a manager.
+
+But nothing in the premises tells us about James's lunch, appearance, or managerial status.
+
+So all are consistent with both scenarios.
+
+Hence, we cannot determine the truth of the conclusion.
+
+Final answer: **Uncertain**
+
+{"answer": "Uncertain"}
+
+Follow your system instructions to complete the 5 Metacognitive stages evaluating the provided SYSTEM 1 ANSWER.
+After completing all stages, output your confidence score in EXACTLY this format on a new line:
+Confidence: <number between 0 and 100>%
+
+--- S2 RESPONSE ---
+Stage 1 — Comprehension & Formalization:  
+The premises describe a set of logical relationships involving employees, managers, meeting scheduling, lunch location, remote work, presence in the company building, and James’s appearance tied to his managerial status. The conclusion is: "James has lunch in the company."  
+The base LLM (SYSTEM 1) attempts to evaluate this by exploring both possibilities (James has lunch in company / at home), deriving implications via modus ponens and contraposition, and checking for contradictions. It correctly identifies that the biconditional in Premise 7 links James’s presence to his managerial status, and that lunch location determines remote work status, which in turn constrains managerial status via Premise 6.  
+It concludes "Uncertain" because neither James’s managerial status nor his presence is given, and both cases (manager / not manager) are internally consistent with the premises.
+
+No hallucinations are present. All inferences are based strictly on the premises. The LLM does not introduce external assumptions.
+
+Stage 2 — Preliminary Logical Modeling:  
+Let me reconstruct the logic independently.
+
+Let:  
+- $ M(x) $: x is a manager  
+- $ L_C(x) $: x has lunch in company building  
+- $ L_H(x) $: x has lunch at home  
+- $ R(x) $: x works remotely from home  
+- $ A(x) $: x appears in company today  
+- $ S(x) $: x schedules meetings with customers  
+- $ G(x) $: x goes to company building today  
+
+From premises:  
+1. $ S(x) \rightarrow G(x) $  
+2. $ L_C(x) \rightarrow S(x) $  
+3. $ L_C(x) \lor L_H(x) $, exclusive (implied by "either...or")  
+4. $ L_H(x) \rightarrow R(x) $  
+5. $ \text{InOtherCountry}(x) \rightarrow R(x) $ — irrelevant unless location known  
+6. $ M(x) \rightarrow \neg R(x) $, so $ R(x) \rightarrow \neg M(x) $  
+7. $ A(x) \leftrightarrow M(x) $ for James  
+
+Also, being in the building ($ G(x) $) implies $ A(x) $, likely synonymous. Assume $ G(x) \equiv A(x) $ for presence.
+
+Now, chain implications:  
+From (2) and (1): $ L_C(x) \rightarrow S(x) \rightarrow G(x) \rightarrow A(x) $  
+So $ L_C(x) \rightarrow A(x) $
+
+From (3) and (4): $ L_H(x) \rightarrow R(x) $  
+From (6): $ R(x) \rightarrow \neg M(x) $  
+So $ L_H(x) \rightarrow \neg M(x) $
+
+From (7): $ A(x) \leftrightarrow M(x) $, so for James:  
+$ A(\text{James}) \leftrightarrow M(\text{James}) $
+
+Now consider $ L_C(\text{James}) $?  
+
+Suppose $ L_C(\text{James}) $:  
+Then $ A(\text{James}) $, so $ M(\text{James}) $ — consistent with (6), since $ M \rightarrow \neg R $, and $ L_C $ implies not $ L_H $, so not $ R $.
+
+Suppose $ \neg L_C(\text{James}) $: then $ L_H(\text{James}) \rightarrow R(\text{James}) \rightarrow \neg M(\text{James}) \rightarrow \neg A(\text{James}) $
+
+No contradiction in either case. Both are consistent.
+
+Thus, $ L_C(\text{James}) $ is not entailed nor contradicted.
+
+Therefore, conclusion is **Uncertain**.
+
+Stage 3 — Critical Deductive Evaluation:  
+The base LLM’s reasoning mirrors this exact structure. It explores both cases, checks for contradictions, and correctly identifies that no premise forces James’s status. It avoids affirming the consequent or denying the antecedent. It correctly uses contrapositives (e.g., from $ R \rightarrow \neg M $, infers that remote implies not manager).  
+It also correctly notes that $ L_C \rightarrow A \rightarrow M $, and $ \neg L_C \rightarrow L_H \rightarrow R \rightarrow \neg M \rightarrow \neg A $, and that both chains are consistent.  
+No logical fallacies detected. The LLM does not overcommit. It resists the temptation to assume James is a manager or appears in the office.
+
+Stage 4 — Decision Confirmation:  
+The base LLM’s conclusion "Uncertain" is strictly entailed by the premises. The truth value of the conclusion depends on an unknown (James’s managerial status), which is not determined by any given information.  
+All paths are explored, and no hidden constraint forces a single outcome. The biconditional in Premise 7 does not resolve uncertainty without additional data.
+
+Stage 5 — Confidence & Soundness Assessment:  
+The LLM’s reasoning is dense, correct, and complete. It avoids overconfidence, explicitly considers both cases, and justifies the uncertainty.  
+My own derivation matches exactly. No hallucinations, no gaps.  
+However, as per metacognitive humility: could I have missed a constraint?  
+For example, does "go to the company building" imply "has lunch there"? No — Premise 1 only says meeting schedulers go, but doesn’t say they eat there. Similarly, someone could go and leave before lunch. So no reverse implication.  
+Is there a way Premise 5 (other countries → remote) helps? Only if James is abroad — but no info. Irrelevant.  
+Thus, no hidden link.
+
+Confidence: 95%  
+(The 5% reduction is due to inherent LLM risk of missing subtle modal or exclusive disjunction nuances, though none appear here.)
+---
+S2 Parsed Confidence: 95.0%
+S2 Escalate Decision: False (Threshold: 80.0%)
+S2 Label Assignment: TN
+S2 Tokens: 1250 | Latency: 1752.0ms

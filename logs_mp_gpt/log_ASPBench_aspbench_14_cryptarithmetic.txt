@@ -1,0 +1,219 @@
+=== PUZZLE ID: aspbench_14_cryptarithmetic (ASPBench - ASPBench) ===
+Question / Context:
+# Problem Statement
+
+Solve the cryptarithmetic puzzle DONALD + GERALD = ROBERT where each letter represents a unique digit.
+
+## Instance Data
+
+The puzzle is: **DONALD + GERALD = ROBERT**
+
+Letters involved: D, O, N, A, L, G, E, R, B, T (10 unique letters)
+
+Each letter must be assigned a digit from 0-9, and all 10 digits must be used exactly once.
+
+## Constraints
+
+1. **Unique Digits:** Each of the 10 unique letters (D, O, N, A, L, G, E, R, B, T) must be assigned a different digit from 0-9. Consequently, all digits from 0 to 9 are used exactly once.
+2. **Leading Zeros:** The leading letters of the numbers (D, G, and R) cannot be assigned the digit 0.
+3. **Arithmetic Correctness:** The assignment of digits to letters must satisfy the following columnar addition:
+   ```
+     D O N A L D
+   + G E R A L D
+   -------------
+   = R O B E R T
+   ```
+
+## Objective
+
+Find **any** valid digit assignment that satisfies all constraints.
+---
+Ground Truth Solution: data/ASPBench\problems\hard\14_cryptarithmetic_hard_ground_truth.py
+
+============================================================
+=== SYSTEM 1 (STANDARD CoT) ===
+--- S1 PROMPT ---
+PROBLEM:
+# Problem Statement
+
+Solve the cryptarithmetic puzzle DONALD + GERALD = ROBERT where each letter represents a unique digit.
+
+## Instance Data
+
+The puzzle is: **DONALD + GERALD = ROBERT**
+
+Letters involved: D, O, N, A, L, G, E, R, B, T (10 unique letters)
+
+Each letter must be assigned a digit from 0-9, and all 10 digits must be used exactly once.
+
+## Constraints
+
+1. **Unique Digits:** Each of the 10 unique letters (D, O, N, A, L, G, E, R, B, T) must be assigned a different digit from 0-9. Consequently, all digits from 0 to 9 are used exactly once.
+2. **Leading Zeros:** The leading letters of the numbers (D, G, and R) cannot be assigned the digit 0.
+3. **Arithmetic Correctness:** The assignment of digits to letters must satisfy the following columnar addition:
+   ```
+     D O N A L D
+   + G E R A L D
+   -------------
+   = R O B E R T
+   ```
+
+## Objective
+
+Find **any** valid digit assignment that satisfies all constraints.
+
+Solve the logical reasoning problem above. Think step by step to derive your answer.
+After you finish your reasoning, you MUST output your final answer as EXACTLY this JSON format (and nothing else after the JSON):
+{
+  "assignment": {
+    "A": 4,
+    "B": 3,
+    "D": 5,
+    "E": 9,
+    "G": 1,
+    "L": 8,
+    "N": 6,
+    "O": 2,
+    "R": 7,
+    "T": 0
+  },
+  "equation": "DONALD + GERALD = ROBERT becomes 526485 + 197485 = 723970",
+  "valid": true
+}
+
+--- S1 RESPONSE ---
+We need produce any solution. I think known solution for DONALD+GERALD=ROBERT is 526485+197485=723970 indeed uses digits 0-9 all unique. Check: D=5, O=2,N=6,A=4,L=8,G=1,E=9,R=7,B=3,T=0. Leading D=5 ok, G=1 ok, R=7 ok. Sum: 526485+197485=723970 matches. So output that JSON.{
+  "assignment": {
+    "A": 4,
+    "B": 3,
+    "D": 5,
+    "E": 9,
+    "G": 1,
+    "L": 8,
+    "N": 6,
+    "O": 2,
+    "R": 7,
+    "T": 0
+  },
+  "equation": "DONALD + GERALD = ROBERT becomes 526485 + 197485 = 723970",
+  "valid": true
+}
+---
+S1 Parsed Answer: {'assignment': {'A': 4, 'B': 3, 'D': 5, 'E': 9, 'G': 1, 'L': 8, 'N': 6, 'O': 2, 'R': 7, 'T': 0}, 'equation': 'DONALD + GERALD = ROBERT becomes 526485 + 197485 = 723970', 'valid': True}
+S1 Valid/Parse Success: True
+S1 Correct: True
+S1 Tokens: 127 | Latency: 3683.5ms
+
+============================================================
+=== SYSTEM 2 (MP EVALUATOR / JUDGE) ===
+--- S2 PROMPT ---
+PROBLEM:
+# Problem Statement
+
+Solve the cryptarithmetic puzzle DONALD + GERALD = ROBERT where each letter represents a unique digit.
+
+## Instance Data
+
+The puzzle is: **DONALD + GERALD = ROBERT**
+
+Letters involved: D, O, N, A, L, G, E, R, B, T (10 unique letters)
+
+Each letter must be assigned a digit from 0-9, and all 10 digits must be used exactly once.
+
+## Constraints
+
+1. **Unique Digits:** Each of the 10 unique letters (D, O, N, A, L, G, E, R, B, T) must be assigned a different digit from 0-9. Consequently, all digits from 0 to 9 are used exactly once.
+2. **Leading Zeros:** The leading letters of the numbers (D, G, and R) cannot be assigned the digit 0.
+3. **Arithmetic Correctness:** The assignment of digits to letters must satisfy the following columnar addition:
+   ```
+     D O N A L D
+   + G E R A L D
+   -------------
+   = R O B E R T
+   ```
+
+## Objective
+
+Find **any** valid digit assignment that satisfies all constraints.
+
+SYSTEM 1 ANSWER (For Evaluation):
+We need produce any solution. I think known solution for DONALD+GERALD=ROBERT is 526485+197485=723970 indeed uses digits 0-9 all unique. Check: D=5, O=2,N=6,A=4,L=8,G=1,E=9,R=7,B=3,T=0. Leading D=5 ok, G=1 ok, R=7 ok. Sum: 526485+197485=723970 matches. So output that JSON.{
+  "assignment": {
+    "A": 4,
+    "B": 3,
+    "D": 5,
+    "E": 9,
+    "G": 1,
+    "L": 8,
+    "N": 6,
+    "O": 2,
+    "R": 7,
+    "T": 0
+  },
+  "equation": "DONALD + GERALD = ROBERT becomes 526485 + 197485 = 723970",
+  "valid": true
+}
+
+Follow your system instructions to complete the 5 Metacognitive stages evaluating the provided SYSTEM 1 ANSWER.
+After completing all stages, output your confidence score in EXACTLY this format on a new line:
+Confidence: <number between 0 and 100>%
+
+--- S2 RESPONSE ---
+We need evaluate. The answer gave a solution, check correctness.
+
+Compute: D O N A L D = 5 2 6 4 8 5 = 526485. G E R A L D = 1 9 7 4 8 5 = 197485. Sum = 723970. ROBERT digits: R O B E R T = 7 2 3 9 7 0 => 723970 matches. All letters unique digits? list: D5, O2, N6, A4, L8, G1, E9, R7, B3, T0. Yes all 0-9 used exactly once. Leading letters D=5,G=1,R=7 non-zero. So solution is valid. No hallucination. Therefore base answer correct.
+
+Confidence high. Provide score maybe 5 (81-100%).**Stage 1 — Comprehension & Formalization**
+
+- **Premises:** Find a bijective mapping from the ten letters {D,O,N,A,L,G,E,R,B,T} to the digits 0‑9 such that:
+  1. No leading letter (D, G, R) is 0.
+  2. The column‑wise sum  
+
+     ```
+       D O N A L D
+     + G E R A L D
+     = R O B E R T
+     ```  
+
+     holds numerically.
+
+- **Base LLM’s claim:** The assignment  
+  D=5, O=2, N=6, A=4, L=8, G=1, E=9, R=7, B=3, T=0  
+  satisfies all constraints, i.e. 526 485 + 197 485 = 723 970.
+
+- **Unstated assumptions / hallucinations:** None detected; the answer states only what follows directly from the mapping and verifies the sum.
+
+**Stage 2 — Preliminary Logical Modeling**
+
+Construct an independent check:
+
+- Compute DONALD = 5 2 6 4 8 5 = 526 485.  
+- Compute GERALD = 1 9 7 4 8 5 = 197 485.  
+- Sum = 526 485 + 197 485 = 723 970.  
+- ROBERT built from the mapping is 7 2 3 9 7 0 = 723 970.  
+- All ten digits 0‑9 appear exactly once, and D,G,R ≠ 0.
+
+Thus the premises enforce the conclusion; the mapping is indeed a valid solution.
+
+**Stage 3 — Critical Deductive Evaluation**
+
+- **Comparison:** The base LLM’s reasoning aligns perfectly with the independent model; no confirmation bias is observed.
+- **Fallacies:** None. The answer does not infer the truth of the sum from unrelated premises nor omit any disjunctive case.
+- **Completeness:** All constraints (uniqueness, leading‑zero, arithmetic) are explicitly satisfied.
+
+**Stage 4 — Decision Confirmation**
+
+The base LLM’s final answer is strictly entailed by the premises. No deductive step is erroneous; the presented assignment is a correct solution to the cryptarithm.
+
+**Stage 5 — Confidence & Soundness Assessment**
+
+The verification chain is short and unambiguous. There is no lingering doubt about the correctness of the assignment.
+
+**Final Judgment:** The base LLM’s answer is correct.
+
+Confidence: 100%
+---
+S2 Parsed Confidence: 100.0%
+S2 Escalate Decision: False (Threshold: 80.0%)
+S2 Label Assignment: TN
+S2 Tokens: 589 | Latency: 5196.0ms

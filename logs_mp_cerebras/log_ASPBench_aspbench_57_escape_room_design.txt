@@ -1,0 +1,732 @@
+=== PUZZLE ID: aspbench_57_escape_room_design (ASPBench - ASPBench) ===
+Question / Context:
+# Problem Statement
+
+Design a multi-room escape experience with 18 puzzles. The design must create a cohesive player journey by managing puzzle dependencies, item collection, room progression, thematic balance, and a smooth difficulty curve.
+
+## Instance Data
+
+### Room Layout
+- **5 rooms** arranged linearly: R1-R2-R3-R4-R5
+- Players can only move between **adjacent rooms** (e.g., R1↔R2, R2↔R3, R3↔R4, R4↔R5)
+
+### Puzzle Specifications
+18 puzzles with the following properties:
+
+| ID | Room | Difficulty | Theme | Prerequisites | Requires Items | Yields Items |
+|----|------|------------|-------|---------------|----------------|--------------|
+| 1 | R1 | 1 | search | - | - | - |
+| 2 | R1 | 1 | logic | [1] | - | key_red |
+| 3 | R2 | 2 | physical | [2] | - | - |
+| 4 | R2 | 2 | search | [3] | key_red | - |
+| 5 | R2 | 2 | logic | [4] | - | uv_light |
+| 6 | R1 | 3 | search | [5] | uv_light | - |
+| 7 | R1 | 3 | logic | [6] | - | key_blue |
+| 8 | R2 | 3 | physical | [7] | - | crowbar |
+| 9 | R3 | 3 | search | [8] | key_blue | - |
+| 10 | R4 | 3 | physical | [9] | crowbar | - |
+| 11 | R4 | 4 | logic | [10] | - | - |
+| 12 | R3 | 4 | search | [11] | uv_light | - |
+| 13 | R3 | 4 | logic | [12] | - | gear_1 |
+| 14 | R4 | 4 | search | [13] | - | - |
+| 15 | R5 | 4 | physical | [14] | crowbar | gear_2 |
+| 16 | R5 | 5 | logic | [15] | - | - |
+| 17 | R5 | 5 | search | [16] | uv_light | gear_3 |
+| 18 | R5 | 5 | logic | [17] | key_red, key_blue | - |
+
+### Items
+- **key_red**: yielded by puzzle 2, required by puzzles 4 and 18
+- **key_blue**: yielded by puzzle 7, required by puzzles 9 and 18
+- **uv_light**: yielded by puzzle 5, required by puzzles 6, 12, and 17
+- **crowbar**: yielded by puzzle 8, required by puzzles 10 and 15
+- **gear_1, gear_2, gear_3**: yielded by puzzles 13, 15, and 17 (not required by any puzzle)
+
+## Constraints
+
+1. **Prerequisite Constraint**: A puzzle can only be solved after all its prerequisite puzzles have been completed.
+
+2. **Item Requirement Constraint**: A puzzle that requires items can only be solved when all required items are in the player's inventory.
+
+3. **Room Adjacency Constraint**: Players can only move between adjacent rooms. The room of puzzle N and puzzle N+1 must be either the same or adjacent.
+
+4. **Theme Balance Constraint**: No two consecutive puzzles can have the same theme.
+
+5. **Difficulty Curve Constraint**: The difficulty difference between consecutive puzzles must be at most 1.
+
+## Objective
+
+Find **any** valid puzzle ordering that satisfies all constraints.
+---
+Ground Truth Solution: data/ASPBench\problems\hard\57_escape_room_design_hard_ground_truth.py
+
+============================================================
+=== SYSTEM 1 (STANDARD CoT) ===
+--- S1 PROMPT ---
+PROBLEM:
+# Problem Statement
+
+Design a multi-room escape experience with 18 puzzles. The design must create a cohesive player journey by managing puzzle dependencies, item collection, room progression, thematic balance, and a smooth difficulty curve.
+
+## Instance Data
+
+### Room Layout
+- **5 rooms** arranged linearly: R1-R2-R3-R4-R5
+- Players can only move between **adjacent rooms** (e.g., R1↔R2, R2↔R3, R3↔R4, R4↔R5)
+
+### Puzzle Specifications
+18 puzzles with the following properties:
+
+| ID | Room | Difficulty | Theme | Prerequisites | Requires Items | Yields Items |
+|----|------|------------|-------|---------------|----------------|--------------|
+| 1 | R1 | 1 | search | - | - | - |
+| 2 | R1 | 1 | logic | [1] | - | key_red |
+| 3 | R2 | 2 | physical | [2] | - | - |
+| 4 | R2 | 2 | search | [3] | key_red | - |
+| 5 | R2 | 2 | logic | [4] | - | uv_light |
+| 6 | R1 | 3 | search | [5] | uv_light | - |
+| 7 | R1 | 3 | logic | [6] | - | key_blue |
+| 8 | R2 | 3 | physical | [7] | - | crowbar |
+| 9 | R3 | 3 | search | [8] | key_blue | - |
+| 10 | R4 | 3 | physical | [9] | crowbar | - |
+| 11 | R4 | 4 | logic | [10] | - | - |
+| 12 | R3 | 4 | search | [11] | uv_light | - |
+| 13 | R3 | 4 | logic | [12] | - | gear_1 |
+| 14 | R4 | 4 | search | [13] | - | - |
+| 15 | R5 | 4 | physical | [14] | crowbar | gear_2 |
+| 16 | R5 | 5 | logic | [15] | - | - |
+| 17 | R5 | 5 | search | [16] | uv_light | gear_3 |
+| 18 | R5 | 5 | logic | [17] | key_red, key_blue | - |
+
+### Items
+- **key_red**: yielded by puzzle 2, required by puzzles 4 and 18
+- **key_blue**: yielded by puzzle 7, required by puzzles 9 and 18
+- **uv_light**: yielded by puzzle 5, required by puzzles 6, 12, and 17
+- **crowbar**: yielded by puzzle 8, required by puzzles 10 and 15
+- **gear_1, gear_2, gear_3**: yielded by puzzles 13, 15, and 17 (not required by any puzzle)
+
+## Constraints
+
+1. **Prerequisite Constraint**: A puzzle can only be solved after all its prerequisite puzzles have been completed.
+
+2. **Item Requirement Constraint**: A puzzle that requires items can only be solved when all required items are in the player's inventory.
+
+3. **Room Adjacency Constraint**: Players can only move between adjacent rooms. The room of puzzle N and puzzle N+1 must be either the same or adjacent.
+
+4. **Theme Balance Constraint**: No two consecutive puzzles can have the same theme.
+
+5. **Difficulty Curve Constraint**: The difficulty difference between consecutive puzzles must be at most 1.
+
+## Objective
+
+Find **any** valid puzzle ordering that satisfies all constraints.
+
+Solve the logical reasoning problem above. Think step by step to derive your answer.
+After you finish your reasoning, you MUST output your final answer as EXACTLY this JSON format (and nothing else after the JSON):
+{
+  "puzzle_order": [1, 2, 3, ...],
+  "room_progression": ["R1", "R1", "R2", ...],
+  "difficulty_progression": [1, 1, 2, ...],
+  "theme_progression": ["search", "logic", "physical", ...],
+  "all_constraints_satisfied": true,
+  "puzzle_details": [
+    {"puzzle_id": 1, "room": "R1", "difficulty": 1, "theme": "search", "prerequisites": [], "requires": [], "yields": []},
+    {"puzzle_id": 2, "room": "R1", "difficulty": 1, "theme": "logic", "prerequisites": [1], "requires": [], "yields": ["key_red"]},
+    ...
+  ]
+}
+
+--- S1 RESPONSE ---
+{
+  "puzzle_order": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
+  "room_progression": ["R1", "R1", "R2", "R2", "R2", "R1", "R1", "R2", "R3", "R4", "R4", "R3", "R3", "R4", "R5", "R5", "R5", "R5"],
+  "difficulty_progression": [1, 1, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 5, 5, 5],
+  "theme_progression": ["search", "logic", "physical", "search", "logic", "search", "logic", "physical", "search", "physical", "logic", "search", "logic", "search", "physical", "logic", "search", "logic"],
+  "all_constraints_satisfied": true,
+  "puzzle_details": [
+    {
+      "puzzle_id": 1,
+      "room": "R1",
+      "difficulty": 1,
+      "theme": "search",
+      "prerequisites": [],
+      "requires": [],
+      "yields": []
+    },
+    {
+      "puzzle_id": 2,
+      "room": "R1",
+      "difficulty": 1,
+      "theme": "logic",
+      "prerequisites": [1],
+      "requires": [],
+      "yields": ["key_red"]
+    },
+    {
+      "puzzle_id": 3,
+      "room": "R2",
+      "difficulty": 2,
+      "theme": "physical",
+      "prerequisites": [2],
+      "requires": [],
+      "yields": []
+    },
+    {
+      "puzzle_id": 4,
+      "room": "R2",
+      "difficulty": 2,
+      "theme": "search",
+      "prerequisites": [3],
+      "requires": ["key_red"],
+      "yields": []
+    },
+    {
+      "puzzle_id": 5,
+      "room": "R2",
+      "difficulty": 2,
+      "theme": "logic",
+      "prerequisites": [4],
+      "requires": [],
+      "yields": ["uv_light"]
+    },
+    {
+      "puzzle_id": 6,
+      "room": "R1",
+      "difficulty": 3,
+      "theme": "search",
+      "prerequisites": [5],
+      "requires": ["uv_light"],
+      "yields": []
+    },
+    {
+      "puzzle_id": 7,
+      "room": "R1",
+      "difficulty": 3,
+      "theme": "logic",
+      "prerequisites": [6],
+      "requires": [],
+      "yields": ["key_blue"]
+    },
+    {
+      "puzzle_id": 8,
+      "room": "R2",
+      "difficulty": 3,
+      "theme": "physical",
+      "prerequisites": [7],
+      "requires": [],
+      "yields": ["crowbar"]
+    },
+    {
+      "puzzle_id": 9,
+      "room": "R3",
+      "difficulty": 3,
+      "theme": "search",
+      "prerequisites": [8],
+      "requires": ["key_blue"],
+      "yields": []
+    },
+    {
+      "puzzle_id": 10,
+      "room": "R4",
+      "difficulty": 3,
+      "theme": "physical",
+      "prerequisites": [9],
+      "requires": ["crowbar"],
+      "yields": []
+    },
+    {
+      "puzzle_id": 11,
+      "room": "R4",
+      "difficulty": 4,
+      "theme": "logic",
+      "prerequisites": [10],
+      "requires": [],
+      "yields": []
+    },
+    {
+      "puzzle_id": 12,
+      "room": "R3",
+      "difficulty": 4,
+      "theme": "search",
+      "prerequisites": [11],
+      "requires": ["uv_light"],
+      "yields": []
+    },
+    {
+      "puzzle_id": 13,
+      "room": "R3",
+      "difficulty": 4,
+      "theme": "logic",
+      "prerequisites": [12],
+      "requires": [],
+      "yields": ["gear_1"]
+    },
+    {
+      "puzzle_id": 14,
+      "room": "R4",
+      "difficulty": 4,
+      "theme": "search",
+      "prerequisites": [13],
+      "requires": [],
+      "yields": []
+    },
+    {
+      "puzzle_id": 15,
+      "room": "R5",
+      "difficulty": 4,
+      "theme": "physical",
+      "prerequisites": [14],
+      "requires": ["crowbar"],
+      "yields": ["gear_2"]
+    },
+    {
+      "puzzle_id": 16,
+      "room": "R5",
+      "difficulty": 5,
+      "theme": "logic",
+      "prerequisites": [15],
+      "requires": [],
+      "yields": []
+    },
+    {
+      "puzzle_id": 17,
+      "room": "R5",
+      "difficulty": 5,
+      "theme": "search",
+      "prerequisites": [16],
+      "requires": ["uv_light"],
+      "yields": ["gear_3"]
+    },
+    {
+      "puzzle_id": 18,
+      "room": "R5",
+      "difficulty": 5,
+      "theme": "logic",
+      "prerequisites": [17],
+      "requires": ["key_red", "key_blue"],
+      "yields": []
+    }
+  ]
+}
+---
+S1 Parsed Answer: {'puzzle_order': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18], 'room_progression': ['R1', 'R1', 'R2', 'R2', 'R2', 'R1', 'R1', 'R2', 'R3', 'R4', 'R4', 'R3', 'R3', 'R4', 'R5', 'R5', 'R5', 'R5'], 'difficulty_progression': [1, 1, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 5, 5, 5], 'theme_progression': ['search', 'logic', 'physical', 'search', 'logic', 'search', 'logic', 'physical', 'search', 'physical', 'logic', 'search', 'logic', 'search', 'physical', 'logic', 'search', 'logic'], 'all_constraints_satisfied': True, 'puzzle_details': [{'puzzle_id': 1, 'room': 'R1', 'difficulty': 1, 'theme': 'search', 'prerequisites': [], 'requires': [], 'yields': []}, {'puzzle_id': 2, 'room': 'R1', 'difficulty': 1, 'theme': 'logic', 'prerequisites': [1], 'requires': [], 'yields': ['key_red']}, {'puzzle_id': 3, 'room': 'R2', 'difficulty': 2, 'theme': 'physical', 'prerequisites': [2], 'requires': [], 'yields': []}, {'puzzle_id': 4, 'room': 'R2', 'difficulty': 2, 'theme': 'search', 'prerequisites': [3], 'requires': ['key_red'], 'yields': []}, {'puzzle_id': 5, 'room': 'R2', 'difficulty': 2, 'theme': 'logic', 'prerequisites': [4], 'requires': [], 'yields': ['uv_light']}, {'puzzle_id': 6, 'room': 'R1', 'difficulty': 3, 'theme': 'search', 'prerequisites': [5], 'requires': ['uv_light'], 'yields': []}, {'puzzle_id': 7, 'room': 'R1', 'difficulty': 3, 'theme': 'logic', 'prerequisites': [6], 'requires': [], 'yields': ['key_blue']}, {'puzzle_id': 8, 'room': 'R2', 'difficulty': 3, 'theme': 'physical', 'prerequisites': [7], 'requires': [], 'yields': ['crowbar']}, {'puzzle_id': 9, 'room': 'R3', 'difficulty': 3, 'theme': 'search', 'prerequisites': [8], 'requires': ['key_blue'], 'yields': []}, {'puzzle_id': 10, 'room': 'R4', 'difficulty': 3, 'theme': 'physical', 'prerequisites': [9], 'requires': ['crowbar'], 'yields': []}, {'puzzle_id': 11, 'room': 'R4', 'difficulty': 4, 'theme': 'logic', 'prerequisites': [10], 'requires': [], 'yields': []}, {'puzzle_id': 12, 'room': 'R3', 'difficulty': 4, 'theme': 'search', 'prerequisites': [11], 'requires': ['uv_light'], 'yields': []}, {'puzzle_id': 13, 'room': 'R3', 'difficulty': 4, 'theme': 'logic', 'prerequisites': [12], 'requires': [], 'yields': ['gear_1']}, {'puzzle_id': 14, 'room': 'R4', 'difficulty': 4, 'theme': 'search', 'prerequisites': [13], 'requires': [], 'yields': []}, {'puzzle_id': 15, 'room': 'R5', 'difficulty': 4, 'theme': 'physical', 'prerequisites': [14], 'requires': ['crowbar'], 'yields': ['gear_2']}, {'puzzle_id': 16, 'room': 'R5', 'difficulty': 5, 'theme': 'logic', 'prerequisites': [15], 'requires': [], 'yields': []}, {'puzzle_id': 17, 'room': 'R5', 'difficulty': 5, 'theme': 'search', 'prerequisites': [16], 'requires': ['uv_light'], 'yields': ['gear_3']}, {'puzzle_id': 18, 'room': 'R5', 'difficulty': 5, 'theme': 'logic', 'prerequisites': [17], 'requires': ['key_red', 'key_blue'], 'yields': []}]}
+S1 Valid/Parse Success: True
+S1 Correct: True
+S1 Tokens: 1327 | Latency: 741.1ms
+
+============================================================
+=== SYSTEM 2 (MP EVALUATOR / JUDGE) ===
+--- S2 PROMPT ---
+PROBLEM:
+# Problem Statement
+
+Design a multi-room escape experience with 18 puzzles. The design must create a cohesive player journey by managing puzzle dependencies, item collection, room progression, thematic balance, and a smooth difficulty curve.
+
+## Instance Data
+
+### Room Layout
+- **5 rooms** arranged linearly: R1-R2-R3-R4-R5
+- Players can only move between **adjacent rooms** (e.g., R1↔R2, R2↔R3, R3↔R4, R4↔R5)
+
+### Puzzle Specifications
+18 puzzles with the following properties:
+
+| ID | Room | Difficulty | Theme | Prerequisites | Requires Items | Yields Items |
+|----|------|------------|-------|---------------|----------------|--------------|
+| 1 | R1 | 1 | search | - | - | - |
+| 2 | R1 | 1 | logic | [1] | - | key_red |
+| 3 | R2 | 2 | physical | [2] | - | - |
+| 4 | R2 | 2 | search | [3] | key_red | - |
+| 5 | R2 | 2 | logic | [4] | - | uv_light |
+| 6 | R1 | 3 | search | [5] | uv_light | - |
+| 7 | R1 | 3 | logic | [6] | - | key_blue |
+| 8 | R2 | 3 | physical | [7] | - | crowbar |
+| 9 | R3 | 3 | search | [8] | key_blue | - |
+| 10 | R4 | 3 | physical | [9] | crowbar | - |
+| 11 | R4 | 4 | logic | [10] | - | - |
+| 12 | R3 | 4 | search | [11] | uv_light | - |
+| 13 | R3 | 4 | logic | [12] | - | gear_1 |
+| 14 | R4 | 4 | search | [13] | - | - |
+| 15 | R5 | 4 | physical | [14] | crowbar | gear_2 |
+| 16 | R5 | 5 | logic | [15] | - | - |
+| 17 | R5 | 5 | search | [16] | uv_light | gear_3 |
+| 18 | R5 | 5 | logic | [17] | key_red, key_blue | - |
+
+### Items
+- **key_red**: yielded by puzzle 2, required by puzzles 4 and 18
+- **key_blue**: yielded by puzzle 7, required by puzzles 9 and 18
+- **uv_light**: yielded by puzzle 5, required by puzzles 6, 12, and 17
+- **crowbar**: yielded by puzzle 8, required by puzzles 10 and 15
+- **gear_1, gear_2, gear_3**: yielded by puzzles 13, 15, and 17 (not required by any puzzle)
+
+## Constraints
+
+1. **Prerequisite Constraint**: A puzzle can only be solved after all its prerequisite puzzles have been completed.
+
+2. **Item Requirement Constraint**: A puzzle that requires items can only be solved when all required items are in the player's inventory.
+
+3. **Room Adjacency Constraint**: Players can only move between adjacent rooms. The room of puzzle N and puzzle N+1 must be either the same or adjacent.
+
+4. **Theme Balance Constraint**: No two consecutive puzzles can have the same theme.
+
+5. **Difficulty Curve Constraint**: The difficulty difference between consecutive puzzles must be at most 1.
+
+## Objective
+
+Find **any** valid puzzle ordering that satisfies all constraints.
+
+SYSTEM 1 ANSWER (For Evaluation):
+{
+  "puzzle_order": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
+  "room_progression": ["R1", "R1", "R2", "R2", "R2", "R1", "R1", "R2", "R3", "R4", "R4", "R3", "R3", "R4", "R5", "R5", "R5", "R5"],
+  "difficulty_progression": [1, 1, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 5, 5, 5],
+  "theme_progression": ["search", "logic", "physical", "search", "logic", "search", "logic", "physical", "search", "physical", "logic", "search", "logic", "search", "physical", "logic", "search", "logic"],
+  "all_constraints_satisfied": true,
+  "puzzle_details": [
+    {
+      "puzzle_id": 1,
+      "room": "R1",
+      "difficulty": 1,
+      "theme": "search",
+      "prerequisites": [],
+      "requires": [],
+      "yields": []
+    },
+    {
+      "puzzle_id": 2,
+      "room": "R1",
+      "difficulty": 1,
+      "theme": "logic",
+      "prerequisites": [1],
+      "requires": [],
+      "yields": ["key_red"]
+    },
+    {
+      "puzzle_id": 3,
+      "room": "R2",
+      "difficulty": 2,
+      "theme": "physical",
+      "prerequisites": [2],
+      "requires": [],
+      "yields": []
+    },
+    {
+      "puzzle_id": 4,
+      "room": "R2",
+      "difficulty": 2,
+      "theme": "search",
+      "prerequisites": [3],
+      "requires": ["key_red"],
+      "yields": []
+    },
+    {
+      "puzzle_id": 5,
+      "room": "R2",
+      "difficulty": 2,
+      "theme": "logic",
+      "prerequisites": [4],
+      "requires": [],
+      "yields": ["uv_light"]
+    },
+    {
+      "puzzle_id": 6,
+      "room": "R1",
+      "difficulty": 3,
+      "theme": "search",
+      "prerequisites": [5],
+      "requires": ["uv_light"],
+      "yields": []
+    },
+    {
+      "puzzle_id": 7,
+      "room": "R1",
+      "difficulty": 3,
+      "theme": "logic",
+      "prerequisites": [6],
+      "requires": [],
+      "yields": ["key_blue"]
+    },
+    {
+      "puzzle_id": 8,
+      "room": "R2",
+      "difficulty": 3,
+      "theme": "physical",
+      "prerequisites": [7],
+      "requires": [],
+      "yields": ["crowbar"]
+    },
+    {
+      "puzzle_id": 9,
+      "room": "R3",
+      "difficulty": 3,
+      "theme": "search",
+      "prerequisites": [8],
+      "requires": ["key_blue"],
+      "yields": []
+    },
+    {
+      "puzzle_id": 10,
+      "room": "R4",
+      "difficulty": 3,
+      "theme": "physical",
+      "prerequisites": [9],
+      "requires": ["crowbar"],
+      "yields": []
+    },
+    {
+      "puzzle_id": 11,
+      "room": "R4",
+      "difficulty": 4,
+      "theme": "logic",
+      "prerequisites": [10],
+      "requires": [],
+      "yields": []
+    },
+    {
+      "puzzle_id": 12,
+      "room": "R3",
+      "difficulty": 4,
+      "theme": "search",
+      "prerequisites": [11],
+      "requires": ["uv_light"],
+      "yields": []
+    },
+    {
+      "puzzle_id": 13,
+      "room": "R3",
+      "difficulty": 4,
+      "theme": "logic",
+      "prerequisites": [12],
+      "requires": [],
+      "yields": ["gear_1"]
+    },
+    {
+      "puzzle_id": 14,
+      "room": "R4",
+      "difficulty": 4,
+      "theme": "search",
+      "prerequisites": [13],
+      "requires": [],
+      "yields": []
+    },
+    {
+      "puzzle_id": 15,
+      "room": "R5",
+      "difficulty": 4,
+      "theme": "physical",
+      "prerequisites": [14],
+      "requires": ["crowbar"],
+      "yields": ["gear_2"]
+    },
+    {
+      "puzzle_id": 16,
+      "room": "R5",
+      "difficulty": 5,
+      "theme": "logic",
+      "prerequisites": [15],
+      "requires": [],
+      "yields": []
+    },
+    {
+      "puzzle_id": 17,
+      "room": "R5",
+      "difficulty": 5,
+      "theme": "search",
+      "prerequisites": [16],
+      "requires": ["uv_light"],
+      "yields": ["gear_3"]
+    },
+    {
+      "puzzle_id": 18,
+      "room": "R5",
+      "difficulty": 5,
+      "theme": "logic",
+      "prerequisites": [17],
+      "requires": ["key_red", "key_blue"],
+      "yields": []
+    }
+  ]
+}
+
+Follow your system instructions to complete the 5 Metacognitive stages evaluating the provided SYSTEM 1 ANSWER.
+After completing all stages, output your confidence score in EXACTLY this format on a new line:
+Confidence: <number between 0 and 100>%
+
+--- S2 RESPONSE ---
+Stage 1 — Comprehension & Formalization:  
+The problem requires sequencing 18 puzzles across 5 linearly connected rooms (R1–R5), satisfying five hard constraints:  
+1. Prerequisites: Each puzzle must come after all its prerequisite puzzles.  
+2. Item Requirements: A puzzle requiring items can only be attempted when those items are in inventory.  
+3. Room Adjacency: Players move only between adjacent rooms; consecutive puzzles must be in same or adjacent rooms.  
+4. Theme Balance: No two consecutive puzzles may share the same theme.  
+5. Difficulty Curve: Consecutive puzzles must differ in difficulty by at most 1.  
+
+The base LLM (System 1) provides a full ordering: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18] with room, theme, and difficulty sequences. It claims all constraints are satisfied.
+
+Stage 2 — Preliminary Logical Modeling:  
+I will independently verify each constraint step-by-step.
+
+- **Prerequisites**: All puzzles list their prerequisites in the table. For example, puzzle 2 requires puzzle 1; puzzle 4 requires puzzle 3, etc. The sequence is in increasing ID order, and prerequisite IDs are always lower. Since all prerequisites are listed with lower IDs and solved earlier, this appears satisfied *if* no circular or missing dependencies exist. Preliminary check: likely valid.
+
+- **Item Requirements**: Need to track item acquisition and usage:
+  - key_red: obtained at puzzle 2 → required by puzzle 4 (after) and puzzle 18 (after) → OK.
+  - uv_light: obtained at puzzle 5 → required by puzzle 6 (after) → OK.
+  - key_blue: obtained at puzzle 7 → required by puzzle 9 (after) → OK.
+  - crowbar: obtained at puzzle 8 → required by puzzle 10 (after) → OK.
+  - gear_1,2,3: not required → OK.
+
+All item usages occur after acquisition → Preliminary: OK.
+
+- **Room Adjacency**: The room progression is:
+  R1 → R1 → R2 → R2 → R2 → R1 → R1 → R2 → R3 → R4 → R4 → R3 → R3 → R4 → R5 → R5 → R5 → R5  
+Check adjacent transitions:
+- R1→R2: OK
+- R2→R1: OK (adjacent)
+- R1→R2: OK
+- R2→R3: OK
+- R3→R4: OK
+- R4→R3: OK
+- R3→R4: OK
+- R4→R5: OK
+All transitions are same or adjacent → Satisfied.
+
+- **Theme Balance**: Theme sequence:
+  search → logic → physical → search → logic → search → logic → physical → search → physical → logic → search → logic → search → physical → logic → search → logic  
+Check consecutive duplicates:
+- logic → physical: OK
+- physical → search: OK
+- search → logic: OK
+- logic → search: OK
+- search → logic: OK
+- logic → physical: OK
+- physical → search: OK
+- search → physical: OK
+- physical → logic: OK
+- logic → search: OK
+- search → logic: OK
+- logic → search: OK
+- search → physical: OK
+- physical → logic: OK
+- logic → search: OK
+- search → logic: OK  
+No two consecutive themes are the same → Satisfied.
+
+- **Difficulty Curve**: Difficulty sequence:
+  1,1,2,2,2,3,3,3,3,3,4,4,4,4,4,5,5,5  
+Differences between consecutive puzzles:
+  0,1,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0 → All ≤1 → Satisfied.
+
+So far, all constraints appear satisfied.
+
+But wait: **puzzle 6 is in R1, requires uv_light, which is obtained at puzzle 5 (in R2)**. Puzzle 5 → puzzle 6: R2 → R1 → valid move. But does the player have uv_light *before* solving puzzle 6? Yes: puzzle 5 yields uv_light, comes before puzzle 6. OK.
+
+**Puzzle 12 requires uv_light**, occurs after puzzle 11 (R4 → R3), and puzzle 12 is after puzzle 5 → uv_light already acquired → OK.
+
+**Puzzle 17 requires uv_light** → still in inventory? The problem does not state items are consumed, so assume items persist unless stated. No consumption rules → assume items remain. So uv_light persists from puzzle 5 onward → OK.
+
+**Puzzle 18 requires key_red and key_blue** → both obtained earlier (puzzle 2 and 7) → still in inventory → OK.
+
+**Puzzle 4 requires key_red** → obtained at puzzle 2 → OK.
+
+**Puzzle 9 requires key_blue** → obtained at puzzle 7 → OK.
+
+**Puzzle 10 requires crowbar** → obtained at puzzle 8 → OK.
+
+**Puzzle 15 requires crowbar** → obtained earlier → OK.
+
+Now, **prerequisites**:  
+Check a few critical ones:
+- Puzzle 6 requires [5] → 5 before 6 → OK
+- Puzzle 7 requires [6] → 6 before 7 → OK
+- Puzzle 8 requires [7] → 7 before 8 → OK
+- Puzzle 9 requires [8] → 8 before 9 → OK
+- Puzzle 10 requires [9] → 9 before 10 → OK
+- Puzzle 11 requires [10] → 10 before 11 → OK
+- Puzzle 12 requires [11] → 11 before 12 → OK
+- Puzzle 13 requires [12] → 12 before 13 → OK
+- Puzzle 14 requires [13] → 13 before 14 → OK
+- Puzzle 15 requires [14] → 14 before 15 → OK
+- Puzzle 16 requires [15] → 15 before 16 → OK
+- Puzzle 17 requires [16] → 16 before 17 → OK
+- Puzzle 18 requires [17] → 17 before 18 → OK
+
+All prerequisites satisfied.
+
+Is there any puzzle whose required items are not yet collected at time of solving?
+
+- Puzzle 4: requires key_red → puzzle 2 yields it → puzzle 2 before 4 → OK
+- Puzzle 6: requires uv_light → puzzle 5 yields it → puzzle 5 before 6 → OK
+- Puzzle 9: requires key_blue → puzzle 7 yields it → puzzle 7 before 9 → OK
+- Puzzle 10: requires crowbar → puzzle 8 yields it → puzzle 8 before 10 → OK
+- Puzzle 12: requires uv_light → already had since 5 → OK
+- Puzzle 15: requires crowbar → had since 8 → OK
+- Puzzle 17: requires uv_light → still have → OK
+- Puzzle 18: requires key_red and key_blue → both held since 2 and 7 → OK
+
+All item dependencies satisfied.
+
+Room transitions: puzzle 11 (R4) → puzzle 12 (R3): R4→R3 → adjacent → OK  
+puzzle 13 (R3) → puzzle 14 (R4): R3→R4 → OK  
+puzzle 14 (R4) → puzzle 15 (R5): R4→R5 → OK  
+All valid.
+
+Themes: check for any consecutive duplicates.  
+Look at:  
+- Puzzle 13 (logic) → 14 (search): OK  
+- 14 (search) → 15 (physical): OK  
+- 15 (physical) → 16 (logic): OK  
+- 16 (logic) → 17 (search): OK  
+- 17 (search) → 18 (logic): OK  
+No duplicates.
+
+Difficulty: from 4 (puzzle 14) → 4 (15): diff 0 → OK  
+15 (4) → 16 (5): diff 1 → OK  
+16 (5) → 17 (5): diff 0 → OK  
+All good.
+
+Stage 3 — Critical Deductive Evaluation:  
+The base LLM assumes that:
+- Items are not consumed and persist in inventory.
+- Prerequisites are only based on puzzle ID order (since all lower-numbered prerequisites come earlier).
+- Room movement is valid due to adjacency.
+- Themes alternate properly.
+- Difficulty changes by at most 1.
+
+No hallucinations or unstated assumptions detected. The base LLM correctly interprets the data.
+
+One potential issue: **puzzle 6 is in R1 and requires uv_light, which is obtained in R2 (puzzle 5)**. After solving puzzle 5 in R2, player moves to R1 to solve puzzle 6. But is there any constraint preventing this? No — adjacency allows R2→R1. Player can carry items between rooms. So this is valid.
+
+Similarly, puzzle 12 is in R3, requires uv_light (from R2), but player visited R2 earlier — no issue, items are portable.
+
+No fallacies detected. The base LLM did not force a conclusion; it provided a traceable path.
+
+Stage 4 — Decision Confirmation:  
+Every constraint is strictly satisfied:
+- Prerequisites: all met.
+- Item requirements: all items available when needed.
+- Room adjacency: all moves valid.
+- Theme balance: no consecutive same themes.
+- Difficulty curve: max delta = 1.
+
+Thus, the base LLM's answer is correct.
+
+Stage 5 — Confidence & Soundness Assessment:  
+The reasoning is straightforward and fully verifiable from the data. No ambiguity in item persistence or room movement. The sequence is linear and follows increasing ID order, which aligns with prerequisite structure. I independently verified all 18 steps.
+
+However, as a metacognitive safeguard: could there be a hidden dependency not captured? For example, does solving puzzle 6 *really* require being in R1 and having uv_light — yes, both conditions are met. Is there any rule that items must be used in the same room they were obtained? No such rule.
+
+Could the theme progression have an error? Re-checked: no two consecutive themes are the same.
+
+Difficulty curve: all steps ≤1.
+
+Therefore, the base LLM's solution is flawless.
+
+But per skeptical adjustment: I am a language model and could overlook subtle state tracking. However, this case is deterministic and small. The solution is so clean that alternative paths are not needed.
+
+Confidence: 98% — penalized 2% for theoretical possibility of undetected inventory state assumption (though no evidence of error).
+
+Confidence: 98%
+---
+S2 Parsed Confidence: 98.0%
+S2 Escalate Decision: False (Threshold: 80.0%)
+S2 Label Assignment: TN
+S2 Tokens: 2401 | Latency: 2484.7ms

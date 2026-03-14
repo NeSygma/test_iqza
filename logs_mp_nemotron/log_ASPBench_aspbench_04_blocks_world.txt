@@ -1,0 +1,1135 @@
+=== PUZZLE ID: aspbench_04_blocks_world (ASPBench - ASPBench) ===
+Question / Context:
+# Problem Statement
+
+Transform stacks of weighted blocks from an initial configuration to a goal configuration by moving blocks one at a time while respecting weight and structural constraints.
+
+## Instance Data
+
+**Blocks:** 12 blocks labeled A through L
+
+**Weights:**
+- A=1, B=2, C=3, D=4, E=5, F=6, G=7, H=8, I=9, J=10, K=11, L=12
+
+**Initial Configuration** (three stacks of height 4):
+- Stack 1: D on table, C on D, B on C, A on B
+- Stack 2: H on table, G on H, F on G, E on F
+- Stack 3: L on table, K on L, J on K, I on J
+
+**Goal Configuration** (three stacks of height 4):
+- Tower 1: L on table, I on L, F on I, C on F
+- Tower 2: K on table, H on K, E on H, B on E
+- Tower 3: J on table, G on J, D on G, A on D
+
+## Constraints
+
+1. **Clear block**: Only blocks with nothing on top can be moved
+2. **Single move**: Only one move occurs per time step
+3. **Weight constraint**: A heavier block **cannot** be placed on a lighter block (weight(Y) >= weight(X) required for placing X on Y)
+4. **Table limit**: **At most** 6 blocks may be directly on the table at any time
+5. **Height limit**: **No** tower may exceed height 5 (depth 1 = directly on table)
+6. **Valid positions**: Blocks can be placed on the table or on top of another clear block
+7. **Distinct positions**: Source and destination **must** differ; block **cannot** be placed on itself
+8. **Maximum Plan Length**: Your final plan must not exceed 50 moves.
+
+## Objective
+
+Your goal is to find a valid sequence of moves to transform the initial configuration into the goal configuration.
+
+For this problem, the primary objective is finding a correct plan that respects all constraints. The complexity of the task suggests that a solution may require a significant number of moves, so you should ensure your search explores plans up to the **maximum allowed length of 50 moves**.
+---
+Ground Truth Solution: data/ASPBench\problems\hard\04_blocks_world_hard_ground_truth.py
+
+============================================================
+=== SYSTEM 1 (STANDARD CoT) ===
+--- S1 PROMPT ---
+PROBLEM:
+# Problem Statement
+
+Transform stacks of weighted blocks from an initial configuration to a goal configuration by moving blocks one at a time while respecting weight and structural constraints.
+
+## Instance Data
+
+**Blocks:** 12 blocks labeled A through L
+
+**Weights:**
+- A=1, B=2, C=3, D=4, E=5, F=6, G=7, H=8, I=9, J=10, K=11, L=12
+
+**Initial Configuration** (three stacks of height 4):
+- Stack 1: D on table, C on D, B on C, A on B
+- Stack 2: H on table, G on H, F on G, E on F
+- Stack 3: L on table, K on L, J on K, I on J
+
+**Goal Configuration** (three stacks of height 4):
+- Tower 1: L on table, I on L, F on I, C on F
+- Tower 2: K on table, H on K, E on H, B on E
+- Tower 3: J on table, G on J, D on G, A on D
+
+## Constraints
+
+1. **Clear block**: Only blocks with nothing on top can be moved
+2. **Single move**: Only one move occurs per time step
+3. **Weight constraint**: A heavier block **cannot** be placed on a lighter block (weight(Y) >= weight(X) required for placing X on Y)
+4. **Table limit**: **At most** 6 blocks may be directly on the table at any time
+5. **Height limit**: **No** tower may exceed height 5 (depth 1 = directly on table)
+6. **Valid positions**: Blocks can be placed on the table or on top of another clear block
+7. **Distinct positions**: Source and destination **must** differ; block **cannot** be placed on itself
+8. **Maximum Plan Length**: Your final plan must not exceed 50 moves.
+
+## Objective
+
+Your goal is to find a valid sequence of moves to transform the initial configuration into the goal configuration.
+
+For this problem, the primary objective is finding a correct plan that respects all constraints. The complexity of the task suggests that a solution may require a significant number of moves, so you should ensure your search explores plans up to the **maximum allowed length of 50 moves**.
+
+Solve the logical reasoning problem above. Think step by step to derive your answer.
+After you finish your reasoning, you MUST output your final answer as EXACTLY this JSON format (and nothing else after the JSON):
+{
+  "plan_length": <number_of_actions>,
+  "actions": [
+    {
+      "step": <integer>,
+      "action": "move",
+      "block": "<block_name>",
+      "from": "<source_position>",
+      "to": "<target_position>"
+    }
+  ]
+}
+
+--- S1 RESPONSE ---
+We need to produce a plan to transform initial to goal respecting constraints: weight constraint: heavier block cannot be placed on lighter block => weight(Y) >= weight(X) needed for placing X on Y. So when moving block X onto Y (or table?), table is considered as infinite weight? Usually table can hold any block, weight constraint only applies to placing on a block; table has no weight limit. Need to check that block on table doesn't violate anything (clear). Also height limit: no tower may exceed height 5 (depth 1 = directly on table). So each stack can have at most 5 blocks (height <=5). Initially each stack height 4, goal also height 4. At any time at most 6 blocks may be directly on the table. Initially each stack bottom block on table: D, H, L (three blocks on table). So within limit.
+
+We need to find a sequence of moves (max 50) to rearrange blocks from initial to goal.
+
+Goal towers: let's list each tower bottom to top:
+
+Tower1 (Goal): L (bottom on table), I on L, F on I, C on F.
+So bottom L (weight 12), then I (weight9) on L, then F (weight6) on I, then C (weight3) on F. Check weight constraints: I on L: weight(L)=12 >= weight(I)=9 ok. F on I: weight(I)=9 >= weight(F)=6 ok. C on F: weight(F)=6 >= weight(C)=3 ok.
+
+Tower2: K (weight11) bottom, H (8) on K, E (5) on H, B (2) on E. Check: H on K: weight(K)=11 >=8 ok. E on H: weight(H)=8 >=5 ok. B on E: weight(E)=5 >=2 ok.
+
+Tower3: J (10) bottom, G (7) on J, D (4) on G, A (1) on D. Check: G on J: weight(J)=10 >=7 ok. D on G: weight(G)=7 >=4 ok. A on D: weight(D)=4 >=1 ok.
+
+Thus goal stacks are all weight decreasing upward (bottom heaviest). Initial stacks: Stack1: D (4) bottom, C (3) on D, B (2) on C, A (1) on B. So bottom D weight4 then C3, B2, A1 (decreasing upward) okay.
+
+Stack2: H(8) bottom, G(7) on H, F(6) on G, E(5) on F: decreasing.
+
+Stack3: L(12) bottom, K(11) on L, J(10) on K, I(9) on J: decreasing.
+
+So initial stacks also are weight decreasing upward: each stack is sorted descending weight bottom to top. The goal stacks also descending, but with different ordering of blocks: goal wants L at bottom of tower1 (weight12), then I (9), F (6), C (3). Tower2: K (11) bottom, H (8), E (5), B (2). Tower3: J (10) bottom, G (7), D (4), A (1).
+
+Thus we need to rearrange blocks between stacks.
+
+Essentially we need to move blocks to achieve these specific groupings.
+
+Observation: weight ordering within each stack must be decreasing, so any intermediate configuration also must maintain decreasing weight (since we can't place a heavier on lighter). However we could temporarily have a stack where order is not decreasing? Let's think: The constraint only prevents placing heavier on lighter. It does not require that a stack be decreasing overall; you could have a lighter block on heavier (allowed) but you cannot place a heavier on lighter. So you can have a stack where weights increase upward? Actually if you place a lighter block on heavier, that's allowed (since weight(Y) >= weight(X) where Y is below, X is placed on top). So you can have decreasing weight upward (heavier at bottom). If you attempted to place a heavier on lighter, that would be prohibited. So any legal move ensures that after placing X on Y, weight(Y) >= weight(X). Therefore the resulting stack will have the property that each block's weight is >= weight of block above it (since that's just the condition for each adjacent pair). So the stack remains non-increasing weight from bottom to top (i.e., decreasing or equal). Since all weights distinct, it's strictly decreasing. Therefore any reachable configuration must have each stack strictly decreasing weight upward (i.e., sorted descending). So intermediate states must also have each stack sorted descending weight.
+
+Thus the problem reduces to rearranging blocks among three stacks while maintaining each stack sorted descending weight (i.e., each stack is a decreasing sequence). This is similar to sorting with stacks where you can only move top block (clear) and you can place onto another stack only if the top block of destination is heavier than the block being moved (or destination empty/table). Equivalent to the classic "stack sorting" problem (like Tower of Hanoi variant with weight constraints). Additionally table limit: at most 6 blocks on table (i.e., number of stacks? Actually "directly on the table" means blocks that are not on top of any other block, i.e., bottom of each stack. So at any time we can have at most 6 stacks (since each stack's bottom block is on table). Since we have only 3 stacks initially, we could create more stacks by moving blocks to table as new stacks (i.e., placing a block on table when it's not on any other block). So we can have up to 6 stacks (piles) at any time.
+
+Height limit: each stack cannot exceed height 5. Since we have only 12 blocks, max height 5 is fine; we won't exceed.
+
+Goal: three stacks of height 4 each.
+
+We need to produce a plan <=50 moves.
+
+We can try to design a solution manually.
+
+Let's denote blocks and weights:
+
+A1
+B2
+C3
+D4
+E5
+F6
+G7
+H8
+I9
+J10
+K11
+L12
+
+Initial stacks (bottom to top):
+S1: D(4), C(3), B(2), A(1)
+S2: H(8), G(7), F(6), E(5)
+S3: L(12), K(11), J(10), I(9)
+
+Goal stacks:
+T1: L(12), I(9), F(6), C(3)
+T2: K(11), H(8), E(5), B(2)
+T3: J(10), G(7), D(4), A(1)
+
+So essentially we need to move blocks between stacks to achieve these groupings.
+
+Observation: The bottom blocks of goal towers are L, K, J (the three heaviest). In initial, bottom blocks are D, H, L (4,8,12). So we need to move L to bottom of tower1 (already bottom of S3). K needs to be bottom of tower2 (currently K is second from bottom in S3, on L). J needs bottom of tower3 (currently third from bottom in S3, on K). So we need to extract K and J from S3 to become bottoms of new stacks, while L remains bottom of S3 (or maybe move L elsewhere? but L is already bottom of goal tower1, so we can keep L where it is, as bottom of S3). So we need to unstack S3: currently S3: L (bottom), K, J, I (top). Goal: L bottom, I on L, F on I, C on F. So we need to move I onto L (currently I is top of S3, above J, K). Actually I is currently top of S3 (since S3: L,K,J,I). Goal: I should be directly on L (second from bottom). So we need to remove K and J from between L and I, and place them elsewhere, then put I on L, then later place F on I, then C on F.
+
+Similarly S2: H,G,F,E. Goal tower2: K bottom, H on K, E on H, B on E. So we need to keep H and E in S2? Actually currently S2 bottom H, then G, F, E. Goal: K bottom (not present), H on K, E on H, B on E. So we need to remove G and F from between H and E, then later place K under H (i.e., K becomes new bottom under H), and place B on top of E. Also we need to move G and F elsewhere (F goes to tower1 on I; G goes to tower3 on J). Also we need to bring B from somewhere (currently in S1) to top of E.
+
+S1: D,C,B,A. Goal tower3: J bottom, G on J, D on G, A on D. So we need to keep D and A in S1? Actually currently S1 bottom D, then C, B, A. Goal: J bottom (not in S1), G on J, D on G, A on D. So we need to remove C and B from between D and A, then later place J under D? Wait goal: J bottom, G on J, D on G, A on D. So D is third from bottom (above G). Actually order: bottom J (10), then G (7), then D (4), then A (1). So D is above G, and A is top. Currently D is bottom of S1, with C,B,A above. We need to move C and B away, then later place G under D (i.e., G becomes just below D), and place J under G (i.e., J becomes bottom). Also we need to move A to top of D (it already is top? Actually currently A is top of S1, yes). So A is already correctly placed on D (top). So we just need to get G under D and J under G.
+
+Thus overall we need to shuffle blocks.
+
+Given the weight constraint (must place lighter on heavier), we can think of using the table as temporary storage. Since we can have up to 6 stacks, we can use extra stacks to hold blocks temporarily.
+
+We need to find a sequence of moves <=50.
+
+We can attempt to solve via reasoning: treat each stack as a decreasing sequence; we can only move the top block (smallest weight in that stack). So we can only remove blocks from the top of each stack (since they are clear). Initially, the top blocks are: S1 top A (weight1), S2 top E (5), S3 top I (9). So we can only move A, E, or I initially.
+
+Goal: we need to get certain blocks to certain positions. Let's think about building goal towers from bottom up using available moves.
+
+We could try to construct each goal tower by moving blocks onto appropriate bases.
+
+But we have constraints: we cannot place a heavier block on a lighter one; we can only place lighter on heavier (or on table). So building a tower bottom-up (starting with heaviest at bottom) is natural: we place lighter blocks onto heavier ones.
+
+Thus to build tower1: bottom L (12) is already present as bottom of S3. Good. Next we need I (9) on L. I is currently top of S3 (above J and K). To place I on L, we need to have L as clear (nothing on top) and I as clear (nothing on top). Currently L has K on top, so not clear. I is clear (top). So we need to remove K and J from above L to expose L, then move I onto L. After moving I onto L, L will have I on top (so L not clear unless we later move I away). Then we need to place F (6) on I: need I clear (nothing on top) and F clear. After placing I on L, I will have nothing on top (if we don't place anything else on I yet). So we can later move F onto I if F is clear and I is clear (i.e., no block on top of I). Then place C (3) on F similarly.
+
+Thus steps for tower1: need to clear L (remove K and J), move I onto L, then move F onto I, then move C onto F.
+
+Similarly tower2: bottom K (11) needs to be placed on table (as base). Currently K is on L in S3 (second from bottom). To make K a base, we need to remove L? Actually K is above L; to have K as bottom (clear underneath), we need to move L away (or have K placed on table directly). Since L is heavier (12) than K (11), we cannot place K on L (since would be heavier on lighter? Actually placing K on L: weight(L)=12 >= weight(K)=11 => allowed (since we place lighter on heavier). Wait placing K on L means K is placed on top of L (L below). That's allowed because L heavier than K. But we want K as bottom (on table). So we need to remove L from underneath K, i.e., move L away (or move K onto table). Since L is currently below K, to make K a base we need to move L elsewhere (or move K off L onto table). However we cannot lift K while L is still underneath because K is not clear (has L? Actually K is above L, so K has L underneath; but to be clear, K must have nothing on top of it. It does have J on top? Actually K has J on top? Wait S3: L(bottom), K, J, I(top). So K has J on top, so K is not clear because J is on top. Actually clarity: a block is clear if nothing is on top of it. So K has J on top, thus not clear. So we need to remove J and I from above K to make K clear, then we can move K. After removing J and I, K becomes clear (top of stack). Then we can move K to table (or onto another block). To make K a base (on table), we move K to table.
+
+Thus to get K as base, we need to clear K (remove J and I). Then move K to table.
+
+Similarly for J as base of tower3: J is currently above K and L, with I on top? Actually S3: L(bottom), K, J, I(top). So J has I on top, and K underneath. To make J clear, we need to remove I from above J. Then J becomes clear (top after removing I). Then we can move J to table (or onto something else). Then we need to place G on J (so J must be base with G placed on top). J as base means J on table, then G placed on J (allowed if weight(J)>=weight(G): 10>=7 ok). Then D on G (weight(G)=7 >= weight(D)=4 ok), then A on D (weight(D)=4 >= weight(A)=1 ok). So after moving J to table, we can place G onto J, then D onto G, then A onto D (but A is currently somewhere else maybe on D? Actually initially A is on B on C on D in S1; we need to move A to top of D eventually). We'll need to manage.
+
+Thus overall we need to unstack S3 to get L, K, J as separate bases (or L stays as base, K and J moved to table as bases). Then we need to restack accordingly.
+
+Similarly we need to unstack S2 to get H and E as bases (or maybe keep H as base? Actually goal tower2: K base, H on K, E on H, B on E. So H is not a base; it's placed on K. So we need to move H onto K after K is base. E needs to be on H after H placed on K. So we need to get H and E as clear blocks to place onto K and then onto H respectively.
+
+S2 currently: H(bottom), G, F, E(top). To get H clear, we need to remove G,F,E from above H. To get E clear, we need to remove nothing above E (it's top), but after we remove G and F, E will become top? Actually initially E is top; it's already clear. But we cannot place E onto H until H is clear and we have placed H onto K (so H is not on table but on K). Actually we need H on K, then E on H. So we need to move H onto K (requires H clear and K clear/top? Actually K as base will be on table, so K is clear (nothing on top) after we move K to table and before placing anything on K. Then we can place H onto K if H is clear and weight(K)>=weight(H): 11>=8 ok. After placing H on K, H will have K underneath and nothing on top (if we haven't placed anything else). Then we need to place E onto H: requires E clear and weight(H)>=weight(E): 8>=5 ok. So we need to make H clear (by removing G,F,E from above H) and E clear (by maybe moving E away temporarily? Actually after removing G and F, E will be on top of H? Wait initially S2: H(bottom), G, F, E(top). If we remove G and F (by moving them elsewhere), we will have H(bottom), E(top). Then E is still on top of H, so not clear (since E is on top of H). Actually clarity: a block is clear if nothing is on top of it. So after removing G and F, E remains on top of H, thus E is not clear (since it has nothing on top? Wait E is topmost, so nothing on top of E, thus E is clear. However H has E on top, thus H is not clear. So to make H clear we need to remove E as well (move E elsewhere). Then after removing E, H becomes clear (top of stack). Then we can place H onto K. After placing H onto K, we need to place E onto H. So we need to have E available (clear) to place onto H after H is on K. So we need to move E away temporarily, then later move it back onto H.
+
+Thus for tower2: we need to remove G, F, E from S2 to expose H as clear, move H onto K (base), then move E onto H, then move G and F elsewhere? Actually G and F need to go to tower1 and tower3 respectively. So after we remove them, we can place them later.
+
+Similarly for tower3: we need to get J as base, then place G on J, then D on G, then A on D. So we need to remove I from above J to make J clear, then move J to table (base). Then we need to move G onto J (requires G clear and weight(J)>=weight(G): 10>=7 ok). Then move D onto G (requires D clear and weight(G)>=weight(D):7>=4 ok). Then move A onto D (requires A clear and weight(D)>=weight(A):4>=1 ok). Note A is currently on B on C on D in S1; we need to free A (make it clear) and also free D from having C,B above? Actually D currently has C on top, B on top of C, A on top of B. To place A onto D, we need D to be clear (nothing on top) and A clear (nothing on top). So we need to remove C and B from above D, and also ensure A is clear (i.e., nothing on top of A). Initially A is top, so clear. After we remove C and B, D becomes clear (since nothing on top). Then we can move A onto D. However we also need to place D onto G later; after placing A onto D, D will have A on top, making D not clear. But we need to place D onto G before placing A onto D? Actually goal: D on G, A on D. So D must be placed onto G first (making D have G underneath, and nothing on top yet), then we place A onto D. So we need to move D onto G while D is clear (nothing on top) and A is elsewhere (not on D). Then after D is on G, we can place A onto D (since D will have A on top, making D not clear but that's fine). So order: move J to table (base), move G onto J, move D onto G (D clear), then move A onto D (A clear). So we need to free D from having C,B above, and ensure A is clear (not on D). Initially A is on top of B; we need to move A away temporarily? Actually we need A to be placed onto D at the end, so we need to have A free (clear) and D free (clear) at that moment. So we need to move A away from its current position (on B) to somewhere else temporarily, then after D is placed on G, we move A onto D.
+
+Thus we need to move A away from S1 early.
+
+Similarly for tower1: we need L base (already), then I on L, then F on I, then C on F. So we need to free I (make it clear) by removing K and J from above L? Actually I is on top of J, which is on top of K, which is on top of L. So to make I clear (it already is clear as top of S3). Wait I is topmost, so I is clear initially. However to place I onto L, we need L to be clear (nothing on top). L currently has K on top, so not clear. So we need to remove K and J from above L to make L clear. After removing K and J, L becomes clear (since nothing on top). Then we can move I onto L (I is clear). After placing I on L, I will have L underneath and nothing on top (if we don't place anything else on I yet). Then we need to place F onto I: need I clear (nothing on top) and F clear. After placing I on L, I is not clear if we place something on top later; but we will place F onto I, so we need I to be clear before placing F. After placing I on L, I is clear (since nothing on top). Good. Then we place F onto I (requires F clear). After placing F on I, I will have F on top, making I not clear. Then we need to place C onto F: need F clear (nothing on top) and C clear. After placing F on I, F is not clear (has C? Actually we will place C onto F later). So we need to place C onto F while F is clear (i.e., before placing anything on top of F). So after placing F on I, we must not place anything else on F before placing C onto F. So we can place C onto F directly after F is placed on I (since F will be clear at that moment). Then after placing C on F, F will have C on top.
+
+Thus for tower1 we need to: clear L (remove K,J), move I onto L, move F onto I, move C onto F.
+
+Thus overall we need to extract K and J from S3 to expose L, then later use K and J as bases for tower2 and tower3 respectively.
+
+Thus the plan: we will unstack S3 to get L, K, J as separate bases (maybe L stays where it is, K and J moved to table). We'll need to temporarily hold I somewhere while we clear L? Actually I is on top of J; to expose L we need to remove K and J, but I is above J, so we need to remove I as well? Wait to get L clear we need to remove everything above L: that includes K, J, I. Since I is on top of J, we need to remove I first to expose J, then remove J to expose K, then remove K to expose L. Actually we need to remove the top blocks sequentially. So we need to move I somewhere, then J somewhere, then K somewhere. After removing I,J,K, L becomes clear (with nothing on top). Then we can move I onto L (but I is currently somewhere else; we need to move it back). So we will need to move I away, then later move it back onto L after L is clear.
+
+Thus we need to temporarily store I, J, K somewhere (maybe on table or other stacks) while we expose L.
+
+Similarly for S2: we need to remove G,F,E to expose H, then later move H onto K (base), then move E onto H, then place G and F elsewhere.
+
+For S1: we need to remove C,B to expose D, then later move D onto G (after G placed on J), then move A onto D (after A is free). Also we need to move A away temporarily to free D? Actually to expose D we need to remove C and B (since they are above D). A is above B, so to remove B we need to remove A first? Let's see S1: D(bottom), C, B, A(top). To make D clear (nothing on top), we need to remove A, B, C. Because A is on top of B, B on top of C, C on top of D. So we need to move A, then B, then C away to expose D. After that, D is clear. Then later we need to place D onto G (which will be on J). After placing D onto G, we need to place A onto D (so we need A available). So we will need to move A away temporarily, then later move it back onto D after D is on G.
+
+Thus we need to move A, B, C away from S1 to expose D.
+
+Thus overall we need to disassemble all three stacks completely to individual blocks (or at least to expose bases) and then rebuild goal stacks.
+
+Given we have up to 6 stacks on table, we can use the table as temporary storage for many blocks.
+
+We have 12 blocks; we can place each on table as a separate stack (height 1) as long as we don't exceed 6 stacks on table at any time. But we can have at most 6 blocks directly on table (i.e., number of stacks). So we cannot have more than 6 stacks at any time. Since we have 12 blocks, we need to manage with at most 6 stacks. However we can have stacks of height >1 on table (i.e., multiple blocks stacked). So we can store multiple blocks in a single stack on table, as long as weight ordering holds (decreasing upward). So we can store blocks in temporary stacks.
+
+Thus we need to design a plan that uses at most 6 stacks (piles) at any moment.
+
+We start with 3 stacks (S1,S2,S3). We can create additional stacks by moving blocks to table as new piles (height 1). We must ensure we never exceed 6 stacks.
+
+Goal ends with 3 stacks.
+
+We need to find a sequence of moves within 50 steps.
+
+Given the complexity, maybe we can design a straightforward algorithm: treat each block as needing to go to a specific destination stack (goal tower). Use table as buffer.
+
+We can think of each goal tower as a target stack: T1 (L,I,F,C), T2 (K,H,E,B), T3 (J,G,D,A). We'll need to move blocks to these target stacks in correct order (bottom-up). Since we can only place lighter on heavier, we need to build each target stack from bottom up: place the heaviest block (bottom) onto table (or ensure it's base), then place next heaviest onto it, etc.
+
+Thus we can process each tower sequentially: first build T1, then T2, then T3, using table as temporary storage for blocks not yet placed.
+
+But we must respect the limit of 6 stacks.
+
+Let's attempt to design a plan.
+
+We'll label stacks by their bottom block maybe, but we can refer to positions as "table" (i.e., placing a block on table creates a new stack) or "on top of X" where X is a block.
+
+We need to specify source and destination positions: from <source_position> to <target_position>. The source_position is either "table" (if block is on table as a stack of height 1? Actually if a block is directly on table with nothing underneath, we can say from "table"? But the problem statement says "from": "<source_position>", "to": "<target_position>". It expects something like block name? Actually they want to specify the position (like stack identifier or "table"). In similar problems, they often denote positions as "table" or the block that is directly underneath? For example, moving block X from being on top of Y to being on top of Z: from Y to Z? Or from "table" to Y? Let's interpret: The position is the object that the block is currently resting on (either table or another block). So "from": "<source_position>" indicates what the block is currently on (the support). "to": "<target_position>" indicates what we will place it on (the new support). For a block on table, source_position is "table". For a block on another block Y, source_position is Y. Similarly, destination is either "table" or a block Y.
+
+Thus we need to output moves like: {"step":1, "action":"move", "block":"A", "from":"table", "to":"B"} meaning move A from table onto B (placing A on top of B). Or from "B" to "table" meaning moving B onto table.
+
+Thus we need to track each block's current support.
+
+We'll need to produce a plan.
+
+Given the complexity, maybe we can attempt to solve via reasoning and produce a plausible plan manually, ensuring constraints.
+
+Let's attempt to design a step-by-step plan.
+
+We'll maintain three goal towers: T1 (target stack for L,I,F,C), T2 (K,H,E,B), T3 (J,G,D,A). We'll also have temporary stacks.
+
+We'll try to keep number of stacks low.
+
+Idea: Use the table as a buffer, but we can have at most 6 stacks. We'll try to keep at most 4 stacks at any time.
+
+We'll start with three stacks: S1 (D,C,B,A), S2 (H,G,F,E), S3 (L,K,J,I). We'll aim to unstack S3 first to get L as base for T1, and store I,J,K somewhere.
+
+We'll need to move I, J, K off S3. Since we can only move top blocks, we'll start moving I (top) somewhere, then J becomes top, move J somewhere, then K becomes top, move K somewhere, leaving L alone.
+
+Where to put I,J,K? We could put them each on table as separate stacks (height1). That would add 3 stacks, making total stacks = original 3 (S1,S2,S3) + 3 new = 6 stacks, which is at the limit. After moving I,J,K onto table, we will have S1, S2, S3 (now just L), plus three table stacks I, J, K. That's 6 stacks exactly. Good.
+
+Then we can proceed.
+
+After that, we need to move I onto L (to start T1). L is currently a stack of height1 (just L). I is on table as its own stack. We can move I from table onto L (since L is clear and weight(L)=12 >= weight(I)=9). This will create stack L,I (L bottom, I on top). After that, we have stacks: S1, S2, L-I (height2), J (table), K (table). That's 5 stacks (S1,S2, L-I, J, K). Good.
+
+Next we need to move F onto I. F is currently in S2 (stack H,G,F,E). F is not top; top of S2 is E. So we need to expose F by moving E and G away? Actually S2: H(bottom), G, F, E(top). To get F, we need to remove E and G? Wait ordering: bottom H, then G, then F, then E on top. So to get F clear (nothing on top), we need to remove E (top) first, then F becomes top? Actually after removing E, the stack becomes H,G,F (top F). So F becomes clear. Then we can move F onto I. However we also need to ensure I is clear (nothing on top) before placing F on I. Currently I has L underneath and nothing on top (since we placed I on L, no other blocks on I). So I is clear. Good.
+
+Thus we need to move E from S2 somewhere, then move G somewhere (or maybe we can move G after moving E? Actually after moving E, the stack is H,G,F. Top is F? Wait after removing E, top is F? Let's check: original S2: H(bottom), G, F, E(top). Remove E (top) -> new stack: H(bottom), G, F (top). So top is F. Good. Then we can move F onto I. After moving F, the stack becomes H,G (top G). So G becomes top.
+
+Thus we need to move E away temporarily, then move F onto I, then later we will need to place G onto J (for T3) and maybe later place something else.
+
+So after moving I onto L, we have S1 (D,C,B,A), S2 (H,G,F,E), L-I stack, J table, K table.
+
+Now we need to move E from S2 somewhere (to expose F). Let's move E to table as a new stack? That would increase stacks count. Currently we have 5 stacks; adding a new stack for E would make 6 stacks (still ok). After moving E to table, S2 becomes H,G,F (top F). Then we can move F onto I.
+
+After moving F onto I, we have L-I-F stack (L bottom, I middle, F top). S2 becomes H,G (top G). E is on table as its own stack. J and K are on table. S1 unchanged.
+
+Now we need to move C onto F. C is in S1 (stack D,C,B,A). To get C, we need to remove A and B from above C? Actually S1: D(bottom), C, B, A(top). To get C clear (nothing on top), we need to remove A and B. Since A is top, we need to move A somewhere, then B becomes top, move B somewhere, then C becomes top. After that we can move C onto F.
+
+We also need to eventually place A onto D (for T3) and B onto E (for T2). So we will need to keep A and B accessible.
+
+Thus we need to move A and B away temporarily.
+
+We currently have stacks: S1 (D,C,B,A), S2 (H,G), L-I-F, E(table), J(table), K(table). That's 6 stacks (S1,S2, L-I-F, E, J, K). Good.
+
+We need to move A and B away; we can move them to table as new stacks, but that would exceed limit (currently 6 stacks, adding two would make 8). So we need to maybe place A and B onto existing stacks (like onto E, J, K, or onto L-I-F? But we must respect weight constraint: we can only place lighter on heavier. Let's see weights: A=1, B=2. They are light; they can be placed on any heavier block (>= weight). So we could place A onto E (weight5) or onto J (10) or K (11) or onto L (12) etc. Similarly B can be placed on any heavier.
+
+We also need to keep them accessible later for moving onto D and E respectively.
+
+We could place A onto E (making stack E,A) and B onto J (making stack J,B) or something like that. However later we need to move A from its position onto D (which will be on G on J). If we place A onto E, later we need to move A from E onto D. That's allowed if we can make A clear (nothing on top of A) and D clear and weight(D)>=weight(A). If we put A onto E, then A will have E underneath and nothing on top (if we don't put anything else on A). So A is clear. Good. Later we can move A from E onto D (provided D is clear and weight(D)>=weight(A)). That's fine.
+
+Similarly B we could place onto J (making J,B). Later we need to move B onto E (which will be on H on K). Actually goal: B on E (E on H on K). So B needs to go onto E after E is placed on H on K. So if we place B onto J initially, later we need to move B from J onto E. That's okay if we can make B clear (nothing on top) and E clear and weight(E)>=weight(B) (5>=2). So we can later move B from J to E.
+
+Thus we can use existing table stacks E, J, K as temporary hosts for A and B.
+
+But we must ensure we don't violate weight constraints when placing A onto E etc. Let's check: placing A (1) onto E (5): weight(E)=5 >= weight(A)=1 ok. Placing B (2) onto J (10): weight(J)=10 >=2 ok.
+
+Now we need to move A and B off S1 to expose C.
+
+We'll need to move A first (top of S1) onto E (or J or K). Then S1 becomes D,C,B (top B). Then move B onto J (or K or maybe onto E? But if we put B onto E, E would have A and then B? Actually we could stack B onto E after A is already on E? That would place B on top of A (since E bottom, A on E, then B on A?). Wait if we move B onto E, the destination is E (the block E). If E currently has A on top (i.e., stack E,A), then placing B onto E would put B on top of the stack? Actually the rule: you place block X on top of Y (where Y is the block directly under X). If Y already has a block on top, you cannot place X onto Y because Y is not clear (it has something on top). So you can only place onto a clear block (nothing on top). So if we have E with A on top, E is not clear (since A is on top). So we cannot place B onto E if A is already on E. So we need to place B onto a different clear block, like J or K or maybe L? But L is part of L-I-F stack; L is bottom, not clear because I and F are on top. I is not clear because F on top? Actually after we placed F on I, I has F on top, so I not clear. F has nothing on top? Actually F is top of L-I-F stack, so F is clear. So we could place B onto F? But weight(F)=6 >= B=2 ok, and F is clear. However later we need to move F? Actually F is already placed correctly in T1 (L-I-F). We don't want to disturb it. So better not.
+
+Thus we should place B onto J or K (both are clear as table stacks). J and K are currently solo on table (no blocks on top). So they are clear.
+
+Thus plan: move A from S1 onto E (making E,A stack). Then S1 becomes D,C,B (top B). Then move B from S1 onto J (making J,B stack). Then S1 becomes D,C (top C). Now C is clear (top of S1). Good.
+
+Now we have stacks: S1 (D,C), S2 (H,G), L-I-F, E-A (E bottom, A on top), J-B (J bottom, B on top), K (table solo). That's 6 stacks: S1,S2, L-I-F, E-A, J-B, K. Good.
+
+Now we can move C from S1 onto F (which is on top of I in L-I-F). Need to check: F is currently top of L-I-F stack, clear. Weight(F)=6 >= weight(C)=3 ok. So we can move C from S1 onto F. After moving, S1 becomes D (bottom only). L-I-F-C stack: L bottom, I, F, C top. Good.
+
+Now we have completed tower1: L-I-F-C is exactly goal T1. Good.
+
+Now we have stacks: S1 (D), S2 (H,G), L-I-F-C (completed T1), E-A, J-B, K.
+
+That's 5 stacks (S1,S2,T1,E-A,J-B,K). Good.
+
+Now we need to build tower2: K base, H on K, E on H, B on E.
+
+Currently K is solo on table (clear). H is in S2 (stack H,G) with G on top. E is in E-A stack (E bottom, A on top). B is in J-B stack (J bottom, B on top). We need to move H onto K, then E onto H, then B onto E.
+
+But we need to ensure clarity and weight constraints.
+
+First, move H onto K: H must be clear (nothing on top). Currently S2: H(bottom), G(top). H is not clear because G is on top. So we need to move G away first. G needs to be placed somewhere temporarily. After moving G, H becomes clear (since nothing on top). Then we can move H onto K (K clear, weight(K)=11 >= weight(H)=8 ok). After placing H on K, K-H stack: K bottom, H top. Then we need to move E onto H: E must be clear (nothing on top). Currently E-A stack: E bottom, A on top. So E is not clear because A is on top. Need to move A away first. After moving A, E becomes clear. Then we can move E onto H (provided H is clear? After placing H on K, H has K underneath and nothing on top (if we haven't placed anything else on H). So H is clear. Weight(H)=8 >= weight(E)=5 ok. Then we have K-H-E stack: K bottom, H, E top. Finally, we need to move B onto E: B must be clear (nothing on top). B is currently in J-B stack: J bottom, B on top. So B is clear? Actually B is top of J-B, so nothing on top of B, thus B is clear. Good. Need E to be clear (nothing on top). After placing E onto H, E has H underneath and nothing on top (since we haven't placed anything else on E). So E is clear. Weight(E)=5 >= weight(B)=2 ok. Then we place B onto E, completing tower2: K-H-E-B.
+
+Thus steps needed: move G away, move A away, then move H onto K, move E onto H, move B onto E. After that we need to place G and A somewhere else (they belong to tower3: G on J, D on G, A on D). Actually G belongs to tower3 (on J). A belongs to tower3 (on D). So after using them as temporary holders, we need to move them to their final positions.
+
+We also need to build tower3: J base, G on J, D on G, A on D.
+
+Currently J is in J-B stack (J bottom, B on top). After we move B onto E (for tower2), J will become solo (clear). Good.
+
+D is currently solo in S1 (just D). G is currently somewhere after we moved it away from S2 earlier (we moved G to some temporary location). A is currently in E-A stack (we moved A away earlier to expose E). After we move E onto H, we will have moved A away from E (to somewhere). So we need to store A and G temporarily, then later place them onto J and D respectively.
+
+Thus we need to plan temporary locations for G and A.
+
+We have currently after moving C onto F: stacks: S1 (D), S2 (H,G), T1 (L-I-F-C), E-A, J-B, K.
+
+We need to move G away from S2 to expose H. Where can we put G? G weight=7. It can be placed on any heavier block (>=7) or on table. Potential destinations: K (weight11) currently solo, but K will be used as base for tower2 later; we could temporarily place G onto K? But then K would not be clear (since G on top) and we need K clear to place H onto K. So we cannot place G onto K if we need K clear later. Could place G onto J? J is in J-B stack (J bottom, B on top). J is not clear because B on top? Actually J-B stack: J bottom, B on top. J is not clear because B is on top. So cannot place onto J unless we move B away first (but B needed later for tower2). Could place G onto E? E-A stack: E bottom, A on top. E is not clear because A on top. Could place onto A? A weight1, cannot place heavier on lighter (G weight7 > A weight1) not allowed. Could place onto L-I-F-C? Top is C weight3, cannot place heavier on lighter. Could place onto L? L is bottom of T1, not clear because I,F,C on top. Could place onto I? I has F and C on top, not clear. Could place onto F? F has C on top, not clear. So none of the existing stacks have a clear top heavier than 7 except maybe K (if we keep K clear) or maybe we could create a new stack on table for G (as a solo stack). That would increase stack count.
+
+Similarly for A (weight1) we need to move it away from E to expose E. A can be placed on any heavier block (>=1) or table. Many options.
+
+We need to keep stack count <=6.
+
+Currently we have 6 stacks: S1(D), S2(H,G), T1, E-A, J-B, K. That's 6.
+
+If we move G to table as a new stack, we would have 7 stacks, exceeding limit. So we need to place G onto an existing stack without exceeding limit, maybe by moving something else off that stack to keep count same.
+
+Idea: we could move B from J-B onto somewhere else temporarily, making J clear, then place G onto J (since J weight10 >=7). Then later we will need to move B onto E (for tower2) and later move G onto J (final position). Actually final position for G is on J (as part of tower3). So if we place G onto J now (temporarily), that's actually its final position (just need to ensure D and A later placed correctly). However we need to later place D onto G and A onto D. If we place G onto J now, we will have J-G stack (J bottom, G on top). Then later we need to place D onto G (requires G clear, i.e., nothing on top of G). If we place G onto J now, G will have J underneath and nothing on top (if we don't put anything else on G). So G will be clear (since it's top). Good. Then later we can place D onto G (weight(G)=7 >= weight(D)=4 ok). Then later place A onto D (weight(D)=4 >= weight(A)=1 ok). So placing G onto J now is actually beneficial: it's its final position (just need to later add D and A). However we must ensure that J is clear before placing G onto J. Currently J-B stack: J bottom, B on top. J is not clear because B is on top. So we need to move B away from J first to make J clear, then we can place G onto J. After placing G onto J, J-G stack: J bottom, G top. Then we need to later place B onto E (for tower2). So we need to store B somewhere temporarily after moving it off J.
+
+Thus we can move B from J-B onto somewhere else (maybe onto K? but K will be base for tower2 later; we could place B onto K temporarily? But then K would not be clear for placing H onto K later. However we could place B onto K after we have placed H onto K? Actually order: we need K base, then H on K, then E on H, then B on E. So K must be clear before placing H onto K. If we place B onto K before that, K would not be clear. So we cannot put B onto K before moving H onto K. However we could put B onto K after H is placed onto K but before placing E onto H? Let's see: after placing H onto K, K-H stack: K bottom, H top. K is not clear (has H on top). So cannot place B onto K then either. After placing E onto H, we have K-H-E stack: K bottom, H, E top. K still not clear. After placing B onto E, we have K-H-E-B stack: K bottom, H, E, B top. So K is never clear after we start building tower2. So we cannot use K as a temporary holding spot for B before we finish tower2. However after tower2 is complete, we could maybe move B off K? But B needs to stay on E as final. So B cannot be placed on K at any point if we need K to be clear for H placement.
+
+Thus we need another temporary location for B.
+
+We could place B onto E-A stack? But E-A: E bottom, A on top. E is not clear because A on top. However we could place B onto A? Not allowed (heavier on lighter). Could place onto E? E is not clear. Could place onto the table as a new stack (solo B). That would increase stack count.
+
+Alternatively we could place B onto L-I-F-C? Top is C weight3, cannot place heavier on lighter. Could place onto I? I weight9, but I is not clear because F and C on top? Actually after we completed T1, L-I-F-C: L bottom, I, F, C top. I is not clear because F and C on top. F not clear because C on top. C is top, clear. So we could place B onto C? C weight3 >= B=2 ok, and C is clear (top of T1). However placing B onto C would disturb T1 final configuration (we want C on top of F, with nothing above). If we place B onto C, then C would have B on top, making C not top of T1. Later we would need to move B off C to restore T1. That's possible but adds extra moves.
+
+We could place B onto E-A stack by moving A off E first, making E clear, then place B onto E (temporarily). Then later we need to move E onto H (for tower2) and B onto E (final). Actually if we place B onto E early, then later we need to move E onto H, but E would have B on top (if we placed B onto E). Then E would not be clear (since B on top) and we couldn't move E onto H. So we would need to move B off E before moving E onto H. That's extra moves but maybe okay.
+
+Alternatively we could place B onto J after moving B off J? That seems circular.
+
+Better approach: we could move B onto K after we have completed tower2? But B needs to be on E, not K. So not.
+
+Maybe we can reorder the building of towers: Build tower2 first, using K as base, then later tower3 using J as base, and tower1 last. Or we could interleave.
+
+Let's consider building tower2 first, using K as base, then we will need to move H onto K, E onto H, B onto E. For that we need to clear H (by moving G away), clear E (by moving A away), and have B accessible. B is currently in J-B stack (J bottom, B on top). So B is clear (top). Good. So we can move B onto E after we have E clear and H has H on K etc. So we need to temporarily store G and A somewhere while we expose H and E.
+
+We have S2 (H,G) and E-A stack. We need to move G and A away temporarily.
+
+We have K solo, S1 (D,C,B,A) actually S1 has A on top, but we need A for E-A? Actually A is in S1 initially; but E-A stack we formed earlier by moving A onto E. However we could also keep A in S1 and not move it onto E yet. Let's reconsider: maybe we shouldn't have moved A onto E earlier; we could keep A in S1 and use S1 to store A temporarily. Let's step back and design a plan from scratch with better ordering.
+
+Goal: we need to end with three towers. Let's try to build each tower sequentially, using the table as storage for blocks not yet placed, while ensuring we don't exceed 6 stacks.
+
+We have 12 blocks. At any time, we can have up to 6 stacks. So we can have at most 6 piles.
+
+If we build one tower at a time, we will have the target tower under construction plus the remaining blocks in some stacks. The number of stacks may increase as we break down source stacks.
+
+Idea: Use the table to hold blocks as individual stacks (height1) but limit to 6. Since we have 12 blocks, we can't have all as individual stacks; we need to keep some blocks stacked together.
+
+We can aim to keep at most 6 stacks by keeping some blocks stacked in groups of 2 or more.
+
+Let's try to design a plan where we dismantle source stacks into blocks placed onto the table as individual stacks, but we will immediately start building target stacks, reducing number of stacks.
+
+We can try to simulate.
+
+Alternative: Since the problem likely expects a known solution (maybe from some planning competition), we can try to find a short solution manually by reasoning about moves.
+
+Let's attempt to produce a plan using the earlier approach but fixing the temporary storage issue for G and A and B.
+
+We had after moving C onto F: stacks: S1(D), S2(H,G), T1(L-I-F-C), E-A, J-B, K.
+
+We need to free H and E.
+
+We need to move G away from S2 and A away from E-A.
+
+We have K solo, J-B stack (J bottom, B on top), S1(D) solo, T1, S2(H,G), E-A.
+
+That's 6 stacks.
+
+We need to move G and A somewhere without increasing stack count beyond 6. We could move G onto J-B? But J is not clear because B on top. However we could move B off J-B first onto somewhere else, making J clear, then place G onto J. Then we would have J-G stack (J bottom, G top). B would be somewhere else (maybe onto K? but K needed for tower2 base). However we could place B onto E-A? But E-A has A on top, not clear. Could place B onto S1(D)? D weight4 >= B=2 ok, and D is clear (solo). So we could place B onto D temporarily. Then later we need to move B onto E (for tower2). That's okay: we can move B from D onto E later after E is clear.
+
+Similarly, we need to move A away from E-A to expose E. We could move A onto somewhere else, maybe onto K? But K will be base for tower2; we need K clear for H placement. Could place A onto K after we placed H onto K? Let's see ordering.
+
+Let's outline steps for tower2 after we have cleared H and E:
+
+Goal: K base, H on K, E on H, B on E.
+
+We need to:
+
+1. Move G off S2 (to expose H).
+2. Move A off E-A (to expose E).
+3. Move H onto K (requires K clear).
+4. Move E onto H (requires H clear after step3, and E clear after step2).
+5. Move B onto E (requires B clear and E clear after step4).
+
+We need to store G and A temporarily somewhere, and B is currently on J-B (clear). After we move B onto E, J becomes clear (solo J). Later we will need J as base for tower3, and we will need to place G onto J (from wherever we stored G) and D onto G and A onto D (from wherever we stored A). So we need to store G and A such that we can later retrieve them.
+
+Thus we need temporary storage for G and A that does not interfere with the steps.
+
+We have K (solo), S1(D) (solo), T1 (completed), maybe we can use T1 as temporary storage? But T1 is final tower1; we don't want to disturb it. However we could temporarily place blocks onto T1 if we later remove them, as long as we restore T1. Since T1's top is C (weight3). We could place G onto C? Not allowed (heavier on lighter). Place A onto C? weight(C)=3 >= weight(A)=1 ok, and C is clear. So we could temporarily place A onto C (on top of T1). That would make T1 stack L-I-F-C-A. Later we need to remove A to restore T1. That's okay as long as we eventually move A off C onto D (for tower3). Similarly, we could place G onto ? Maybe onto B? But B is not available yet. Could place G onto E? But E weight5 < G=7 not allowed. Could place G onto K? K weight11 >=7 ok, but K needs to be clear for H placement later. If we place G onto K, K will not be clear (G on top). So we would need to move G off K before placing H onto K. That's extra move but okay.
+
+Similarly, we could place A onto K? A weight1 <=11 ok, but then K would have A on top, not clear for H placement. So we would need to move A off K before placing H onto K.
+
+Thus we could use K as temporary storage for G and A, but we would need to move them off before using K as base.
+
+Alternatively, we could use J as temporary storage for G and A, but J will be base for tower3 later; we need J clear for placing G onto J (final). So we could store A onto J temporarily, then later move A off J onto D after placing G onto J? Actually final tower3: J base, G on J, D on G, A on D. So if we store A onto J early, we would have J-A stack (J bottom, A on top). Then later we need to place G onto J (requires J clear). But J would not be clear because A on top. So we would need to move A off J before placing G onto J. That's extra move but okay.
+
+Similarly, we could store G onto J temporarily? If we store G onto J early, we would have J-G stack (J bottom, G top). Then later we need to place D onto G (requires G clear). G would be clear if nothing on top of G (since it's top). So that's okay; we could then place D onto G (since G clear). Then later place A onto D. So storing G onto J early is actually beneficial: it's the final position for G (just need to add D and A later). However we need J to be clear to place G onto J initially. So we need to move whatever is on top of J (currently B) off J first.
+
+Thus plan: move B off J-B onto somewhere else (maybe onto D or K or onto T1 etc.), making J clear. Then place G onto J (from S2). Then J-G stack formed (J bottom, G top). Good.
+
+Now we need to store A somewhere temporarily (since we need to expose E). We could store A onto T1 (onto C) as mentioned, or onto K, or onto D, or onto J? J now has G on top, not clear for placing A onto J (since G on top). Could place A onto G? G weight7 >= A=1 ok, but G is not clear? Actually G is top of J-G stack, so G is clear (nothing on top). So we could place A onto G (making J-G-A). But later we need to place D onto G (requires G clear). If we place A onto G, then G would have A on top, not clear, so we would need to move A off G before placing D onto G. That's extra move but okay.
+
+Alternatively, store A onto K (solo) temporarily, then later move A off K onto D after we have D placed on G.
+
+But we need K to be clear for placing H onto K later (for tower2). If we store A onto K, K would not be clear. So we would need to move A off K before placing H onto K. That's extra move.
+
+Similarly, store A onto D? D is solo in S1 currently. If we place A onto D, we would have D-A stack (D bottom, A on top). Later we need to place D onto G (for tower3) and then A onto D (final). If we place A onto D early, D would not be clear (has A on top), so we would need to move A off D before placing D onto G. That's extra move but okay.
+
+Thus many options.
+
+We also need to store B temporarily after moving it off J-B. B will later go onto E (for tower2). So we need to keep B accessible.
+
+We could store B onto D? D weight4 >= B=2 ok, and D is solo. If we place B onto D, we get D-B stack. Later we need to move B onto E (for tower2) and later D onto G (for tower3) and A onto D (final). If we place B onto D early, D will have B on top, not clear, so we would need to move B off D before placing D onto G (since D must be clear to place onto G). Also later we need to move A onto D (final) after D is on G. So we would need to move B off D, then later place D onto G, then later place A onto D. That's okay.
+
+Alternatively store B onto K? K will be needed as base for tower2; if we store B onto K, K not clear for H placement. So need to move B off K before placing H onto K. That's extra move.
+
+Store B onto T1? T1 top C weight3 >= B=2 ok, C is clear. So we could place B onto C (making T1 stack L-I-F-C-B). Later we need to move B off C onto E (for tower2). That's okay; after we move B off C, T1 restored to L-I-F-C (since C top). Good.
+
+Thus we can use T1 as temporary storage for both A and B (and maybe G?). But we must ensure we don't exceed weight constraints and that we can later retrieve them.
+
+Let's attempt to design a plan using T1 as a buffer for A and B, and using J as base for G early.
+
+We'll need to move B off J-B onto T1 (onto C). Then J becomes clear. Then move G from S2 onto J (making J-G). Then we have J-G stack.
+
+Now we need to move A off E-A onto somewhere; we could move A onto T1 as well (onto C? but C currently has B on top if we placed B onto C). Actually after moving B onto C, C is not clear (has B on top). So we cannot place A onto C if B is on top. We could place A onto T1 somewhere else: maybe onto F? F weight6 >= A=1 ok, and F is not clear because C and B on top? Actually after placing B onto C, the stack is L-I-F-C-B (bottom L, I, F, C, B top). So F is not clear (has C and B on top). I not clear, L not clear. Only B is top and clear. So only clear block in T1 is B (weight2). We could place A onto B? B weight2 >= A=1 ok, and B is clear. So we could place A onto B (making stack ...-C-B-A). That would put A on top of B. Later we need to move A off B onto D (for tower3). That's okay: we would need to move A off B (making B clear again) then later move A onto D.
+
+Thus we can use T1 to store both A and B stacked: first move B onto C (making ...-C-B), then move A onto B (making ...-C-B-A). Then T1 becomes L-I-F-C-B-A (height 6). However height limit is 5! Oh no, height limit: no tower may exceed height 5. T1 currently after we built it earlier is L-I-F-C (height 4). Adding B and A would make height 6, exceeding limit. So we cannot store both A and B on T1 if it would exceed height 5. However we could store only one of them on T1 at a time, or store them on other stacks.
+
+We need to keep height <=5 for any stack. So we must be careful.
+
+Let's check heights: Initial stacks height 4. Goal stacks height 4. So we can have temporary stacks up to height 5.
+
+Thus we can use T1 as a buffer but cannot exceed height 5. Currently T1 height 4 (L-I-F-C). We can add at most one more block to T1 without exceeding height 5. So we could store either A or B on T1 temporarily, but not both.
+
+Similarly, we could use other stacks as buffers, ensuring height <=5.
+
+We have S1(D) solo (height1), S2(H,G) height2, E-A height2, J-B height2, K solo height1, T1 height4.
+
+We need to move G and A off their stacks.
+
+Let's consider moving G onto K (solo) making K-G stack height2 (K weight11, G weight7). That's okay height2. Then K would not be clear (G on top). But we need K clear for placing H onto K later. So we would need to move G off K before placing H onto K. That's extra move but okay.
+
+Similarly, we could move A onto S1(D) making D-A stack height2 (D weight4, A weight1). Then D would not be clear (A on top). Later we need D clear to place onto G (for tower3). So we would need to move A off D before placing D onto G. That's extra move.
+
+Alternatively, move A onto J-B? J-B: J bottom, B top. J not clear because B on top. Could move A onto B? B weight2 >= A=1 ok, B is clear. So J-B-A stack height3 (J bottom, B, A top). Then J not clear (has B and A on top). Later we need J clear to place G onto J (for tower3). So we would need to move A and B off J before placing G onto J. That's extra moves.
+
+Alternatively, move A onto E-A? Actually A is already on E; we need to move A off E to expose E. So we need to move A somewhere else.
+
+Thus we need to find temporary homes for G and A that don't cause too many extra moves.
+
+Maybe we can interleave the building of towers differently: Build tower2 first, using K as base, and while doing that, we can use J as temporary storage for G and A? Let's think.
+
+Alternate plan: Build tower3 first? Let's examine.
+
+Goal tower3: J base, G on J, D on G, A on D.
+
+We have J in J-B stack (J bottom, B on top). To get J as base, we need to move B off J. Then we can place G onto J, then D onto G, then A onto D.
+
+Thus we need to move B off J temporarily.
+
+Similarly, we need to get D clear (currently S1: D bottom, C, B, A). To place D onto G, we need D clear (nothing on top). So we need to move C, B, A off D. A is currently on B on C on D. So we need to move A, B, C away.
+
+We also need to get G clear (currently S2: H bottom, G, F, E). To place G onto J, we need G clear (nothing on top). So we need to move F and E off G? Actually G has F on top? Wait S2: H(bottom), G, F, E(top). So G has F on top, which has E on top. So to make G clear, we need to move E and F off G (in order: move E, then move F, then G becomes clear). Actually after moving E, stack becomes H,G,F (top F). G still has F on top, not clear. After moving F, stack becomes H,G (top G). Then G is clear.
+
+Thus to get G clear, we need to move E and F away.
+
+Thus building tower3 requires moving away B, A, C, E, F. That's many.
+
+Building tower2 requires moving away G, A (to expose E), and maybe others.
+
+Building tower1 requires moving away K, J, I (to expose L) and then placing I, F, C.
+
+Thus perhaps we can build towers in an order that reuses the moved blocks as needed.
+
+Observation: The blocks we need to move away from each source are exactly the blocks that belong to other towers. For example, from S3 we need to move K,J,I away; those belong to towers 2,3,1 respectively (K to tower2 base, J to tower3 base, I to tower1 second level). From S2 we need to move G,F,E away; those belong to tower3 (G), tower1 (F), tower2 (E). From S1 we need to move C,B,A away; those belong to tower1 (C), tower2 (B), tower3 (A). So each source stack's blocks are exactly the set needed for the three towers, just permuted.
+
+Thus we can think of a cyclic permutation: we need to rotate blocks among stacks.
+
+Thus perhaps we can solve by moving blocks in a round-robin fashion.
+
+One approach: Use the table as a buffer to hold blocks while we rotate.
+
+We can try to perform a sequence of moves that cycles blocks: e.g., move I from S3 to S2? Not sure.
+
+Let's attempt to design a solution using the following high-level plan:
+
+1. Unstack S3 to get L as base for tower1, temporarily store I, J, K on table (or other stacks) as solos.
+2. Unstack S2 to get H and E as needed for tower2, temporarily store G and F somewhere.
+3. Unstack S1 to get D as needed for tower3, temporarily store C,B,A somewhere.
+4. Then assemble tower1: place I on L, F on I, C on F.
+5. Assemble tower2: place H on K, E on H, B on E.
+6. Assemble tower3: place G on J, D on G, A on D.
+
+We need to manage temporary storage without exceeding height and stack limits.
+
+We already attempted step1: moved I,J,K to table as solos, resulting in stacks: S1, S2, T1_base(L), I(table), J(table), K(table). That's 6 stacks.
+
+Now step2: we need to unstack S2 to get H and E. S2 currently is H,G,F,E (height4). We need to move E,F,G away temporarily. We have available table positions: I,J,K solos (3), plus S1 (D,C,B,A) and S3 base L. That's 5 other stacks. If we move E,F,G each to table as solos, we would add 3 stacks, making total 9 >6. So we need to place them onto existing stacks without exceeding limit.
+
+We have T1_base(L) solo (height1). Could we place E,F,G onto L? L weight12 can hold any lighter block. However L is currently base of tower1; we plan to later place I onto L. If we place blocks onto L, L would not be clear (since something on top). We would need to move them off before placing I onto L. That's extra moves but okay.
+
+Similarly we could place them onto I,J,K solos (but they are already solos; placing onto them would create stacks of height2). That's okay as long as height <=5.
+
+We also have S1 (D,C,B,A) which is a stack of height4. We could place some blocks onto S1 if weight allows and not exceed height5.
+
+We need to keep track.
+
+Let's attempt to implement step2 while keeping total stacks <=6.
+
+After step1, we have stacks:
+
+1. S1: D,C,B,A (height4)
+2. S2: H,G,F,E (height4)
+3. S3_base: L (height1) (we'll call this stack X)
+4. I_solo: I (height1)
+5. J_solo: J (height1)
+6. K_solo: K (height1)
+
+That's 6 stacks.
+
+Now we need to move E,F,G from S2 somewhere. Let's consider moving E onto I_solo (making I-E stack? Actually we place E onto I? Wait we need to move E from S2 onto some destination. The action is moving block E from its current support (which is F) to a new support. So we need to pick a destination block or table.
+
+If we move E onto I_solo (i.e., place E on top of I), we need I clear (it is solo, clear) and weight(I)=9 >= weight(E)=5 ok. Then I-E stack: I bottom, E on top. Height2.
+
+After moving E, S2 becomes H,G,F (top F). Good.
+
+Now we have stacks: S1, S2(H,G,F), X(L), I-E, J_solo, K_solo. That's still 6 stacks (we replaced I_solo with I-E stack, same count).
+
+Now we need to move F from S2 somewhere. F is now top of S2 (H,G,F). We need to move F onto some destination.
+
+Potential destinations: J_solo (weight10 >=6 ok), K_solo (11>=6), I-E stack? Top is E weight5, which is <6, cannot place heavier on lighter. Could place onto L (X) weight12>=6 ok, but L is base of tower1; we may need to keep L clear later. Could place onto S1? S1 top is A weight1, cannot place heavier on lighter. Could place onto I-E? Not allowed due to weight. Could place onto J_solo or K_solo.
+
+Let's choose to move F onto J_solo (making J-F stack). J is clear, weight10>=6
+---
+S1 Parsed Answer: {'step': 1, 'action': 'move', 'block': 'A', 'from': 'table', 'to': 'B'}
+S1 Valid/Parse Success: True
+S1 Correct: False
+S1 Tokens: 14773 | Latency: 409095.2ms
+
+============================================================
+=== SYSTEM 2 (MP EVALUATOR / JUDGE) ===
+--- S2 PROMPT ---
+PROBLEM:
+# Problem Statement
+
+Transform stacks of weighted blocks from an initial configuration to a goal configuration by moving blocks one at a time while respecting weight and structural constraints.
+
+## Instance Data
+
+**Blocks:** 12 blocks labeled A through L
+
+**Weights:**
+- A=1, B=2, C=3, D=4, E=5, F=6, G=7, H=8, I=9, J=10, K=11, L=12
+
+**Initial Configuration** (three stacks of height 4):
+- Stack 1: D on table, C on D, B on C, A on B
+- Stack 2: H on table, G on H, F on G, E on F
+- Stack 3: L on table, K on L, J on K, I on J
+
+**Goal Configuration** (three stacks of height 4):
+- Tower 1: L on table, I on L, F on I, C on F
+- Tower 2: K on table, H on K, E on H, B on E
+- Tower 3: J on table, G on J, D on G, A on D
+
+## Constraints
+
+1. **Clear block**: Only blocks with nothing on top can be moved
+2. **Single move**: Only one move occurs per time step
+3. **Weight constraint**: A heavier block **cannot** be placed on a lighter block (weight(Y) >= weight(X) required for placing X on Y)
+4. **Table limit**: **At most** 6 blocks may be directly on the table at any time
+5. **Height limit**: **No** tower may exceed height 5 (depth 1 = directly on table)
+6. **Valid positions**: Blocks can be placed on the table or on top of another clear block
+7. **Distinct positions**: Source and destination **must** differ; block **cannot** be placed on itself
+8. **Maximum Plan Length**: Your final plan must not exceed 50 moves.
+
+## Objective
+
+Your goal is to find a valid sequence of moves to transform the initial configuration into the goal configuration.
+
+For this problem, the primary objective is finding a correct plan that respects all constraints. The complexity of the task suggests that a solution may require a significant number of moves, so you should ensure your search explores plans up to the **maximum allowed length of 50 moves**.
+
+SYSTEM 1 ANSWER (For Evaluation):
+We need to produce a plan to transform initial to goal respecting constraints: weight constraint: heavier block cannot be placed on lighter block => weight(Y) >= weight(X) needed for placing X on Y. So when moving block X onto Y (or table?), table is considered as infinite weight? Usually table can hold any block, weight constraint only applies to placing on a block; table has no weight limit. Need to check that block on table doesn't violate anything (clear). Also height limit: no tower may exceed height 5 (depth 1 = directly on table). So each stack can have at most 5 blocks (height <=5). Initially each stack height 4, goal also height 4. At any time at most 6 blocks may be directly on the table. Initially each stack bottom block on table: D, H, L (three blocks on table). So within limit.
+
+We need to find a sequence of moves (max 50) to rearrange blocks from initial to goal.
+
+Goal towers: let's list each tower bottom to top:
+
+Tower1 (Goal): L (bottom on table), I on L, F on I, C on F.
+So bottom L (weight 12), then I (weight9) on L, then F (weight6) on I, then C (weight3) on F. Check weight constraints: I on L: weight(L)=12 >= weight(I)=9 ok. F on I: weight(I)=9 >= weight(F)=6 ok. C on F: weight(F)=6 >= weight(C)=3 ok.
+
+Tower2: K (weight11) bottom, H (8) on K, E (5) on H, B (2) on E. Check: H on K: weight(K)=11 >=8 ok. E on H: weight(H)=8 >=5 ok. B on E: weight(E)=5 >=2 ok.
+
+Tower3: J (10) bottom, G (7) on J, D (4) on G, A (1) on D. Check: G on J: weight(J)=10 >=7 ok. D on G: weight(G)=7 >=4 ok. A on D: weight(D)=4 >=1 ok.
+
+Thus goal stacks are all weight decreasing upward (bottom heaviest). Initial stacks: Stack1: D (4) bottom, C (3) on D, B (2) on C, A (1) on B. So bottom D weight4 then C3, B2, A1 (decreasing upward) okay.
+
+Stack2: H(8) bottom, G(7) on H, F(6) on G, E(5) on F: decreasing.
+
+Stack3: L(12) bottom, K(11) on L, J(10) on K, I(9) on J: decreasing.
+
+So initial stacks also are weight decreasing upward: each stack is sorted descending weight bottom to top. The goal stacks also descending, but with different ordering of blocks: goal wants L at bottom of tower1 (weight12), then I (9), F (6), C (3). Tower2: K (11) bottom, H (8), E (5), B (2). Tower3: J (10) bottom, G (7), D (4), A (1).
+
+Thus we need to rearrange blocks between stacks.
+
+Essentially we need to move blocks to achieve these specific groupings.
+
+Observation: weight ordering within each stack must be decreasing, so any intermediate configuration also must maintain decreasing weight (since we can't place a heavier on lighter). However we could temporarily have a stack where order is not decreasing? Let's think: The constraint only prevents placing heavier on lighter. It does not require that a stack be decreasing overall; you could have a lighter block on heavier (allowed) but you cannot place a heavier on lighter. So you can have a stack where weights increase upward? Actually if you place a lighter block on heavier, that's allowed (since weight(Y) >= weight(X) where Y is below, X is placed on top). So you can have decreasing weight upward (heavier at bottom). If you attempted to place a heavier on lighter, that would be prohibited. So any legal move ensures that after placing X on Y, weight(Y) >= weight(X). Therefore the resulting stack will have the property that each block's weight is >= weight of block above it (since that's just the condition for each adjacent pair). So the stack remains non-increasing weight from bottom to top (i.e., decreasing or equal). Since all weights distinct, it's strictly decreasing. Therefore any reachable configuration must have each stack strictly decreasing weight upward (i.e., sorted descending). So intermediate states must also have each stack sorted descending weight.
+
+Thus the problem reduces to rearranging blocks among three stacks while maintaining each stack sorted descending weight (i.e., each stack is a decreasing sequence). This is similar to sorting with stacks where you can only move top block (clear) and you can place onto another stack only if the top block of destination is heavier than the block being moved (or destination empty/table). Equivalent to the classic "stack sorting" problem (like Tower of Hanoi variant with weight constraints). Additionally table limit: at most 6 blocks on table (i.e., number of stacks? Actually "directly on the table" means blocks that are not on top of any other block, i.e., bottom of each stack. So at any time we can have at most 6 stacks (since each stack's bottom block is on table). Since we have only 3 stacks initially, we could create more stacks by moving blocks to table as new stacks (i.e., placing a block on table when it's not on any other block). So we can have up to 6 stacks (piles) at any time.
+
+Height limit: each stack cannot exceed height 5. Since we have only 12 blocks, max height 5 is fine; we won't exceed.
+
+Goal: three stacks of height 4 each.
+
+We need to produce a plan <=50 moves.
+
+We can try to design a solution manually.
+
+Let's denote blocks and weights:
+
+A1
+B2
+C3
+D4
+E5
+F6
+G7
+H8
+I9
+J10
+K11
+L12
+
+Initial stacks (bottom to top):
+S1: D(4), C(3), B(2), A(1)
+S2: H(8), G(7), F(6), E(5)
+S3: L(12), K(11), J(10), I(9)
+
+Goal stacks:
+T1: L(12), I(9), F(6), C(3)
+T2: K(11), H(8), E(5), B(2)
+T3: J(10), G(7), D(4), A(1)
+
+So essentially we need to move blocks between stacks to achieve these groupings.
+
+Observation: The bottom blocks of goal towers are L, K, J (the three heaviest). In initial, bottom blocks are D, H, L (4,8,12). So we need to move L to bottom of tower1 (already bottom of S3). K needs to be bottom of tower2 (currently K is second from bottom in S3, on L). J needs bottom of tower3 (currently third from bottom in S3, on K). So we need to extract K and J from S3 to become bottoms of new stacks, while L remains bottom of S3 (or maybe move L elsewhere? but L is already bottom of goal tower1, so we can keep L where it is, as bottom of S3). So we need to unstack S3: currently S3: L (bottom), K, J, I (top). Goal: L bottom, I on L, F on I, C on F. So we need to move I onto L (currently I is top of S3, above J, K). Actually I is currently top of S3 (since S3: L,K,J,I). Goal: I should be directly on L (second from bottom). So we need to remove K and J from between L and I, and place them elsewhere, then put I on L, then later place F on I, then C on F.
+
+Similarly S2: H,G,F,E. Goal tower2: K bottom, H on K, E on H, B on E. So we need to keep H and E in S2? Actually currently S2 bottom H, then G, F, E. Goal: K bottom (not present), H on K, E on H, B on E. So we need to remove G and F from between H and E, then later place K under H (i.e., K becomes new bottom under H), and place B on top of E. Also we need to move G and F elsewhere (F goes to tower1 on I; G goes to tower3 on J). Also we need to bring B from somewhere (currently in S1) to top of E.
+
+S1: D,C,B,A. Goal tower3: J bottom, G on J, D on G, A on D. So we need to keep D and A in S1? Actually currently S1 bottom D, then C, B, A. Goal: J bottom (not in S1), G on J, D on G, A on D. So we need to remove C and B from between D and A, then later place J under D? Wait goal: J bottom, G on J, D on G, A on D. So D is third from bottom (above G). Actually order: bottom J (10), then G (7), then D (4), then A (1). So D is above G, and A is top. Currently D is bottom of S1, with C,B,A above. We need to move C and B away, then later place G under D (i.e., G becomes just below D), and place J under G (i.e., J becomes bottom). Also we need to move A to top of D (it already is top? Actually currently A is top of S1, yes). So A is already correctly placed on D (top). So we just need to get G under D and J under G.
+
+Thus overall we need to shuffle blocks.
+
+Given the weight constraint (must place lighter on heavier), we can think of using the table as temporary storage. Since we can have up to 6 stacks, we can use extra stacks to hold blocks temporarily.
+
+We need to find a sequence of moves <=50.
+
+We can attempt to solve via reasoning: treat each stack as a decreasing sequence; we can only move the top block (smallest weight in that stack). So we can only remove blocks from the top of each stack (since they are clear). Initially, the top blocks are: S1 top A (weight1), S2 top E (5), S3 top I (9). So we can only move A, E, or I initially.
+
+Goal: we need to get certain blocks to certain positions. Let's think about building goal towers from bottom up using available moves.
+
+We could try to construct each goal tower by moving blocks onto appropriate bases.
+
+But we have constraints: we cannot place a heavier block on a lighter one; we can only place lighter on heavier (or on table). So building a tower bottom-up (starting with heaviest at bottom) is natural: we place lighter blocks onto heavier ones.
+
+Thus to build tower1: bottom L (12) is already present as bottom of S3. Good. Next we need I (9) on L. I is currently top of S3 (above J and K). To place I on L, we need to have L as clear (nothing on top) and I as clear (nothing on top). Currently L has K on top, so not clear. I is clear (top). So we need to remove K and J from above L to expose L, then move I onto L. After moving I onto L, L will have I on top (so L not clear unless we later move I away). Then we need to place F (6) on I: need I clear (nothing on top) and F clear. After placing I on L, I will have nothing on top (if we don't place anything else on I yet). So we can later move F onto I if F is clear and I is clear (i.e., no block on top of I). Then place C (3) on F similarly.
+
+Thus steps for tower1: need to clear L (remove K and J), move I onto L, then move F onto I, then move C onto F.
+
+Similarly tower2: bottom K (11) needs to be placed on table (as base). Currently K is on L in S3 (second from bottom). To make K a base, we need to remove L? Actually K is above L; to have K as bottom (clear underneath), we need to move L away (or have K placed on table directly). Since L is heavier (12) than K (11), we cannot place K on L (since would be heavier on lighter? Actually placing K on L: weight(L)=12 >= weight(K)=11 => allowed (since we place lighter on heavier). Wait placing K on L means K is placed on top of L (L below). That's allowed because L heavier than K. But we want K as bottom (on table). So we need to remove L from underneath K, i.e., move L away (or move K onto table). Since L is currently below K, to make K a base we need to move L elsewhere (or move K off L onto table). However we cannot lift K while L is still underneath because K is not clear (has L? Actually K is above L, so K has L underneath; but to be clear, K must have nothing on top of it. It does have J on top? Actually K has J on top? Wait S3: L(bottom), K, J, I(top). So K has J on top, so K is not clear because J is on top. Actually clarity: a block is clear if nothing is on top of it. So K has J on top, thus not clear. So we need to remove J and I from above K to make K clear, then we can move K. After removing J and I, K becomes clear (top of stack). Then we can move K to table (or onto another block). To make K a base (on table), we move K to table.
+
+Thus to get K as base, we need to clear K (remove J and I). Then move K to table.
+
+Similarly for J as base of tower3: J is currently above K and L, with I on top? Actually S3: L(bottom), K, J, I(top). So J has I on top, and K underneath. To make J clear, we need to remove I from above J. Then J becomes clear (top after removing I). Then we can move J to table (or onto something else). Then we need to place G on J (so J must be base with G placed on top). J as base means J on table, then G placed on J (allowed if weight(J)>=weight(G): 10>=7 ok). Then D on G (weight(G)=7 >= weight(D)=4 ok), then A on D (weight(D)=4 >= weight(A)=1 ok). So after moving J to table, we can place G onto J, then D onto G, then A onto D (but A is currently somewhere else maybe on D? Actually initially A is on B on C on D in S1; we need to move A to top of D eventually). We'll need to manage.
+
+Thus overall we need to unstack S3 to get L, K, J as separate bases (or L stays as base, K and J moved to table as bases). Then we need to restack accordingly.
+
+Similarly we need to unstack S2 to get H and E as bases (or maybe keep H as base? Actually goal tower2: K base, H on K, E on H, B on E. So H is not a base; it's placed on K. So we need to move H onto K after K is base. E needs to be on H after H placed on K. So we need to get H and E as clear blocks to place onto K and then onto H respectively.
+
+S2 currently: H(bottom), G, F, E(top). To get H clear, we need to remove G,F,E from above H. To get E clear, we need to remove nothing above E (it's top), but after we remove G and F, E will become top? Actually initially E is top; it's already clear. But we cannot place E onto H until H is clear and we have placed H onto K (so H is not on table but on K). Actually we need H on K, then E on H. So we need to move H onto K (requires H clear and K clear/top? Actually K as base will be on table, so K is clear (nothing on top) after we move K to table and before placing anything on K. Then we can place H onto K if H is clear and weight(K)>=weight(H): 11>=8 ok. After placing H on K, H will have K underneath and nothing on top (if we haven't placed anything else). Then we need to place E onto H: requires E clear and weight(H)>=weight(E): 8>=5 ok. So we need to make H clear (by removing G,F,E from above H) and E clear (by maybe moving E away temporarily? Actually after removing G and F, E will be on top of H? Wait initially S2: H(bottom), G, F, E(top). If we remove G and F (by moving them elsewhere), we will have H(bottom), E(top). Then E is still on top of H, so not clear (since E is on top of H). Actually clarity: a block is clear if nothing is on top of it. So after removing G and F, E remains on top of H, thus E is not clear (since it has nothing on top? Wait E is topmost, so nothing on top of E, thus E is clear. However H has E on top, thus H is not clear. So to make H clear we need to remove E as well (move E elsewhere). Then after removing E, H becomes clear (top of stack). Then we can place H onto K. After placing H onto K, we need to place E onto H. So we need to have E available (clear) to place onto H after H is on K. So we need to move E away temporarily, then later move it back onto H.
+
+Thus for tower2: we need to remove G, F, E from S2 to expose H as clear, move H onto K (base), then move E onto H, then move G and F elsewhere? Actually G and F need to go to tower1 and tower3 respectively. So after we remove them, we can place them later.
+
+Similarly for tower3: we need to get J as base, then place G on J, then D on G, then A on D. So we need to remove I from above J to make J clear, then move J to table (base). Then we need to move G onto J (requires G clear and weight(J)>=weight(G): 10>=7 ok). Then move D onto G (requires D clear and weight(G)>=weight(D):7>=4 ok). Then move A onto D (requires A clear and weight(D)>=weight(A):4>=1 ok). Note A is currently on B on C on D in S1; we need to free A (make it clear) and also free D from having C,B above? Actually D currently has C on top, B on top of C, A on top of B. To place A onto D, we need D to be clear (nothing on top) and A clear (nothing on top). So we need to remove C and B from above D, and also ensure A is clear (i.e., nothing on top of A). Initially A is top, so clear. After we remove C and B, D becomes clear (since nothing on top). Then we can move A onto D. However we also need to place D onto G later; after placing A onto D, D will have A on top, making D not clear. But we need to place D onto G before placing A onto D? Actually goal: D on G, A on D. So D must be placed onto G first (making D have G underneath, and nothing on top yet), then we place A onto D. So we need to move D onto G while D is clear (nothing on top) and A is elsewhere (not on D). Then after D is on G, we can place A onto D (since D will have A on top, making D not clear but that's fine). So order: move J to table (base), move G onto J, move D onto G (D clear), then move A onto D (A clear). So we need to free D from having C,B above, and ensure A is clear (not on D). Initially A is on top of B; we need to move A away temporarily? Actually we need A to be placed onto D at the end, so we need to have A free (clear) and D free (clear) at that moment. So we need to move A away from its current position (on B) to somewhere else temporarily, then after D is placed on G, we move A onto D.
+
+Thus we need to move A away from S1 early.
+
+Similarly for tower1: we need L base (already), then I on L, then F on I, then C on F. So we need to free I (make it clear) by removing K and J from above L? Actually I is on top of J, which is on top of K, which is on top of L. So to make I clear (it already is clear as top of S3). Wait I is topmost, so I is clear initially. However to place I onto L, we need L to be clear (nothing on top). L currently has K on top, so not clear. So we need to remove K and J from above L to make L clear. After removing K and J, L becomes clear (since nothing on top). Then we can move I onto L (I is clear). After placing I on L, I will have L underneath and nothing on top (if we don't place anything else on I yet). Then we need to place F onto I: need I clear (nothing on top) and F clear. After placing I on L, I is not clear if we place something on top later; but we will place F onto I, so we need I to be clear before placing F. After placing I on L, I is clear (since nothing on top). Good. Then we place F onto I (requires F clear). After placing F on I, I will have F on top, making I not clear. Then we need to place C onto F: need F clear (nothing on top) and C clear. After placing F on I, F is not clear (has C? Actually we will place C onto F later). So we need to place C onto F while F is clear (i.e., before placing anything on top of F). So after placing F on I, we must not place anything else on F before placing C onto F. So we can place C onto F directly after F is placed on I (since F will be clear at that moment). Then after placing C on F, F will have C on top.
+
+Thus for tower1 we need to: clear L (remove K,J), move I onto L, move F onto I, move C onto F.
+
+Thus overall we need to extract K and J from S3 to expose L, then later use K and J as bases for tower2 and tower3 respectively.
+
+Thus the plan: we will unstack S3 to get L, K, J as separate bases (maybe L stays where it is, K and J moved to table). We'll need to temporarily hold I somewhere while we clear L? Actually I is on top of J; to expose L we need to remove K and J, but I is above J, so we need to remove I as well? Wait to get L clear we need to remove everything above L: that includes K, J, I. Since I is on top of J, we need to remove I first to expose J, then remove J to expose K, then remove K to expose L. Actually we need to remove the top blocks sequentially. So we need to move I somewhere, then J somewhere, then K somewhere. After removing I,J,K, L becomes clear (with nothing on top). Then we can move I onto L (but I is currently somewhere else; we need to move it back). So we will need to move I away, then later move it back onto L after L is clear.
+
+Thus we need to temporarily store I, J, K somewhere (maybe on table or other stacks) while we expose L.
+
+Similarly for S2: we need to remove G,F,E to expose H, then later move H onto K (base), then move E onto H, then place G and F elsewhere.
+
+For S1: we need to remove C,B to expose D, then later move D onto G (after G placed on J), then move A onto D (after A is free). Also we need to move A away temporarily to free D? Actually to expose D we need to remove C and B (since they are above D). A is above B, so to remove B we need to remove A first? Let's see S1: D(bottom), C, B, A(top). To make D clear (nothing on top), we need to remove A, B, C. Because A is on top of B, B on top of C, C on top of D. So we need to move A, then B, then C away to expose D. After that, D is clear. Then later we need to place D onto G (which will be on J). After placing D onto G, we need to place A onto D (so we need A available). So we will need to move A away temporarily, then later move it back onto D after D is on G.
+
+Thus we need to move A, B, C away from S1 to expose D.
+
+Thus overall we need to disassemble all three stacks completely to individual blocks (or at least to expose bases) and then rebuild goal stacks.
+
+Given we have up to 6 stacks on table, we can use the table as temporary storage for many blocks.
+
+We have 12 blocks; we can place each on table as a separate stack (height 1) as long as we don't exceed 6 stacks on table at any time. But we can have at most 6 blocks directly on table (i.e., number of stacks). So we cannot have more than 6 stacks at any time. Since we have 12 blocks, we need to manage with at most 6 stacks. However we can have stacks of height >1 on table (i.e., multiple blocks stacked). So we can store multiple blocks in a single stack on table, as long as weight ordering holds (decreasing upward). So we can store blocks in temporary stacks.
+
+Thus we need to design a plan that uses at most 6 stacks (piles) at any moment.
+
+We start with 3 stacks (S1,S2,S3). We can create additional stacks by moving blocks to table as new piles (height 1). We must ensure we never exceed 6 stacks.
+
+Goal ends with 3 stacks.
+
+We need to find a sequence of moves within 50 steps.
+
+Given the complexity, maybe we can design a straightforward algorithm: treat each block as needing to go to a specific destination stack (goal tower). Use table as buffer.
+
+We can think of each goal tower as a target stack: T1 (L,I,F,C), T2 (K,H,E,B), T3 (J,G,D,A). We'll need to move blocks to these target stacks in correct order (bottom-up). Since we can only place lighter on heavier, we need to build each target stack from bottom up: place the heaviest block (bottom) onto table (or ensure it's base), then place next heaviest onto it, etc.
+
+Thus we can process each tower sequentially: first build T1, then T2, then T3, using table as temporary storage for blocks not yet placed.
+
+But we must respect the limit of 6 stacks.
+
+Let's attempt to design a plan.
+
+We'll label stacks by their bottom block maybe, but we can refer to positions as "table" (i.e., placing a block on table creates a new stack) or "on top of X" where X is a block.
+
+We need to specify source and destination positions: from <source_position> to <target_position>. The source_position is either "table" (if block is on table as a stack of height 1? Actually if a block is directly on table with nothing underneath, we can say from "table"? But the problem statement says "from": "<source_position>", "to": "<target_position>". It expects something like block name? Actually they want to specify the position (like stack identifier or "table"). In similar problems, they often denote positions as "table" or the block that is directly underneath? For example, moving block X from being on top of Y to being on top of Z: from Y to Z? Or from "table" to Y? Let's interpret: The position is the object that the block is currently resting on (either table or another block). So "from": "<source_position>" indicates what the block is currently on (the support). "to": "<target_position>" indicates what we will place it on (the new support). For a block on table, source_position is "table". For a block on another block Y, source_position is Y. Similarly, destination is either "table" or a block Y.
+
+Thus we need to output moves like: {"step":1, "action":"move", "block":"A", "from":"table", "to":"B"} meaning move A from table onto B (placing A on top of B). Or from "B" to "table" meaning moving B onto table.
+
+Thus we need to track each block's current support.
+
+We'll need to produce a plan.
+
+Given the complexity, maybe we can attempt to solve via reasoning and produce a plausible plan manually, ensuring constraints.
+
+Let's attempt to design a step-by-step plan.
+
+We'll maintain three goal towers: T1 (target stack for L,I,F,C), T2 (K,H,E,B), T3 (J,G,D,A). We'll also have temporary stacks.
+
+We'll try to keep number of stacks low.
+
+Idea: Use the table as a buffer, but we can have at most 6 stacks. We'll try to keep at most 4 stacks at any time.
+
+We'll start with three stacks: S1 (D,C,B,A), S2 (H,G,F,E), S3 (L,K,J,I). We'll aim to unstack S3 first to get L as base for T1, and store I,J,K somewhere.
+
+We'll need to move I, J, K off S3. Since we can only move top blocks, we'll start moving I (top) somewhere, then J becomes top, move J somewhere, then K becomes top, move K somewhere, leaving L alone.
+
+Where to put I,J,K? We could put them each on table as separate stacks (height1). That would add 3 stacks, making total stacks = original 3 (S1,S2,S3) + 3 new = 6 stacks, which is at the limit. After moving I,J,K onto table, we will have S1, S2, S3 (now just L), plus three table stacks I, J, K. That's 6 stacks exactly. Good.
+
+Then we can proceed.
+
+After that, we need to move I onto L (to start T1). L is currently a stack of height1 (just L). I is on table as its own stack. We can move I from table onto L (since L is clear and weight(L)=12 >= weight(I)=9). This will create stack L,I (L bottom, I on top). After that, we have stacks: S1, S2, L-I (height2), J (table), K (table). That's 5 stacks (S1,S2, L-I, J, K). Good.
+
+Next we need to move F onto I. F is currently in S2 (stack H,G,F,E). F is not top; top of S2 is E. So we need to expose F by moving E and G away? Actually S2: H(bottom), G, F, E(top). To get F, we need to remove E and G? Wait ordering: bottom H, then G, then F, then E on top. So to get F clear (nothing on top), we need to remove E (top) first, then F becomes top? Actually after removing E, the stack becomes H,G,F (top F). So F becomes clear. Then we can move F onto I. However we also need to ensure I is clear (nothing on top) before placing F on I. Currently I has L underneath and nothing on top (since we placed I on L, no other blocks on I). So I is clear. Good.
+
+Thus we need to move E from S2 somewhere, then move G somewhere (or maybe we can move G after moving E? Actually after moving E, the stack is H,G,F. Top is F? Wait after removing E, top is F? Let's check: original S2: H(bottom), G, F, E(top). Remove E (top) -> new stack: H(bottom), G, F (top). So top is F. Good. Then we can move F onto I. After moving F, the stack becomes H,G (top G). So G becomes top.
+
+Thus we need to move E away temporarily, then move F onto I, then later we will need to place G onto J (for T3) and maybe later place something else.
+
+So after moving I onto L, we have S1 (D,C,B,A), S2 (H,G,F,E), L-I stack, J table, K table.
+
+Now we need to move E from S2 somewhere (to expose F). Let's move E to table as a new stack? That would increase stacks count. Currently we have 5 stacks; adding a new stack for E would make 6 stacks (still ok). After moving E to table, S2 becomes H,G,F (top F). Then we can move F onto I.
+
+After moving F onto I, we have L-I-F stack (L bottom, I middle, F top). S2 becomes H,G (top G). E is on table as its own stack. J and K are on table. S1 unchanged.
+
+Now we need to move C onto F. C is in S1 (stack D,C,B,A). To get C, we need to remove A and B from above C? Actually S1: D(bottom), C, B, A(top). To get C clear (nothing on top), we need to remove A and B. Since A is top, we need to move A somewhere, then B becomes top, move B somewhere, then C becomes top. After that we can move C onto F.
+
+We also need to eventually place A onto D (for T3) and B onto E (for T2). So we will need to keep A and B accessible.
+
+Thus we need to move A and B away temporarily.
+
+We currently have stacks: S1 (D,C,B,A), S2 (H,G), L-I-F, E(table), J(table), K(table). That's 6 stacks (S1,S2, L-I-F, E, J, K). Good.
+
+We need to move A and B away; we can move them to table as new stacks, but that would exceed limit (currently 6 stacks, adding two would make 8). So we need to maybe place A and B onto existing stacks (like onto E, J, K, or onto L-I-F? But we must respect weight constraint: we can only place lighter on heavier. Let's see weights: A=1, B=2. They are light; they can be placed on any heavier block (>= weight). So we could place A onto E (weight5) or onto J (10) or K (11) or onto L (12) etc. Similarly B can be placed on any heavier.
+
+We also need to keep them accessible later for moving onto D and E respectively.
+
+We could place A onto E (making stack E,A) and B onto J (making stack J,B) or something like that. However later we need to move A from its position onto D (which will be on G on J). If we place A onto E, later we need to move A from E onto D. That's allowed if we can make A clear (nothing on top of A) and D clear and weight(D)>=weight(A). If we put A onto E, then A will have E underneath and nothing on top (if we don't put anything else on A). So A is clear. Good. Later we can move A from E onto D (provided D is clear and weight(D)>=weight(A)). That's fine.
+
+Similarly B we could place onto J (making J,B). Later we need to move B onto E (which will be on H on K). Actually goal: B on E (E on H on K). So B needs to go onto E after E is placed on H on K. So if we place B onto J initially, later we need to move B from J onto E. That's okay if we can make B clear (nothing on top) and E clear and weight(E)>=weight(B) (5>=2). So we can later move B from J to E.
+
+Thus we can use existing table stacks E, J, K as temporary hosts for A and B.
+
+But we must ensure we don't violate weight constraints when placing A onto E etc. Let's check: placing A (1) onto E (5): weight(E)=5 >= weight(A)=1 ok. Placing B (2) onto J (10): weight(J)=10 >=2 ok.
+
+Now we need to move A and B off S1 to expose C.
+
+We'll need to move A first (top of S1) onto E (or J or K). Then S1 becomes D,C,B (top B). Then move B onto J (or K or maybe onto E? But if we put B onto E, E would have A and then B? Actually we could stack B onto E after A is already on E? That would place B on top of A (since E bottom, A on E, then B on A?). Wait if we move B onto E, the destination is E (the block E). If E currently has A on top (i.e., stack E,A), then placing B onto E would put B on top of the stack? Actually the rule: you place block X on top of Y (where Y is the block directly under X). If Y already has a block on top, you cannot place X onto Y because Y is not clear (it has something on top). So you can only place onto a clear block (nothing on top). So if we have E with A on top, E is not clear (since A is on top). So we cannot place B onto E if A is already on E. So we need to place B onto a different clear block, like J or K or maybe L? But L is part of L-I-F stack; L is bottom, not clear because I and F are on top. I is not clear because F on top? Actually after we placed F on I, I has F on top, so I not clear. F has nothing on top? Actually F is top of L-I-F stack, so F is clear. So we could place B onto F? But weight(F)=6 >= B=2 ok, and F is clear. However later we need to move F? Actually F is already placed correctly in T1 (L-I-F). We don't want to disturb it. So better not.
+
+Thus we should place B onto J or K (both are clear as table stacks). J and K are currently solo on table (no blocks on top). So they are clear.
+
+Thus plan: move A from S1 onto E (making E,A stack). Then S1 becomes D,C,B (top B). Then move B from S1 onto J (making J,B stack). Then S1 becomes D,C (top C). Now C is clear (top of S1). Good.
+
+Now we have stacks: S1 (D,C), S2 (H,G), L-I-F, E-A (E bottom, A on top), J-B (J bottom, B on top), K (table solo). That's 6 stacks: S1,S2, L-I-F, E-A, J-B, K. Good.
+
+Now we can move C from S1 onto F (which is on top of I in L-I-F). Need to check: F is currently top of L-I-F stack, clear. Weight(F)=6 >= weight(C)=3 ok. So we can move C from S1 onto F. After moving, S1 becomes D (bottom only). L-I-F-C stack: L bottom, I, F, C top. Good.
+
+Now we have completed tower1: L-I-F-C is exactly goal T1. Good.
+
+Now we have stacks: S1 (D), S2 (H,G), L-I-F-C (completed T1), E-A, J-B, K.
+
+That's 5 stacks (S1,S2,T1,E-A,J-B,K). Good.
+
+Now we need to build tower2: K base, H on K, E on H, B on E.
+
+Currently K is solo on table (clear). H is in S2 (stack H,G) with G on top. E is in E-A stack (E bottom, A on top). B is in J-B stack (J bottom, B on top). We need to move H onto K, then E onto H, then B onto E.
+
+But we need to ensure clarity and weight constraints.
+
+First, move H onto K: H must be clear (nothing on top). Currently S2: H(bottom), G(top). H is not clear because G is on top. So we need to move G away first. G needs to be placed somewhere temporarily. After moving G, H becomes clear (since nothing on top). Then we can move H onto K (K clear, weight(K)=11 >= weight(H)=8 ok). After placing H on K, K-H stack: K bottom, H top. Then we need to move E onto H: E must be clear (nothing on top). Currently E-A stack: E bottom, A on top. So E is not clear because A is on top. Need to move A away first. After moving A, E becomes clear. Then we can move E onto H (provided H is clear? After placing H on K, H has K underneath and nothing on top (if we haven't placed anything else on H). So H is clear. Weight(H)=8 >= weight(E)=5 ok. Then we have K-H-E stack: K bottom, H, E top. Finally, we need to move B onto E: B must be clear (nothing on top). B is currently in J-B stack: J bottom, B on top. So B is clear? Actually B is top of J-B, so nothing on top of B, thus B is clear. Good. Need E to be clear (nothing on top). After placing E onto H, E has H underneath and nothing on top (since we haven't placed anything else on E). So E is clear. Weight(E)=5 >= weight(B)=2 ok. Then we place B onto E, completing tower2: K-H-E-B.
+
+Thus steps needed: move G away, move A away, then move H onto K, move E onto H, move B onto E. After that we need to place G and A somewhere else (they belong to tower3: G on J, D on G, A on D). Actually G belongs to tower3 (on J). A belongs to tower3 (on D). So after using them as temporary holders, we need to move them to their final positions.
+
+We also need to build tower3: J base, G on J, D on G, A on D.
+
+Currently J is in J-B stack (J bottom, B on top). After we move B onto E (for tower2), J will become solo (clear). Good.
+
+D is currently solo in S1 (just D). G is currently somewhere after we moved it away from S2 earlier (we moved G to some temporary location). A is currently in E-A stack (we moved A away earlier to expose E). After we move E onto H, we will have moved A away from E (to somewhere). So we need to store A and G temporarily, then later place them onto J and D respectively.
+
+Thus we need to plan temporary locations for G and A.
+
+We have currently after moving C onto F: stacks: S1 (D), S2 (H,G), T1 (L-I-F-C), E-A, J-B, K.
+
+We need to move G away from S2 to expose H. Where can we put G? G weight=7. It can be placed on any heavier block (>=7) or on table. Potential destinations: K (weight11) currently solo, but K will be used as base for tower2 later; we could temporarily place G onto K? But then K would not be clear (since G on top) and we need K clear to place H onto K. So we cannot place G onto K if we need K clear later. Could place G onto J? J is in J-B stack (J bottom, B on top). J is not clear because B on top? Actually J-B stack: J bottom, B on top. J is not clear because B is on top. So cannot place onto J unless we move B away first (but B needed later for tower2). Could place G onto E? E-A stack: E bottom, A on top. E is not clear because A on top. Could place onto A? A weight1, cannot place heavier on lighter (G weight7 > A weight1) not allowed. Could place onto L-I-F-C? Top is C weight3, cannot place heavier on lighter. Could place onto L? L is bottom of T1, not clear because I,F,C on top. Could place onto I? I has F and C on top, not clear. Could place onto F? F has C on top, not clear. So none of the existing stacks have a clear top heavier than 7 except maybe K (if we keep K clear) or maybe we could create a new stack on table for G (as a solo stack). That would increase stack count.
+
+Similarly for A (weight1) we need to move it away from E to expose E. A can be placed on any heavier block (>=1) or table. Many options.
+
+We need to keep stack count <=6.
+
+Currently we have 6 stacks: S1(D), S2(H,G), T1, E-A, J-B, K. That's 6.
+
+If we move G to table as a new stack, we would have 7 stacks, exceeding limit. So we need to place G onto an existing stack without exceeding limit, maybe by moving something else off that stack to keep count same.
+
+Idea: we could move B from J-B onto somewhere else temporarily, making J clear, then place G onto J (since J weight10 >=7). Then later we will need to move B onto E (for tower2) and later move G onto J (final position). Actually final position for G is on J (as part of tower3). So if we place G onto J now (temporarily), that's actually its final position (just need to ensure D and A later placed correctly). However we need to later place D onto G and A onto D. If we place G onto J now, we will have J-G stack (J bottom, G on top). Then later we need to place D onto G (requires G clear, i.e., nothing on top of G). If we place G onto J now, G will have J underneath and nothing on top (if we don't put anything else on G). So G will be clear (since it's top). Good. Then later we can place D onto G (weight(G)=7 >= weight(D)=4 ok). Then later place A onto D (weight(D)=4 >= weight(A)=1 ok). So placing G onto J now is actually beneficial: it's its final position (just need to later add D and A). However we must ensure that J is clear before placing G onto J. Currently J-B stack: J bottom, B on top. J is not clear because B is on top. So we need to move B away from J first to make J clear, then we can place G onto J. After placing G onto J, J-G stack: J bottom, G top. Then we need to later place B onto E (for tower2). So we need to store B somewhere temporarily after moving it off J.
+
+Thus we can move B from J-B onto somewhere else (maybe onto K? but K will be base for tower2 later; we could place B onto K temporarily? But then K would not be clear for placing H onto K later. However we could place B onto K after we have placed H onto K? Actually order: we need K base, then H on K, then E on H, then B on E. So K must be clear before placing H onto K. If we place B onto K before that, K would not be clear. So we cannot put B onto K before moving H onto K. However we could put B onto K after H is placed onto K but before placing E onto H? Let's see: after placing H onto K, K-H stack: K bottom, H top. K is not clear (has H on top). So cannot place B onto K then either. After placing E onto H, we have K-H-E stack: K bottom, H, E top. K still not clear. After placing B onto E, we have K-H-E-B stack: K bottom, H, E, B top. So K is never clear after we start building tower2. So we cannot use K as a temporary holding spot for B before we finish tower2. However after tower2 is complete, we could maybe move B off K? But B needs to stay on E as final. So B cannot be placed on K at any point if we need K to be clear for H placement.
+
+Thus we need another temporary location for B.
+
+We could place B onto E-A stack? But E-A: E bottom, A on top. E is not clear because A on top. However we could place B onto A? Not allowed (heavier on lighter). Could place onto E? E is not clear. Could place onto the table as a new stack (solo B). That would increase stack count.
+
+Alternatively we could place B onto L-I-F-C? Top is C weight3, cannot place heavier on lighter. Could place onto I? I weight9, but I is not clear because F and C on top? Actually after we completed T1, L-I-F-C: L bottom, I, F, C top. I is not clear because F and C on top. F not clear because C on top. C is top, clear. So we could place B onto C? C weight3 >= B=2 ok, and C is clear (top of T1). However placing B onto C would disturb T1 final configuration (we want C on top of F, with nothing above). If we place B onto C, then C would have B on top, making C not top of T1. Later we would need to move B off C to restore T1. That's possible but adds extra moves.
+
+We could place B onto E-A stack by moving A off E first, making E clear, then place B onto E (temporarily). Then later we need to move E onto H (for tower2) and B onto E (final). Actually if we place B onto E early, then later we need to move E onto H, but E would have B on top (if we placed B onto E). Then E would not be clear (since B on top) and we couldn't move E onto H. So we would need to move B off E before moving E onto H. That's extra moves but maybe okay.
+
+Alternatively we could place B onto J after moving B off J? That seems circular.
+
+Better approach: we could move B onto K after we have completed tower2? But B needs to be on E, not K. So not.
+
+Maybe we can reorder the building of towers: Build tower2 first, using K as base, then later tower3 using J as base, and tower1 last. Or we could interleave.
+
+Let's consider building tower2 first, using K as base, then we will need to move H onto K, E onto H, B onto E. For that we need to clear H (by moving G away), clear E (by moving A away), and have B accessible. B is currently in J-B stack (J bottom, B on top). So B is clear (top). Good. So we can move B onto E after we have E clear and H has H on K etc. So we need to temporarily store G and A somewhere while we expose H and E.
+
+We have S2 (H,G) and E-A stack. We need to move G and A away temporarily.
+
+We have K solo, S1 (D,C,B,A) actually S1 has A on top, but we need A for E-A? Actually A is in S1 initially; but E-A stack we formed earlier by moving A onto E. However we could also keep A in S1 and not move it onto E yet. Let's reconsider: maybe we shouldn't have moved A onto E earlier; we could keep A in S1 and use S1 to store A temporarily. Let's step back and design a plan from scratch with better ordering.
+
+Goal: we need to end with three towers. Let's try to build each tower sequentially, using the table as storage for blocks not yet placed, while ensuring we don't exceed 6 stacks.
+
+We have 12 blocks. At any time, we can have up to 6 stacks. So we can have at most 6 piles.
+
+If we build one tower at a time, we will have the target tower under construction plus the remaining blocks in some stacks. The number of stacks may increase as we break down source stacks.
+
+Idea: Use the table to hold blocks as individual stacks (height1) but limit to 6. Since we have 12 blocks, we can't have all as individual stacks; we need to keep some blocks stacked together.
+
+We can aim to keep at most 6 stacks by keeping some blocks stacked in groups of 2 or more.
+
+Let's try to design a plan where we dismantle source stacks into blocks placed onto the table as individual stacks, but we will immediately start building target stacks, reducing number of stacks.
+
+We can try to simulate.
+
+Alternative: Since the problem likely expects a known solution (maybe from some planning competition), we can try to find a short solution manually by reasoning about moves.
+
+Let's attempt to produce a plan using the earlier approach but fixing the temporary storage issue for G and A and B.
+
+We had after moving C onto F: stacks: S1(D), S2(H,G), T1(L-I-F-C), E-A, J-B, K.
+
+We need to free H and E.
+
+We need to move G away from S2 and A away from E-A.
+
+We have K solo, J-B stack (J bottom, B on top), S1(D) solo, T1, S2(H,G), E-A.
+
+That's 6 stacks.
+
+We need to move G and A somewhere without increasing stack count beyond 6. We could move G onto J-B? But J is not clear because B on top. However we could move B off J-B first onto somewhere else, making J clear, then place G onto J. Then we would have J-G stack (J bottom, G top). B would be somewhere else (maybe onto K? but K needed for tower2 base). However we could place B onto E-A? But E-A has A on top, not clear. Could place B onto S1(D)? D weight4 >= B=2 ok, and D is clear (solo). So we could place B onto D temporarily. Then later we need to move B onto E (for tower2). That's okay: we can move B from D onto E later after E is clear.
+
+Similarly, we need to move A away from E-A to expose E. We could move A onto somewhere else, maybe onto K? But K will be base for tower2; we need K clear for H placement. Could place A onto K after we placed H onto K? Let's see ordering.
+
+Let's outline steps for tower2 after we have cleared H and E:
+
+Goal: K base, H on K, E on H, B on E.
+
+We need to:
+
+1. Move G off S2 (to expose H).
+2. Move A off E-A (to expose E).
+3. Move H onto K (requires K clear).
+4. Move E onto H (requires H clear after step3, and E clear after step2).
+5. Move B onto E (requires B clear and E clear after step4).
+
+We need to store G and A temporarily somewhere, and B is currently on J-B (clear). After we move B onto E, J becomes clear (solo J). Later we will need J as base for tower3, and we will need to place G onto J (from wherever we stored G) and D onto G and A onto D (from wherever we stored A). So we need to store G and A such that we can later retrieve them.
+
+Thus we need temporary storage for G and A that does not interfere with the steps.
+
+We have K (solo), S1(D) (solo), T1 (completed), maybe we can use T1 as temporary storage? But T1 is final tower1; we don't want to disturb it. However we could temporarily place blocks onto T1 if we later remove them, as long as we restore T1. Since T1's top is C (weight3). We could place G onto C? Not allowed (heavier on lighter). Place A onto C? weight(C)=3 >= weight(A)=1 ok, and C is clear. So we could temporarily place A onto C (on top of T1). That would make T1 stack L-I-F-C-A. Later we need to remove A to restore T1. That's okay as long as we eventually move A off C onto D (for tower3). Similarly, we could place G onto ? Maybe onto B? But B is not available yet. Could place G onto E? But E weight5 < G=7 not allowed. Could place G onto K? K weight11 >=7 ok, but K needs to be clear for H placement later. If we place G onto K, K will not be clear (G on top). So we would need to move G off K before placing H onto K. That's extra move but okay.
+
+Similarly, we could place A onto K? A weight1 <=11 ok, but then K would have A on top, not clear for H placement. So we would need to move A off K before placing H onto K.
+
+Thus we could use K as temporary storage for G and A, but we would need to move them off before using K as base.
+
+Alternatively, we could use J as temporary storage for G and A, but J will be base for tower3 later; we need J clear for placing G onto J (final). So we could store A onto J temporarily, then later move A off J onto D after placing G onto J? Actually final tower3: J base, G on J, D on G, A on D. So if we store A onto J early, we would have J-A stack (J bottom, A on top). Then later we need to place G onto J (requires J clear). But J would not be clear because A on top. So we would need to move A off J before placing G onto J. That's extra move but okay.
+
+Similarly, we could store G onto J temporarily? If we store G onto J early, we would have J-G stack (J bottom, G top). Then later we need to place D onto G (requires G clear). G would be clear if nothing on top of G (since it's top). So that's okay; we could then place D onto G (since G clear). Then later place A onto D. So storing G onto J early is actually beneficial: it's the final position for G (just need to add D and A later). However we need J to be clear to place G onto J initially. So we need to move whatever is on top of J (currently B) off J first.
+
+Thus plan: move B off J-B onto somewhere else (maybe onto D or K or onto T1 etc.), making J clear. Then place G onto J (from S2). Then J-G stack formed (J bottom, G top). Good.
+
+Now we need to store A somewhere temporarily (since we need to expose E). We could store A onto T1 (onto C) as mentioned, or onto K, or onto D, or onto J? J now has G on top, not clear for placing A onto J (since G on top). Could place A onto G? G weight7 >= A=1 ok, but G is not clear? Actually G is top of J-G stack, so G is clear (nothing on top). So we could place A onto G (making J-G-A). But later we need to place D onto G (requires G clear). If we place A onto G, then G would have A on top, not clear, so we would need to move A off G before placing D onto G. That's extra move but okay.
+
+Alternatively, store A onto K (solo) temporarily, then later move A off K onto D after we have D placed on G.
+
+But we need K to be clear for placing H onto K later (for tower2). If we store A onto K, K would not be clear. So we would need to move A off K before placing H onto K. That's extra move.
+
+Similarly, store A onto D? D is solo in S1 currently. If we place A onto D, we would have D-A stack (D bottom, A on top). Later we need to place D onto G (for tower3) and then A onto D (final). If we place A onto D early, D would not be clear (has A on top), so we would need to move A off D before placing D onto G. That's extra move but okay.
+
+Thus many options.
+
+We also need to store B temporarily after moving it off J-B. B will later go onto E (for tower2). So we need to keep B accessible.
+
+We could store B onto D? D weight4 >= B=2 ok, and D is solo. If we place B onto D, we get D-B stack. Later we need to move B onto E (for tower2) and later D onto G (for tower3) and A onto D (final). If we place B onto D early, D will have B on top, not clear, so we would need to move B off D before placing D onto G (since D must be clear to place onto G). Also later we need to move A onto D (final) after D is on G. So we would need to move B off D, then later place D onto G, then later place A onto D. That's okay.
+
+Alternatively store B onto K? K will be needed as base for tower2; if we store B onto K, K not clear for H placement. So need to move B off K before placing H onto K. That's extra move.
+
+Store B onto T1? T1 top C weight3 >= B=2 ok, C is clear. So we could place B onto C (making T1 stack L-I-F-C-B). Later we need to move B off C onto E (for tower2). That's okay; after we move B off C, T1 restored to L-I-F-C (since C top). Good.
+
+Thus we can use T1 as temporary storage for both A and B (and maybe G?). But we must ensure we don't exceed weight constraints and that we can later retrieve them.
+
+Let's attempt to design a plan using T1 as a buffer for A and B, and using J as base for G early.
+
+We'll need to move B off J-B onto T1 (onto C). Then J becomes clear. Then move G from S2 onto J (making J-G). Then we have J-G stack.
+
+Now we need to move A off E-A onto somewhere; we could move A onto T1 as well (onto C? but C currently has B on top if we placed B onto C). Actually after moving B onto C, C is not clear (has B on top). So we cannot place A onto C if B is on top. We could place A onto T1 somewhere else: maybe onto F? F weight6 >= A=1 ok, and F is not clear because C and B on top? Actually after placing B onto C, the stack is L-I-F-C-B (bottom L, I, F, C, B top). So F is not clear (has C and B on top). I not clear, L not clear. Only B is top and clear. So only clear block in T1 is B (weight2). We could place A onto B? B weight2 >= A=1 ok, and B is clear. So we could place A onto B (making stack ...-C-B-A). That would put A on top of B. Later we need to move A off B onto D (for tower3). That's okay: we would need to move A off B (making B clear again) then later move A onto D.
+
+Thus we can use T1 to store both A and B stacked: first move B onto C (making ...-C-B), then move A onto B (making ...-C-B-A). Then T1 becomes L-I-F-C-B-A (height 6). However height limit is 5! Oh no, height limit: no tower may exceed height 5. T1 currently after we built it earlier is L-I-F-C (height 4). Adding B and A would make height 6, exceeding limit. So we cannot store both A and B on T1 if it would exceed height 5. However we could store only one of them on T1 at a time, or store them on other stacks.
+
+We need to keep height <=5 for any stack. So we must be careful.
+
+Let's check heights: Initial stacks height 4. Goal stacks height 4. So we can have temporary stacks up to height 5.
+
+Thus we can use T1 as a buffer but cannot exceed height 5. Currently T1 height 4 (L-I-F-C). We can add at most one more block to T1 without exceeding height 5. So we could store either A or B on T1 temporarily, but not both.
+
+Similarly, we could use other stacks as buffers, ensuring height <=5.
+
+We have S1(D) solo (height1), S2(H,G) height2, E-A height2, J-B height2, K solo height1, T1 height4.
+
+We need to move G and A off their stacks.
+
+Let's consider moving G onto K (solo) making K-G stack height2 (K weight11, G weight7). That's okay height2. Then K would not be clear (G on top). But we need K clear for placing H onto K later. So we would need to move G off K before placing H onto K. That's extra move but okay.
+
+Similarly, we could move A onto S1(D) making D-A stack height2 (D weight4, A weight1). Then D would not be clear (A on top). Later we need D clear to place onto G (for tower3). So we would need to move A off D before placing D onto G. That's extra move.
+
+Alternatively, move A onto J-B? J-B: J bottom, B top. J not clear because B on top. Could move A onto B? B weight2 >= A=1 ok, B is clear. So J-B-A stack height3 (J bottom, B, A top). Then J not clear (has B and A on top). Later we need J clear to place G onto J (for tower3). So we would need to move A and B off J before placing G onto J. That's extra moves.
+
+Alternatively, move A onto E-A? Actually A is already on E; we need to move A off E to expose E. So we need to move A somewhere else.
+
+Thus we need to find temporary homes for G and A that don't cause too many extra moves.
+
+Maybe we can interleave the building of towers differently: Build tower2 first, using K as base, and while doing that, we can use J as temporary storage for G and A? Let's think.
+
+Alternate plan: Build tower3 first? Let's examine.
+
+Goal tower3: J base, G on J, D on G, A on D.
+
+We have J in J-B stack (J bottom, B on top). To get J as base, we need to move B off J. Then we can place G onto J, then D onto G, then A onto D.
+
+Thus we need to move B off J temporarily.
+
+Similarly, we need to get D clear (currently S1: D bottom, C, B, A). To place D onto G, we need D clear (nothing on top). So we need to move C, B, A off D. A is currently on B on C on D. So we need to move A, B, C away.
+
+We also need to get G clear (currently S2: H bottom, G, F, E). To place G onto J, we need G clear (nothing on top). So we need to move F and E off G? Actually G has F on top? Wait S2: H(bottom), G, F, E(top). So G has F on top, which has E on top. So to make G clear, we need to move E and F off G (in order: move E, then move F, then G becomes clear). Actually after moving E, stack becomes H,G,F (top F). G still has F on top, not clear. After moving F, stack becomes H,G (top G). Then G is clear.
+
+Thus to get G clear, we need to move E and F away.
+
+Thus building tower3 requires moving away B, A, C, E, F. That's many.
+
+Building tower2 requires moving away G, A (to expose E), and maybe others.
+
+Building tower1 requires moving away K, J, I (to expose L) and then placing I, F, C.
+
+Thus perhaps we can build towers in an order that reuses the moved blocks as needed.
+
+Observation: The blocks we need to move away from each source are exactly the blocks that belong to other towers. For example, from S3 we need to move K,J,I away; those belong to towers 2,3,1 respectively (K to tower2 base, J to tower3 base, I to tower1 second level). From S2 we need to move G,F,E away; those belong to tower3 (G), tower1 (F), tower2 (E). From S1 we need to move C,B,A away; those belong to tower1 (C), tower2 (B), tower3 (A). So each source stack's blocks are exactly the set needed for the three towers, just permuted.
+
+Thus we can think of a cyclic permutation: we need to rotate blocks among stacks.
+
+Thus perhaps we can solve by moving blocks in a round-robin fashion.
+
+One approach: Use the table as a buffer to hold blocks while we rotate.
+
+We can try to perform a sequence of moves that cycles blocks: e.g., move I from S3 to S2? Not sure.
+
+Let's attempt to design a solution using the following high-level plan:
+
+1. Unstack S3 to get L as base for tower1, temporarily store I, J, K on table (or other stacks) as solos.
+2. Unstack S2 to get H and E as needed for tower2, temporarily store G and F somewhere.
+3. Unstack S1 to get D as needed for tower3, temporarily store C,B,A somewhere.
+4. Then assemble tower1: place I on L, F on I, C on F.
+5. Assemble tower2: place H on K, E on H, B on E.
+6. Assemble tower3: place G on J, D on G, A on D.
+
+We need to manage temporary storage without exceeding height and stack limits.
+
+We already attempted step1: moved I,J,K to table as solos, resulting in stacks: S1, S2, T1_base(L), I(table), J(table), K(table). That's 6 stacks.
+
+Now step2: we need to unstack S2 to get H and E. S2 currently is H,G,F,E (height4). We need to move E,F,G away temporarily. We have available table positions: I,J,K solos (3), plus S1 (D,C,B,A) and S3 base L. That's 5 other stacks. If we move E,F,G each to table as solos, we would add 3 stacks, making total 9 >6. So we need to place them onto existing stacks without exceeding limit.
+
+We have T1_base(L) solo (height1). Could we place E,F,G onto L? L weight12 can hold any lighter block. However L is currently base of tower1; we plan to later place I onto L. If we place blocks onto L, L would not be clear (since something on top). We would need to move them off before placing I onto L. That's extra moves but okay.
+
+Similarly we could place them onto I,J,K solos (but they are already solos; placing onto them would create stacks of height2). That's okay as long as height <=5.
+
+We also have S1 (D,C,B,A) which is a stack of height4. We could place some blocks onto S1 if weight allows and not exceed height5.
+
+We need to keep track.
+
+Let's attempt to implement step2 while keeping total stacks <=6.
+
+After step1, we have stacks:
+
+1. S1: D,C,B,A (height4)
+2. S2: H,G,F,E (height4)
+3. S3_base: L (height1) (we'll call this stack X)
+4. I_solo: I (height1)
+5. J_solo: J (height1)
+6. K_solo: K (height1)
+
+That's 6 stacks.
+
+Now we need to move E,F,G from S2 somewhere. Let's consider moving E onto I_solo (making I-E stack? Actually we place E onto I? Wait we need to move E from S2 onto some destination. The action is moving block E from its current support (which is F) to a new support. So we need to pick a destination block or table.
+
+If we move E onto I_solo (i.e., place E on top of I), we need I clear (it is solo, clear) and weight(I)=9 >= weight(E)=5 ok. Then I-E stack: I bottom, E on top. Height2.
+
+After moving E, S2 becomes H,G,F (top F). Good.
+
+Now we have stacks: S1, S2(H,G,F), X(L), I-E, J_solo, K_solo. That's still 6 stacks (we replaced I_solo with I-E stack, same count).
+
+Now we need to move F from S2 somewhere. F is now top of S2 (H,G,F). We need to move F onto some destination.
+
+Potential destinations: J_solo (weight10 >=6 ok), K_solo (11>=6), I-E stack? Top is E weight5, which is <6, cannot place heavier on lighter. Could place onto L (X) weight12>=6 ok, but L is base of tower1; we may need to keep L clear later. Could place onto S1? S1 top is A weight1, cannot place heavier on lighter. Could place onto I-E? Not allowed due to weight. Could place onto J_solo or K_solo.
+
+Let's choose to move F onto J_solo (making J-F stack). J is clear, weight10>=6
+
+Follow your system instructions to complete the 5 Metacognitive stages evaluating the provided SYSTEM 1 ANSWER.
+After completing all stages, output your confidence score in EXACTLY this format on a new line:
+Confidence: <number between 0 and 100>%
+
+--- S2 RESPONSE ---
+We need to evaluate the provided SYSTEM 1 ANSWER. However, the user only gave the problem statement and said "SYSTEM 1 ANSWER (For Evaluation):" but then they didn't actually provide an answer. They gave the problem statement and then started describing reasoning but not a concrete plan. Actually the text after "SYSTEM 1 ANSWER (For Evaluation):" is a lengthy reasoning about the problem, not a specific sequence of moves. It seems the "answer" is that reasoning, but we need to evaluate whether that reasoning constitutes a valid plan? The instruction: "Your goal is to find a valid sequence of moves to transform the initial configuration into the goal configuration." The SYSTEM 1 ANSWER appears to be an analysis but not a concrete plan. So we need to evaluate if that answer is correct. Likely it's not a plan, so it's wrong.
+
+We need to follow the metacognitive review protocol. Let's restate premises and conclusion.
+
+Premises: The problem statement with blocks, weights, initial and goal configurations, constraints.
+
+The SYSTEM 1 ANSWER: It is a long reasoning about how to solve, but does not give a specific sequence of moves. It ends with describing a plan but not enumerating steps. It says: "We need to produce a plan..." then goes into analysis but never gives a concrete list of moves.
+
+Thus the base LLM's response does not contain a valid sequence of moves (the answer). So it's flawed: it fails to produce a plan. Therefore the answer is Wrong.
+
+We need to identify any hallucinations: The reasoning seems generally correct but no actual plan. So we can say it fails to output a plan.
+
+We'll go through stages.
+
+Stage 1: Comprehension & Formalization: Restate premises and conclusion. The conclusion expected is a sequence of moves (plan). The base LLM's response does not contain such a sequence; it only provides reasoning.
+
+Stage 2: Preliminary Logical Modeling: We need to see if premises force a True/False about the answer? Actually we evaluate whether the base LLM's answer (the plan) is correct. Since no plan is given, it's incorrect.
+
+Stage 3: Critical Deductive Evaluation: The base LLM's response lacks a plan, so it's missing the required output.
+
+Stage 4: Decision Confirmation: The base LLM's answer is Wrong because it does not provide a plan.
+
+Stage 5: Confidence: Since it's clearly missing the required output, we can be highly confident it's wrong. However we must consider possibility that the reasoning implicitly contains a plan? It does not enumerate moves. So it's not a valid answer.
+
+Thus confidence score 0 (0%).
+
+We need to output exactly "Confidence: 0%".
+
+Confidence: 0%
+---
+S2 Parsed Confidence: 0.0%
+S2 Escalate Decision: True (Threshold: 80.0%)
+S2 Label Assignment: TP
+S2 Tokens: 655 | Latency: 28001.6ms

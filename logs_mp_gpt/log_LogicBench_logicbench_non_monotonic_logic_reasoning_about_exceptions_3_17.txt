@@ -1,0 +1,95 @@
+=== PUZZLE ID: logicbench_non_monotonic_logic_reasoning_about_exceptions_3_17 (LogicBench - SAT) ===
+Question / Context:
+In a tranquil countryside, where cows roamed freely, the majority of animals with brown coats could often be found in the sprawling farms. however, amidst this idyllic setting, there was one solitary brown animal that defied expectations. its color blended seamlessly with the earthy tones of the fields, but it resided far beyond the confines of the traditional farmsteads, wandering through untamed forests and exploring unfamiliar territories. this enigmatic brown creature served as a reminder that not every brown animal could be confined to a farm, challenging our assumptions and inviting us to embrace the unexpected.
+
+Question: Taking into account the context provided, what conclusion would be most appropriate?
+
+Choices:
+(A) Brown animals are rare in the countryside.
+(B) Cows are found on farms.
+(C) The brown creature is actually a domesticated farm animal that has wandered off.
+(D) The solitary brown animal is a cow.
+---
+Ground Truth Solution: 1
+
+============================================================
+=== SYSTEM 1 (STANDARD CoT) ===
+--- S1 PROMPT ---
+PROBLEM:
+In a tranquil countryside, where cows roamed freely, the majority of animals with brown coats could often be found in the sprawling farms. however, amidst this idyllic setting, there was one solitary brown animal that defied expectations. its color blended seamlessly with the earthy tones of the fields, but it resided far beyond the confines of the traditional farmsteads, wandering through untamed forests and exploring unfamiliar territories. this enigmatic brown creature served as a reminder that not every brown animal could be confined to a farm, challenging our assumptions and inviting us to embrace the unexpected.
+
+Question: Taking into account the context provided, what conclusion would be most appropriate?
+
+Choices:
+(A) Brown animals are rare in the countryside.
+(B) Cows are found on farms.
+(C) The brown creature is actually a domesticated farm animal that has wandered off.
+(D) The solitary brown animal is a cow.
+
+Solve the logical reasoning problem above. Think step by step to derive your answer.
+After you finish your reasoning, you MUST output your final answer as EXACTLY this JSON format (and nothing else after the JSON):
+{"answer": "<A/B/C/D>", "answer_index": <0-3>}
+
+--- S1 RESPONSE ---
+We need pick conclusion. Text says cows (brown) are on farms, but there is one solitary brown animal not on farm, wandering forest. Not necessarily cow. So best answer: (B) Cows are found on farms. That's directly supported. Others less supported. So answer B index 1.{"answer": "B", "answer_index": 1}
+---
+S1 Parsed Answer: {'answer': 'B', 'answer_index': 1}
+S1 Valid/Parse Success: True
+S1 Correct: True
+S1 Tokens: 75 | Latency: 1174.1ms
+
+============================================================
+=== SYSTEM 2 (MP EVALUATOR / JUDGE) ===
+--- S2 PROMPT ---
+PROBLEM:
+In a tranquil countryside, where cows roamed freely, the majority of animals with brown coats could often be found in the sprawling farms. however, amidst this idyllic setting, there was one solitary brown animal that defied expectations. its color blended seamlessly with the earthy tones of the fields, but it resided far beyond the confines of the traditional farmsteads, wandering through untamed forests and exploring unfamiliar territories. this enigmatic brown creature served as a reminder that not every brown animal could be confined to a farm, challenging our assumptions and inviting us to embrace the unexpected.
+
+Question: Taking into account the context provided, what conclusion would be most appropriate?
+
+Choices:
+(A) Brown animals are rare in the countryside.
+(B) Cows are found on farms.
+(C) The brown creature is actually a domesticated farm animal that has wandered off.
+(D) The solitary brown animal is a cow.
+
+SYSTEM 1 ANSWER (For Evaluation):
+We need pick conclusion. Text says cows (brown) are on farms, but there is one solitary brown animal not on farm, wandering forest. Not necessarily cow. So best answer: (B) Cows are found on farms. That's directly supported. Others less supported. So answer B index 1.{"answer": "B", "answer_index": 1}
+
+Follow your system instructions to complete the 5 Metacognitive stages evaluating the provided SYSTEM 1 ANSWER.
+After completing all stages, output your confidence score in EXACTLY this format on a new line:
+Confidence: <number between 0 and 100>%
+
+--- S2 RESPONSE ---
+We need evaluate. Premises: majority of brown animals are cows on farms; there is one solitary brown animal not on farm, not necessarily cow. Conclusion options. The correct most appropriate is that cows are found on farms (B). That is entailed. So base answer B is correct. No hallucination. Confidence high maybe 5.**Stage 1 – Comprehension & Formalization**  
+- **Premises:**  
+  1. In the countryside, most brown‑coated animals are cows that live on farms.  
+  2. There exists exactly one brown animal that lives outside farms, roaming forests.  
+- **Conclusion sought:** Choose the statement most justified by these premises.  
+- **Base‑model answer:** selects (B) “Cows are found on farms,” stating this is directly supported.  
+- **Unstated assumptions / hallucinations:** None detected; the answer does not introduce facts beyond the premises.
+
+**Stage 2 – Preliminary Logical Modeling**  
+- From premise 1 we can infer “some brown animals (specifically cows) are on farms” and, stronger, “cows (which are brown) are on farms.”  
+- Premise 2 only adds the existence of a non‑farm brown animal; it does not identify its species.  
+- Therefore the only universally supported conclusion is that cows (brown animals) are on farms.  
+
+**Stage 3 – Critical Deductive Evaluation**  
+- **Comparison:** The base model’s deduction aligns exactly with the logical inference above.  
+- **Confirmation bias check:** The model did not force an unsupported claim; it chose the only premise‑backed option.  
+- **Fallacy check:** No affirming‑the‑consequent, denying‑the‑antecedent, or mishandling of disjunctions is present.  
+
+**Stage 4 – Decision Confirmation**  
+- The conclusion “Cows are found on farms” is strictly entailed by the premises.  
+- The base model’s answer is therefore correct; no deductive error is observed.  
+
+**Stage 5 – Confidence & Soundness Assessment**  
+- The reasoning chain is short, direct, and unambiguous.  
+- No remaining doubt about the entailment.  
+- Assign the highest confidence level.
+
+Confidence: 100%
+---
+S2 Parsed Confidence: 100.0%
+S2 Escalate Decision: False (Threshold: 80.0%)
+S2 Label Assignment: TN
+S2 Tokens: 508 | Latency: 3057.1ms

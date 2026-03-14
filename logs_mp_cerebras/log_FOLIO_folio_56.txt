@@ -1,0 +1,156 @@
+=== PUZZLE ID: folio_56 (FOLIO - NLI) ===
+Question / Context:
+Given the following premises:
+- Robert Lewandowski is a striker.
+- Strikers are soccer players.
+- Robert Lewandowski left Bayern Munchen.
+- If a player leaves a team they no longer play for that team.
+
+Conclusion: Robert Lewandowski is a star.
+
+Based on the premises, is the conclusion True, False, or Uncertain?
+---
+Ground Truth Solution: Uncertain
+
+============================================================
+=== SYSTEM 1 (STANDARD CoT) ===
+--- S1 PROMPT ---
+PROBLEM:
+Given the following premises:
+- Robert Lewandowski is a striker.
+- Strikers are soccer players.
+- Robert Lewandowski left Bayern Munchen.
+- If a player leaves a team they no longer play for that team.
+
+Conclusion: Robert Lewandowski is a star.
+
+Based on the premises, is the conclusion True, False, or Uncertain?
+
+Solve the logical reasoning problem above. Think step by step to derive your answer.
+After you finish your reasoning, you MUST output your final answer as EXACTLY this JSON format (and nothing else after the JSON):
+{"answer": "<True/False/Uncertain>"}
+
+--- S1 RESPONSE ---
+Let's analyze the premises step by step:
+
+1. Robert Lewandowski is a striker.  
+   → This tells us his position in soccer.
+
+2. Strikers are soccer players.  
+   → This means that since Lewandowski is a striker, he is a soccer player (by transitive property).
+
+3. Robert Lewandowski left Bayern Munchen.  
+   → This gives us information about his team status.
+
+4. If a player leaves a team, they no longer play for that team.  
+   → This is a conditional statement. Applying it to premise 3, we conclude:  
+   → Lewandowski no longer plays for Bayern Munchen.
+
+Now, the conclusion is: "Robert Lewandowski is a star."
+
+Is this supported by the premises?
+
+- The premises establish that Lewandowski is a striker, a soccer player, and no longer plays for Bayern Munchen.
+- However, there is no information about his performance, skill level, fame, or status as a "star."
+- The term "star" is subjective and not defined in the premises. None of the premises mention anything about being a star, or what qualifies someone as a star.
+- Therefore, while we might know external facts that Lewandowski is a star, based solely on the given premises, we cannot logically deduce that he is a star.
+
+Conclusion: The conclusion is not logically entailed by the premises. It is neither contradicted (so not definitely false), nor supported (so not true), hence it is **not determinable** from the information given.
+
+{"answer": "Uncertain"}
+---
+S1 Parsed Answer: {'answer': 'Uncertain'}
+S1 Valid/Parse Success: True
+S1 Correct: True
+S1 Tokens: 330 | Latency: 658.1ms
+
+============================================================
+=== SYSTEM 2 (MP EVALUATOR / JUDGE) ===
+--- S2 PROMPT ---
+PROBLEM:
+Given the following premises:
+- Robert Lewandowski is a striker.
+- Strikers are soccer players.
+- Robert Lewandowski left Bayern Munchen.
+- If a player leaves a team they no longer play for that team.
+
+Conclusion: Robert Lewandowski is a star.
+
+Based on the premises, is the conclusion True, False, or Uncertain?
+
+SYSTEM 1 ANSWER (For Evaluation):
+Let's analyze the premises step by step:
+
+1. Robert Lewandowski is a striker.  
+   → This tells us his position in soccer.
+
+2. Strikers are soccer players.  
+   → This means that since Lewandowski is a striker, he is a soccer player (by transitive property).
+
+3. Robert Lewandowski left Bayern Munchen.  
+   → This gives us information about his team status.
+
+4. If a player leaves a team, they no longer play for that team.  
+   → This is a conditional statement. Applying it to premise 3, we conclude:  
+   → Lewandowski no longer plays for Bayern Munchen.
+
+Now, the conclusion is: "Robert Lewandowski is a star."
+
+Is this supported by the premises?
+
+- The premises establish that Lewandowski is a striker, a soccer player, and no longer plays for Bayern Munchen.
+- However, there is no information about his performance, skill level, fame, or status as a "star."
+- The term "star" is subjective and not defined in the premises. None of the premises mention anything about being a star, or what qualifies someone as a star.
+- Therefore, while we might know external facts that Lewandowski is a star, based solely on the given premises, we cannot logically deduce that he is a star.
+
+Conclusion: The conclusion is not logically entailed by the premises. It is neither contradicted (so not definitely false), nor supported (so not true), hence it is **not determinable** from the information given.
+
+{"answer": "Uncertain"}
+
+Follow your system instructions to complete the 5 Metacognitive stages evaluating the provided SYSTEM 1 ANSWER.
+After completing all stages, output your confidence score in EXACTLY this format on a new line:
+Confidence: <number between 0 and 100>%
+
+--- S2 RESPONSE ---
+Stage 1 — Comprehension & Formalization:  
+The premises are:  
+- P1: Robert Lewandowski is a striker.  
+- P2: Strikers are soccer players.  
+- P3: Robert Lewandowski left Bayern Munchen.  
+- P4: If a player leaves a team, they no longer play for that team.  
+
+Conclusion: Robert Lewandowski is a star.
+
+The base LLM (SYSTEM 1) correctly identifies that the premises establish Lewandowski’s position (striker), his category (soccer player), and team status (no longer plays for Bayern Munchen). It also correctly notes that "star" is undefined and not logically connected to any of the premises. The base LLM concludes "Uncertain", meaning the conclusion is neither entailed nor contradicted by the premises.
+
+No hallucinations are present in the base LLM’s reasoning. It does not assume any external knowledge (e.g., fame, performance stats) and explicitly rejects such assumptions. It correctly treats "star" as a predicate not grounded in the premises.
+
+Stage 2 — Preliminary Logical Modeling:  
+Independently, I model the premises:  
+- From P1 and P2: Lewandowski is a soccer player.  
+- From P3 and P4: Lewandowski does not play for Bayern Munchen.  
+No premise mentions "star", "fame", "skill", "performance", or any attribute that could formally define stardom. The term "star" is semantically external to the logical system defined by the premises.  
+
+Thus, the truth of "Lewandowski is a star" cannot be derived. It is also not contradicted — nothing says he is not a star. Therefore, the logical status is **Uncertain**.
+
+Stage 3 — Critical Deductive Evaluation:  
+The base LLM avoids confirmation bias. It does not conflate "being a top player" with "being a striker" or "leaving a team". It does not affirm the consequent or commit any formal fallacy. It correctly applies transitivity (striker → soccer player) and modus ponens (leaves team → doesn't play for team), but stops short of overreaching.  
+
+It explicitly acknowledges the gap: no premise supports or denies "star" status. This is correct. The conclusion introduces a new predicate not linked to any premise — a clear case of semantic non-entailment.
+
+Stage 4 — Decision Confirmation:  
+The base LLM’s conclusion of "Uncertain" is strictly correct. The premises neither entail nor contradict the conclusion. The reasoning is sound, complete, and avoids overreach. No deductive error is present.
+
+Stage 5 — Confidence & Soundness Assessment:  
+The base LLM’s reasoning is flawless in structure, content, and epistemic humility. It resists the temptation to import real-world knowledge. My own derivation matches exactly. There is no ambiguity in the logical gap — "star" is not defined or referenced.  
+
+However, as per metacognitive humility: I am an LLM and could theoretically hallucinate a connection, but in this case, the absence of any reference to "star" is so clear that even under skeptical adjustment, the conclusion of Uncertain is inescapable.  
+
+No overconfidence bias is detected. The reasoning is short and transparent, minimizing error surface. Confidence is high.
+
+Confidence: 98%
+---
+S2 Parsed Confidence: 98.0%
+S2 Escalate Decision: False (Threshold: 80.0%)
+S2 Label Assignment: TN
+S2 Tokens: 710 | Latency: 65908.2ms

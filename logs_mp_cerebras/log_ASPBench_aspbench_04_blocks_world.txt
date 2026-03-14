@@ -1,0 +1,2889 @@
+=== PUZZLE ID: aspbench_04_blocks_world (ASPBench - ASPBench) ===
+Question / Context:
+# Problem Statement
+
+Transform stacks of weighted blocks from an initial configuration to a goal configuration by moving blocks one at a time while respecting weight and structural constraints.
+
+## Instance Data
+
+**Blocks:** 12 blocks labeled A through L
+
+**Weights:**
+- A=1, B=2, C=3, D=4, E=5, F=6, G=7, H=8, I=9, J=10, K=11, L=12
+
+**Initial Configuration** (three stacks of height 4):
+- Stack 1: D on table, C on D, B on C, A on B
+- Stack 2: H on table, G on H, F on G, E on F
+- Stack 3: L on table, K on L, J on K, I on J
+
+**Goal Configuration** (three stacks of height 4):
+- Tower 1: L on table, I on L, F on I, C on F
+- Tower 2: K on table, H on K, E on H, B on E
+- Tower 3: J on table, G on J, D on G, A on D
+
+## Constraints
+
+1. **Clear block**: Only blocks with nothing on top can be moved
+2. **Single move**: Only one move occurs per time step
+3. **Weight constraint**: A heavier block **cannot** be placed on a lighter block (weight(Y) >= weight(X) required for placing X on Y)
+4. **Table limit**: **At most** 6 blocks may be directly on the table at any time
+5. **Height limit**: **No** tower may exceed height 5 (depth 1 = directly on table)
+6. **Valid positions**: Blocks can be placed on the table or on top of another clear block
+7. **Distinct positions**: Source and destination **must** differ; block **cannot** be placed on itself
+8. **Maximum Plan Length**: Your final plan must not exceed 50 moves.
+
+## Objective
+
+Your goal is to find a valid sequence of moves to transform the initial configuration into the goal configuration.
+
+For this problem, the primary objective is finding a correct plan that respects all constraints. The complexity of the task suggests that a solution may require a significant number of moves, so you should ensure your search explores plans up to the **maximum allowed length of 50 moves**.
+---
+Ground Truth Solution: data/ASPBench\problems\hard\04_blocks_world_hard_ground_truth.py
+
+============================================================
+=== SYSTEM 1 (STANDARD CoT) ===
+--- S1 PROMPT ---
+PROBLEM:
+# Problem Statement
+
+Transform stacks of weighted blocks from an initial configuration to a goal configuration by moving blocks one at a time while respecting weight and structural constraints.
+
+## Instance Data
+
+**Blocks:** 12 blocks labeled A through L
+
+**Weights:**
+- A=1, B=2, C=3, D=4, E=5, F=6, G=7, H=8, I=9, J=10, K=11, L=12
+
+**Initial Configuration** (three stacks of height 4):
+- Stack 1: D on table, C on D, B on C, A on B
+- Stack 2: H on table, G on H, F on G, E on F
+- Stack 3: L on table, K on L, J on K, I on J
+
+**Goal Configuration** (three stacks of height 4):
+- Tower 1: L on table, I on L, F on I, C on F
+- Tower 2: K on table, H on K, E on H, B on E
+- Tower 3: J on table, G on J, D on G, A on D
+
+## Constraints
+
+1. **Clear block**: Only blocks with nothing on top can be moved
+2. **Single move**: Only one move occurs per time step
+3. **Weight constraint**: A heavier block **cannot** be placed on a lighter block (weight(Y) >= weight(X) required for placing X on Y)
+4. **Table limit**: **At most** 6 blocks may be directly on the table at any time
+5. **Height limit**: **No** tower may exceed height 5 (depth 1 = directly on table)
+6. **Valid positions**: Blocks can be placed on the table or on top of another clear block
+7. **Distinct positions**: Source and destination **must** differ; block **cannot** be placed on itself
+8. **Maximum Plan Length**: Your final plan must not exceed 50 moves.
+
+## Objective
+
+Your goal is to find a valid sequence of moves to transform the initial configuration into the goal configuration.
+
+For this problem, the primary objective is finding a correct plan that respects all constraints. The complexity of the task suggests that a solution may require a significant number of moves, so you should ensure your search explores plans up to the **maximum allowed length of 50 moves**.
+
+Solve the logical reasoning problem above. Think step by step to derive your answer.
+After you finish your reasoning, you MUST output your final answer as EXACTLY this JSON format (and nothing else after the JSON):
+{
+  "plan_length": <number_of_actions>,
+  "actions": [
+    {
+      "step": <integer>,
+      "action": "move",
+      "block": "<block_name>",
+      "from": "<source_position>",
+      "to": "<target_position>"
+    }
+  ]
+}
+
+--- S1 RESPONSE ---
+Let's solve this block-stacking problem step by step, carefully tracking the state, constraints, and moves.
+
+---
+
+### **Step 1: Understand the Initial and Goal Configurations**
+
+#### **Initial Configuration**
+Three stacks of height 4:
+
+- **Stack 1**: A on B, B on C, C on D, D on table
+  - Table: D
+- **Stack 2**: E on F, F on G, G on H, H on table
+  - Table: H
+- **Stack 3**: I on J, J on K, K on L, L on table
+  - Table: L
+
+So, blocks on the table initially: **D, H, L** → 3 blocks on table
+
+Clear blocks (tops): **A, E, I**
+
+#### **Goal Configuration**
+- **Tower 1**: C on F, F on I, I on L → L on table
+- **Tower 2**: B on E, E on H, H on K → K on table
+- **Tower 3**: A on D, D on G, G on J → J on table
+
+So, table blocks in goal: **L, K, J** → 3 blocks on table
+
+Clear blocks in goal: **C, B, A**
+
+---
+
+### **Step 2: Analyze Constraints**
+
+1. **Only clear blocks can be moved**
+2. **One move per step**
+3. **Weight constraint**: Can't place heavier on lighter → `weight(X) <= weight(Y)` to place X on Y
+4. **Table limit**: ≤6 blocks on table at any time
+5. **Height limit**: No stack > height 5
+6. **Valid positions**: On table or on a clear block
+7. **Cannot move block to itself**
+8. **Plan ≤ 50 moves**
+
+We'll need to dismantle and rebuild towers.
+
+---
+
+### **Step 3: Strategy**
+
+We need to:
+- Dismantle current stacks to access buried blocks
+- Build toward goal stacks
+- Avoid violating weight or table limits
+- Use intermediate positions wisely
+
+We note:
+- Goal has **L, K, J** on table → so we must eventually remove **D, H, I** from table and place **K, J** on table (L already is)
+- So **D, H** must be moved off the table (but can be placed on other blocks or temporarily on table if under limit)
+
+We must be careful with **weight constraints**:
+- Heaviest block is L=12, lightest is A=1
+- So, e.g., A (1) can go on anyone; L (12) can only go on table or on a block ≥12 (only itself), so L can only be on table.
+
+Wait: **L = 12**, so can only be placed on something ≥12 → only itself → so **L can only be on table**.
+
+Similarly:
+- K = 11 → can only go on blocks ≥11 → K or L
+- J = 10 → can go on ≥10 → J, K, L
+- I = 9 → ≥9 → I, J, K, L
+- H = 8 → ≥8 → H, I, J, K, L
+- G = 7 → ≥7 → G, H, I, J, K, L
+- F = 6 → ≥6 → F, G, H, I, J, K, L
+- E = 5 → ≥5 → E, F, G, H, I, J, K, L
+- D = 4 → ≥4 → D, E, F, G, H, I, J, K, L
+- C = 3 → ≥3 → C, D, E, F, G, H, I, J, K, L
+- B = 2 → ≥2 → B, C, D, ..., L
+- A = 1 → can go on anyone
+
+So only **L** is strictly restricted to table (since nothing heavier exists). Others can be placed on heavier or equal.
+
+But **K=11**, so only L or K can support it. Since K > J (10), K cannot go on J. So K must be on table or on L.
+
+But in goal, **K is on table**, so that's fine.
+
+Similarly, **J=10**, can go on K=11 or L=12 → but in goal, **J is on table**, so okay.
+
+So only **L must be on table at all times**.
+
+Wait: can we move L? Only if nothing is on top. Currently, K is on L, so we can't move L until K is removed. But **we cannot place L on any block**, because no block is heavier than L (12), and we can't place it on a lighter one. So **L can never be moved from the table**.
+
+Therefore:
+- **L must remain on the table throughout**.
+- **We cannot move L**.
+
+Similarly, **K** is on L → K can be moved, but if we move K, we can place it on table or on L (since L=12 > K=11) → valid.
+
+But in goal, **K is on table**, so we can move K to table.
+
+Similarly, **J** is on K → we can move J to table or to K or L.
+
+So, **L is fixed on the table**.
+
+Therefore, in goal, **Tower 1: L on table, I on L, F on I, C on F** → all valid.
+
+So we can build Tower 1 on top of L.
+
+Similarly, **K and J can be moved to table** as needed.
+
+---
+
+### **Step 4: Plan Overview**
+
+We need to:
+- Dismantle Stack 1 (D-C-B-A)
+- Dismantle Stack 2 (H-G-F-E)
+- Dismantle Stack 3 (L-K-J-I) → but L is fixed; so we remove K, J, I from L
+- Build:
+  - Tower 1: L → I → F → C
+  - Tower 2: K → H → E → B
+  - Tower 3: J → G → D → A
+
+Note: In goal, D is on G, and G is on J → so D is not on table.
+
+So D must be moved off table.
+
+Similarly, H is moved off table.
+
+So final table blocks: **L, K, J** → so we must have **K and J on table**, and **D and H** moved off.
+
+We'll use intermediate steps.
+
+Let’s proceed step by step.
+
+---
+
+### **Initial State**
+
+Stacks:
+
+- S1: A-B-C-D-t (clear: A)
+- S2: E-F-G-H-t (clear: E)
+- S3: I-J-K-L-t (clear: I)
+- Table: D, H, L
+- Clear blocks: A, E, I
+
+We need to dismantle to access lower blocks.
+
+We want to build Tower 1 on L: L → I → F → C
+
+So we need I, F, C in that order.
+
+But I is currently on top of J → so we can move I.
+
+Similarly, F is under E → so we need to move E first.
+
+Let’s try to build Tower 1 on L first.
+
+But currently, K is on L, then J on K, then I on J → so to place I on L, we need to remove J and K.
+
+So we need to move K and J off.
+
+But K=11 → can only go on table or on L (12)
+
+Similarly, J=10 → can go on table, K, or L
+
+So we can move K to table → then J to table → then I to L.
+
+But table currently has D, H, L → 3 blocks.
+
+We can have up to 6 on table → so moving K and J to table is fine.
+
+Similarly, we can temporarily place other blocks on table.
+
+Let’s begin.
+
+---
+
+### **Move Plan**
+
+We'll track:
+- Each move
+- State of stacks
+- Clear blocks
+- Blocks on table
+
+Let’s begin.
+
+#### **Step 1**: Move A from B to table
+- A is clear
+- Table has space (3 → 4 blocks)
+- A=1, can go on table
+- Now: Stack1: B-C-D-t; A on table
+- Clear: B, E, I
+- Table: D, H, L, A
+
+#### **Step 2**: Move E from F to table
+- E is clear
+- Table: 5 blocks
+- E=5, valid
+- Stack2: F-G-H-t; E on table
+- Clear: B, F, I
+- Table: D, H, L, A, E
+
+#### **Step 3**: Move I from J to table
+- I is clear
+- Table: 6 blocks → max reached
+- I=9, valid
+- Stack3: J-K-L-t; I on table
+- Clear: B, F, J
+- Table: D, H, L, A, E, I
+
+Now table is full. We cannot place any more blocks directly on table until we free space.
+
+#### **Step 4**: Move B from C to table? → no, table is full (6 already). Can't place.
+
+So we must place B on another block.
+
+B=2 → can go on any block ≥2 → so almost any.
+
+But only clear blocks are F, J
+
+F=6 > B=2 → valid
+J=10 > B=2 → valid
+
+Let’s place B on F (to start combining)
+
+#### **Step 4**: Move B from C to F
+- B on F → F is clear
+- Weight: 2 ≤ 6 → ok
+- Stack1: C-D-t; Stack2: B-F-G-H-t
+- Clear: C, J
+- Table: D, H, L, A, E, I
+
+#### **Step 5**: Move C from D to table? → table full → can't
+- Clear blocks: J, C
+- Can place C on J? C=3, J=10 → yes
+- Or on F? But F has B → not clear
+- Or on H? H has G → not clear
+- Only clear: J and B (but B is under nothing? no, B is on F, and nothing on B → so B is clear?
+
+Wait: B is on F → nothing on B → so B is clear.
+
+Similarly, J is clear.
+
+So clear blocks: C, B, J
+
+We can place C on B? C=3, B=2 → 3 > 2 → invalid! Cannot place heavier on lighter.
+
+C on J? 3 ≤ 10 → yes.
+
+So:
+
+#### **Step 5**: Move C from D to J
+- C on J → J is clear
+- Weight: 3 ≤ 10 → ok
+- Stack3: C-J-K-L-t
+- Clear: D, B
+- Table: D, H, L, A, E, I
+
+D is now clear.
+
+#### **Step 6**: Move D from table to... where?
+- D=4
+- Clear blocks: B, C
+- B=2 < 4 → cannot place D on B
+- C=3 < 4 → cannot place D on C
+- So nowhere to place D? Only option is table, but D is already on table.
+
+We need to move D off table to eventually have only L, K, J on table.
+
+But we can't place D on B or C.
+
+We could place D on a heavier block.
+
+Available clear: B=2, C=3 → both lighter → invalid
+
+No other clear blocks.
+
+So stuck.
+
+Alternative: instead of moving C to J, move C to another place.
+
+Backtrack.
+
+After Step 4:
+- Clear: C, B, J
+- Table: D, H, L, A, E, I (full)
+- We need to move C
+
+But C cannot go on B (3>2), and only options are B, J
+
+So must go to J.
+
+But then D is stuck.
+
+So we need to free up table space before moving D.
+
+But table is full.
+
+So we need to move one of the table blocks to a stack.
+
+Currently on table: D, H, L, A, E, I
+
+We can move A, E, or I to a stack.
+
+A=1 → can go anywhere
+E=5 → can go on ≥5
+I=9 → can go on ≥9
+
+Available clear blocks: B, C, J
+
+But J has nothing on it? After Step 4, J is clear? No:
+
+After Step 4: Stack3: J-K-L-t → J is clear
+
+After Step 5: C on J → C is clear, J not clear
+
+But in Step 5 we placed C on J → so J is not clear.
+
+After Step 4:
+- Clear: C (from D), B (on F), J (top of K)
+
+So we could move A or E or I from table to a clear block.
+
+For example:
+- Move A to B? A=1, B=2 → 1≤2 → ok
+- Or A to J? 1≤10 → ok
+
+Similarly, E=5 → can go on J? 5≤10 → yes
+Or on B? 5>2 → no
+Or on C? 5>3 → no
+
+I=9 → can go on J? 9≤10 → yes
+
+So we can move A, E, or I to J.
+
+But J is clear → so we can place on J.
+
+Let’s try to free table space.
+
+After Step 4:
+- Clear: C, B, J
+- Table: D, H, L, A, E, I
+
+#### Alternative Step 5: Move A from table to J
+- A on J → J=10 ≥1 → ok
+- Table: D, H, L, E, I → 5 blocks
+- Stack3: A-J-K-L-t
+- Clear: C, B, A (A is now clear)
+
+Now table has space.
+
+#### Step 6: Move C from D to table
+- C=3, table has space
+- Move C to table
+- Stack1: D-t; C on table
+- Clear: D, B, A
+- Table: D, H, L, E, I, C → 6 again
+
+#### Step 7: Move D from table to... where?
+- D=4
+- Clear blocks: B=2, A=1, C=3 → all lighter than D → cannot place D on any
+- No other clear blocks
+
+Still stuck.
+
+We need a heavier clear block.
+
+Currently, F has B on it → B is clear, but F is not.
+
+G has F on it → F has B → not clear.
+
+H has G → not clear.
+
+K has J → J has A → not clear.
+
+So only clear: B, A, C
+
+All light.
+
+So we need to free a heavier block.
+
+For example, if we can make G clear, G=7 → D=4 ≤7 → valid
+
+How to make G clear?
+
+G is under F → F has B → so we need to move B.
+
+B is on F → clear → so we can move B.
+
+Where can we move B?
+
+B=2 → can go on any ≥2 → many options.
+
+Clear blocks: A=1, C=3, D (if we could move it, but it's not clear)
+
+After Step 6:
+- Clear: D, B, A, C
+
+We can move B to C? B=2, C=3 → 2≤3 → yes
+
+Or to A? 2>1 → no
+
+Or to D? D=4 ≥2 → yes
+
+But D is on table → we can place B on D.
+
+But D is not clear? D is on table, nothing on it → D is clear.
+
+Yes.
+
+So:
+
+#### Step 7: Move B from F to D
+- B on D → D=4 ≥2 → ok
+- Stack1: B-D-t
+- Stack2: F-G-H-t (F now clear)
+- Clear: F, A, C
+- Table: D, H, L, E, I, C
+
+Now F is clear.
+
+F=6
+
+We can now move G? No, G is under F.
+
+F is on G → so to access G, we need to move F.
+
+F is now clear.
+
+So:
+
+#### Step 8: Move F from G to table? → table full → can't
+- Table: D, H, L, E, I, C → 6
+- F=6
+- Can place F on clear blocks: A=1 → 6>1 → no
+- C=3 → 6>3 → no
+- B=2 → 6>2 → no
+- D has B → B is not clear? B is on D, nothing on B → B is clear
+
+Clear blocks: F (source), A, C, B
+
+F is the block being moved, so not available as destination.
+
+Destinations: A, B, C, D (but D has B on it → D is not clear)
+
+Only clear blocks are A, B, C
+
+F=6 > A=1, B=2, C=3 → cannot place F on any.
+
+And table is full.
+
+So F cannot be moved.
+
+Stuck again.
+
+We need to free table space.
+
+Currently on table: D, H, L, E, I, C
+
+We can move E, I, C to a stack.
+
+C is clear → we can move C to a heavier clear block.
+
+But clear blocks are A=1, B=2 → both lighter than C=3 → cannot place C on them.
+
+E=5 → can go on B=2? 5>2 → no; A=1 → no; C=3 → 5>3 → no
+
+I=9 → can go on B? 9>2 → no; A? no; C? 9>3 → no
+
+So no block can accept E, I, C.
+
+And we can't move F.
+
+Dead end.
+
+We need a better strategy.
+
+---
+
+### **New Strategy: Use intermediate towers and free table early**
+
+Let’s try to dismantle Stack 3 first to free K and J for the table.
+
+Goal has K and J on table.
+
+Currently, K is on L, J on K, I on J.
+
+So we can:
+- Move I to table
+- Move J to table
+- Move K to table
+
+Then we have more flexibility.
+
+But table currently has D, H, L → 3
+
+We can move I, J, K to table → up to 6, which is allowed.
+
+Let’s try.
+
+#### **Step 1**: Move A from B to table
+- A on table
+- Table: D, H, L, A
+- Clear: B, E, I
+
+#### **Step 2**: Move E from F to table
+- E on table
+- Table: D, H, L, A, E
+- Clear: B, F, I
+
+#### **Step 3**: Move I from J to table
+- I on table
+- Table: D, H, L, A, E, I → full
+- Clear: B, F, J
+
+#### **Step 4**: Move J from K to table? → table full → can't
+
+So need to free space.
+
+Move one of the table blocks to a stack.
+
+Available clear: B=2, F=6
+
+B=2 → can have light blocks on it
+
+F=6 → can have up to 6
+
+We can move A to B? A=1 ≤2 → yes
+
+#### **Step 4**: Move A from table to B
+- A on B
+- Table: D, H, L, E, I → 5
+- Stack1: A-B-C-D-t
+- Clear: F, J, A
+
+Now table has space.
+
+#### **Step 5**: Move J from K to table
+- J=10, table has space
+- J on table
+- Table: D, H, L, E, I, J → full
+- Stack3: K-L-t
+- Clear: F, K, A
+
+#### **Step 6**: Move K from L to table
+- K=11, can go on table
+- K on table
+- Table: D, H, L, E, I, J, K → 7 blocks! → violates table limit (max 6)
+
+Oh no! Cannot have 7 on table.
+
+After Step 5, table has 6: D, H, L, E, I, J
+
+Cannot add K.
+
+So we cannot move both J and K to table if we already have 6.
+
+We have to place K on L, since L=12 > K=11.
+
+But K is currently on L → we can't place K on L again.
+
+We want to move K off L to table, but can't if table full.
+
+So we must move K to table before table is full.
+
+Let’s sequence differently.
+
+After initial:
+
+- Table: D, H, L
+- Clear: A, E, I
+
+#### **Step 1**: Move A to table → table: D,H,L,A (4)
+
+#### **Step 2**: Move E to table → table: D,H,L,A,E (5)
+
+#### **Step 3**: Move I to table → table: D,H,L,A,E,I (6) — full
+
+Now we cannot move J or K to table.
+
+But we can move K to L? K is on L, so we can't move it to L.
+
+We can only move K to table, but table full.
+
+So we must move one of the table blocks to a stack before moving K.
+
+For example, move I to a stack.
+
+I=9, clear blocks: A, E, J
+
+J=10 >9 → can place I on J
+
+But I is on table, J is on K.
+
+J is clear.
+
+So:
+
+#### **Step 3 alternative**: Move I from J to... let's not move to table.
+
+Instead, after Step 2:
+
+Table: D,H,L,A,E (5)
+
+Clear: B, F, I
+
+#### **Step 3**: Move I from J to table? → would make 6, but then we can't move K.
+
+Better: move I to a temporary stack.
+
+But where? Only clear blocks are B=2, F=6
+
+I=9 > B=2, > F=6? 9>6 → cannot place I on F or B.
+
+So no.
+
+Cannot move I anywhere except table or heavier block.
+
+Heavier than 9: J=10, K=11, L=12
+
+J is under I, so not clear.
+
+K has J on it, not clear.
+
+L has K on it, not clear.
+
+So only place for I is table.
+
+So we must move I to table.
+
+Similarly, to move J, we need space.
+
+So we must move one of A, E, I to a stack after they are on table.
+
+But to do that, we need a clear heavier block.
+
+So let's create one.
+
+Let’s move B and C up.
+
+#### **Step 1**: Move A from B to table
+- Table: D,H,L,A
+- Clear: B, E, I
+
+#### **Step 2**: Move B from C to table
+- B on table
+- Table: D,H,L,A,B (5)
+- Clear: C, E, I
+
+#### **Step 3**: Move C from D to table
+- C on table
+- Table: D,H,L,A,B,C (6) — full
+- Clear: D, E, I
+
+Now we can move E and I to stacks.
+
+E=5, clear blocks: D=4? 5>4 → cannot place E on D
+I=9 > D=4 → no
+
+No heavier clear block.
+
+D is clear, but lighter.
+
+So stuck.
+
+We need to use the existing towers to place blocks.
+
+Perhaps start building the goal towers early.
+
+Let’s try to build Tower 2: K on table, H on K, E on H, B on E
+
+So we need K on table, then H on K, then E on H, then B on E.
+
+H=8, K=11 >8 → can place H on K
+E=5 <8 → can place E on H
+B=2 <5 → can place B on E
+
+Good.
+
+Similarly, Tower 3: J on table, G on J, D on G, A on D
+G=7, J=10>7 → ok
+D=4<7 → ok
+A=1<4 → ok
+
+Tower 1: L on table, I on L, F on I, C on F
+I=9, L=12>9 → ok
+F=6<9 → ok
+C=3<6 → ok
+
+So all are valid.
+
+So let’s try to build these incrementally.
+
+First, we need K on table.
+
+But K is on L.
+
+To move K to table, we need to remove J and I from above.
+
+But I is on J, J on K.
+
+So:
+- Move I to table (temporary)
+- Move J to table (temporary)
+- Move K to table
+
+But table will have D, H, L, I, J, K — 6, if we move I and J.
+
+Currently table: D, H, L
+
+So after moving I and J: D,H,L,I,J — 5
+Then K to table: 6
+
+Yes.
+
+So:
+
+#### **Step 1**: Move A from B to table
+- Table: D,H,L,A
+- Clear: B, E, I
+
+#### **Step 2**: Move E from F to table
+- Table: D,H,L,A,E
+- Clear: B, F, I
+
+#### **Step 3**: Move I from J to table
+- Table: D,H,L,A,E,I
+- Clear: B, F, J
+
+#### **Step 4**: Move J from K to table
+- Table: D,H,L,A,E,I,J — 7? No: D,H,L,A,E,I,J = 7 blocks
+
+D,H,L =3; A,E,I =3; total 6; then J =7? No:
+
+After Step 3: table has D,H,L,A,E,I — 6 blocks
+
+Cannot move J to table.
+
+So must move one of A,E,I to a stack.
+
+Available clear: B=2, F=6
+
+A=1 -> can go on B (2>1) or F (6>1)
+E=5 -> can go on F (6>5) but not B (2<5)
+I=9 -> cannot go on B or F (9>2, 9>6)
+
+So only A and E can be moved to F or B.
+
+Let’s move A to F.
+
+#### **Step 4**: Move A from table to F
+- A on F
+- Table: D,H,L,E,I — 5
+- Stack2: A-E-F-G-H-t? No: E is on table, F is on G.
+
+After Step 2: Stack2: F-G-H-t, E on table
+
+So F is on G, G on H, H on table.
+
+F is clear.
+
+So move A to F:
+- A on F
+- Stack2: A-F-G-H-t
+- Clear: B, J, A
+- Table: D,H,L,E,I
+
+#### **Step 5**: Move J from K to table
+- J on table
+- Table: D,H,L,E,I,J — 6
+- Stack3: K-L-t
+- Clear: B, K, A
+
+#### **Step 6**: Move K from L to table
+- K=11, can go on table, but table has 6 already -> cannot
+
+ table full.
+
+So cannot.
+
+Must move one of E,I,J to a stack.
+
+J is on table, but J=10, clear blocks: B=2, K=11, A=1
+
+K=11 > J=10 -> can place J on K
+
+K is on L, clear.
+
+So:
+
+#### **Step 6**: Move J from table to K
+- J on K
+- Stack3: J-K-L-t
+- Table: D,H,L,E,I — 5
+- Clear: B, J, A
+
+J is now on K, so not clear; clear are B, A, and K? K has J on it -> not clear.
+
+Clear: B, A
+
+#### **Step 7**: Move K from L to table
+- K on table
+- Table: D,H,L,E,I,K — 6
+- Stack3: L-t
+- Clear: B, A, J
+
+Now L is clear on table.
+
+We can start building on L.
+
+Goal: I on L, but I is on table.
+
+#### **Step 8**: Move I from table to L
+- I=9, L=12>9 -> valid
+- I on L
+- Table: D,H,E,K — 4 (removed I)
+- Stack3: I-L-t
+- Clear: B, A, J
+
+Good.
+
+Now, next for Tower 1: F on I
+
+F is in Stack2: A-F-G-H-t
+
+F has A on it, so not clear.
+
+G has F on it, not clear.
+
+H has G on it, not clear.
+
+So to access F, need to move A.
+
+A is on F, clear.
+
+#### **Step 9**: Move A from F to table
+- A on table
+- Table: D,H,E,K,A — 5
+- Stack2: F-G-H-t
+- Clear: B, F, J
+
+#### **Step 10**: Move F from G to I
+- F=6, I=9>6 -> valid
+- F on I
+- Stack3: F-I-L-t
+- Clear: B, G, J
+
+#### **Step 11**: Move C from D to table? C is under B.
+
+Stack1: A-B-C-D-t, but A is on table, B is on C, C on D.
+
+After initial, we moved A to table, so Stack1: B-C-D-t, B clear.
+
+We haven't moved B or C.
+
+So currently, B is on C, C on D, D on table.
+
+B is clear.
+
+C is not clear.
+
+So to move C, need to move B.
+
+#### **Step 11**: Move B from C to table
+- B on table
+- Table: D,H,E,K,A,B — 6
+- Stack1: C-D-t
+- Clear: C, G, J
+
+#### **Step 12**: Move C from D to F
+- C=3, F=6>3 -> valid
+- C on F
+- Stack3: C-F-I-L-t -> complete Tower 1
+- Clear: D, G, J
+
+Good.
+
+Now Tower 1 is done.
+
+Now Tower 2: K on table, H on K, E on H, B on E
+
+K is on table, good.
+
+H is in Stack2: G-H-t, G on H.
+
+H is not clear.
+
+G is on H, clear? G has nothing on it? After moving F, Stack2: G-H-t, G clear.
+
+So G is clear.
+
+H is not clear.
+
+So to move H, need to move G.
+
+#### **Step 13**: Move G from H to table? table full (6: D,H,E,K,A,B) -> cannot
+
+H is on table, so table has H.
+
+Blocks on table: D, H, E, K, A, B
+
+We can move one to a stack.
+
+For example, move A to somewhere.
+
+A=1, clear blocks: D=4, G=7, J=10
+
+All >1, so can place A on any.
+
+Let’s move A to J (J is on K, clear).
+
+#### **Step 13**: Move A from table to J
+- A on J
+- Table: D,H,E,K,B — 5
+- Stack3: A-J-K-L-t? No, J is on K, K on table.
+
+Stack3 is Tower 1 on L.
+
+J is on K, K on table.
+
+So move A to J:
+- A on J
+- Tower: A-J-K-table
+- Clear: D, G, A
+
+#### **Step 14**: Move G from H to table
+- G=7, table has space
+- G on table
+- Table: D,H,E,K,B,G — 6
+- Stack2: H-t
+- Clear: D, H, A
+
+H is now clear.
+
+#### **Step 15**: Move H from table to K
+- H=8, K=11>8 -> valid
+- H on K
+- Tower2: H-K-table
+- Table: D,E,B,G — 4 (removed H)
+- Clear: D, E, A
+
+Good.
+
+Next: E on H
+
+E is on table, clear.
+
+H is clear.
+
+So:
+
+#### **Step 16**: Move E from table to H
+- E=5, H=8>5 -> valid
+- E on H
+- Tower2: E-H-K-table
+- Table: D,B,G — 3
+- Clear: D, B, A
+
+Good.
+
+Next: B on E
+
+B is on table, clear.
+
+E is clear.
+
+B=2, E=5>2 -> valid
+
+#### **Step 17**: Move B from table to E
+- B on E
+- Tower2: B-E-H-K-table -> complete Tower 2
+- Table: D,G — 2
+- Clear: D, A, G
+
+Good.
+
+Now Tower 3: J on table, G on J, D on G, A on D
+
+J is currently on K, with A on J.
+
+We need J on table.
+
+So move A and then J to table.
+
+#### **Step 18**: Move A from J to table
+- A on table
+- Table: D,G,A — 3
+- Tower2: J-K-table
+- Clear: D, G, J
+
+#### **Step 19**: Move J from K to table
+- J on table
+- Table: D,G,A,J — 4
+- K on table
+- Clear: D, G, K
+
+Good.
+
+Now, G is on table, clear.
+
+We need G on J.
+
+G=7, J=10>7 -> valid
+
+#### **Step 20**: Move G from table to J
+- G on J
+- Tower3: G-J-table
+- Table: D,A — 2
+- Clear: D, A, G
+
+Good.
+
+Next: D on G
+
+D is on table, clear.
+
+G is clear.
+
+D=4, G=7>4 -> valid
+
+#### **Step 21**: Move D from table to G
+- D on G
+- Tower3: D-G-J-table
+- Table: A — 1
+- Clear: A, D
+
+Good.
+
+Next: A on D
+
+A on table, D clear.
+
+A=1, D=4>1 -> valid
+
+#### **Step 22**: Move A from table to D
+- A on D
+- Tower3: A-D-G-J-table -> complete Tower 3
+- Table: none? Wait, table has K, L, J? No.
+
+Let's check table.
+
+After all moves:
+
+- K on table (from earlier)
+- L on table (always)
+- J was moved to table in step 19, but then G on J, so J not on table.
+- Only blocks directly on table are those with nothing under them.
+
+After step 19: J on table
+
+Step 20: G on J → so J is not on table anymore? J is on table, G on J → so J is on table.
+
+" on table" means directly on table.
+
+So when we say "J on table", it's directly on table.
+
+In step 19: J on table
+
+Step 20: G on J → so G is on J, J on table → so J is still on table.
+
+Similarly, K on table, L on table.
+
+D was on table, then moved to G.
+
+So after step 22:
+
+- Table: K, L, J, A? No, A is on D.
+
+Blocks on table:
+- K: yes
+- L: yes
+- J: yes (G on J)
+- D: was on table, but moved to G, so not on table
+- H: was on table, moved to K
+- etc.
+
+After step 15: H moved to K, so H not on table.
+
+After step 14: G on table, but moved to J in step 20.
+
+After step 19: J on table.
+
+After step 20: G on J → so J still on table.
+
+After step 21: D on G → D not on table.
+
+After step 22: A on D → A not on table.
+
+So table has: K, L, J
+
+Exactly as goal.
+
+And the three towers:
+- Tower on L: C-F-I-L-t → but we have C on F, F on I, I on L, L on table → yes
+- Tower on K: B-E-H-K-t → B on E, E on H, H on K, K on table → yes
+- Tower on J: A on D, D on G, G on J, J on table → yes
+
+Perfect.
+
+Now, let's list all moves:
+
+1. move A from B to table
+2. move E from F to table
+3. move I from J to table
+4. move A from table to F
+5. move J from K to table
+6. move J from table to K
+7. move K from L to table
+8. move I from table to L
+9. move A from F to table
+10. move F from G to I
+11. move B from C to table
+12. move C from D to F
+13. move A from table to J
+14. move G from H to table
+15. move H from table to K
+16. move E from table to H
+17. move B from table to E
+18. move A from J to table
+19. move J from K to table
+20. move G from table to J
+21. move D from table to G
+22. move A from table to D
+
+Wait, in step 13, we moved A from table to J, but A was on table after step 9.
+
+In step 9: A moved from F to table
+
+Then step 11: B moved from C to table
+
+Then step 12: C moved
+
+Then step 13: A from table to J
+
+Yes.
+
+Then step 18: A from J to table
+
+Then step 22: A from table to D
+
+All good.
+
+Total moves: 22
+
+All within 50.
+
+Check table limit:
+
+At no point did we have more than 6 on table.
+
+For example, after step 5: table has D,H,L,E,I,J — 6
+
+Then step 6: move J to K → J off table → 5
+
+Then step 7: move K to table → 6
+
+Then step 8: move I to L → I off table → 5
+
+ etc.
+
+All good.
+
+Weight constraints all satisfied.
+
+Height: max 4 in goal, never exceeded 5.
+
+So valid.
+
+Now output in JSON.
+
+Note: In the action, "from" and "to" should be positions.
+
+"table" or the block it's on.
+
+For example, initially A is on B, so from: B
+
+When on table, from: table
+
+Similarly for to.
+
+Also, in step 6: move J from table to K — but after step 5, J is on table, and K is on L.
+
+K is clear.
+
+So yes.
+
+Let's list the actions:
+
+{
+  "plan_length": 22,
+  "actions": [
+    {
+      "step": 1,
+      "action": "move",
+      "block": "A",
+      "from": "B",
+      "to": "table"
+    },
+    {
+      "step": 2,
+      "action": "move",
+      "block": "E",
+      "from": "F",
+      "to": "table"
+    },
+    {
+      "step": 3,
+      "action": "move",
+      "block": "I",
+      "from": "J",
+      "to": "table"
+    },
+    {
+      "step": 4,
+      "action": "move",
+      "block": "A",
+      "from": "table",
+      "to": "F"
+    },
+    {
+      "step": 5,
+      "action": "move",
+      "block": "J",
+      "from": "K",
+      "to": "table"
+    },
+    {
+      "step": 6,
+      "action": "move",
+      "block": "J",
+      "from": "table",
+      "to": "K"
+    },
+    {
+      "step": 7,
+      "action": "move",
+      "block": "K",
+      "from": "L",
+      "to": "table"
+    },
+    {
+      "step": 8,
+      "action": "move",
+      "block": "I",
+      "from": "table",
+      "to": "L"
+    },
+    {
+      "step": 9,
+      "action": "move",
+      "block": "A",
+      "from": "F",
+      "to": "table"
+    },
+    {
+      "step": 10,
+      "action": "move",
+      "block": "F",
+      "from": "G",
+      "to": "I"
+    },
+    {
+      "step": 11,
+      "action": "move",
+      "block": "B",
+      "from": "C",
+      "to": "table"
+    },
+    {
+      "step": 12,
+      "action": "move",
+      "block": "C",
+      "from": "D",
+      "to": "F"
+    },
+    {
+      "step": 13,
+      "action": "move",
+      "block": "A",
+      "from": "table",
+      "to": "J"
+    },
+    {
+      "step": 14,
+      "action": "move",
+      "block": "G",
+      "from": "H",
+      "to": "table"
+    },
+    {
+      "step": 15,
+      "action": "move",
+      "block": "H",
+      "from": "table",
+      "to": "K"
+    },
+    {
+      "step": 16,
+      "action": "move",
+      "block": "E",
+      "from": "table",
+      "to": "H"
+    },
+    {
+      "step": 17,
+      "action": "move",
+      "block": "B",
+      "from": "table",
+      "to": "E"
+    },
+    {
+      "step": 18,
+      "action": "move",
+      "block": "A",
+      "from": "J",
+      "to": "table"
+    },
+    {
+      "step": 19,
+      "action": "move",
+      "block": "J",
+      "from": "K",
+      "to": "table"
+    },
+    {
+      "step": 20,
+      "action": "move",
+      "block": "G",
+      "from": "table",
+      "to": "J"
+    },
+    {
+      "step": 21,
+      "action": "move",
+      "block": "D",
+      "from": "table",
+      "to": "G"
+    },
+    {
+      "step": 22,
+      "action": "move",
+      "block": "A",
+      "from": "table",
+      "to": "D"
+    }
+  ]
+}
+---
+S1 Parsed Answer: {'plan_length': 22, 'actions': [{'step': 1, 'action': 'move', 'block': 'A', 'from': 'B', 'to': 'table'}, {'step': 2, 'action': 'move', 'block': 'E', 'from': 'F', 'to': 'table'}, {'step': 3, 'action': 'move', 'block': 'I', 'from': 'J', 'to': 'table'}, {'step': 4, 'action': 'move', 'block': 'A', 'from': 'table', 'to': 'F'}, {'step': 5, 'action': 'move', 'block': 'J', 'from': 'K', 'to': 'table'}, {'step': 6, 'action': 'move', 'block': 'J', 'from': 'table', 'to': 'K'}, {'step': 7, 'action': 'move', 'block': 'K', 'from': 'L', 'to': 'table'}, {'step': 8, 'action': 'move', 'block': 'I', 'from': 'table', 'to': 'L'}, {'step': 9, 'action': 'move', 'block': 'A', 'from': 'F', 'to': 'table'}, {'step': 10, 'action': 'move', 'block': 'F', 'from': 'G', 'to': 'I'}, {'step': 11, 'action': 'move', 'block': 'B', 'from': 'C', 'to': 'table'}, {'step': 12, 'action': 'move', 'block': 'C', 'from': 'D', 'to': 'F'}, {'step': 13, 'action': 'move', 'block': 'A', 'from': 'table', 'to': 'J'}, {'step': 14, 'action': 'move', 'block': 'G', 'from': 'H', 'to': 'table'}, {'step': 15, 'action': 'move', 'block': 'H', 'from': 'table', 'to': 'K'}, {'step': 16, 'action': 'move', 'block': 'E', 'from': 'table', 'to': 'H'}, {'step': 17, 'action': 'move', 'block': 'B', 'from': 'table', 'to': 'E'}, {'step': 18, 'action': 'move', 'block': 'A', 'from': 'J', 'to': 'table'}, {'step': 19, 'action': 'move', 'block': 'J', 'from': 'K', 'to': 'table'}, {'step': 20, 'action': 'move', 'block': 'G', 'from': 'table', 'to': 'J'}, {'step': 21, 'action': 'move', 'block': 'D', 'from': 'table', 'to': 'G'}, {'step': 22, 'action': 'move', 'block': 'A', 'from': 'table', 'to': 'D'}]}
+S1 Valid/Parse Success: True
+S1 Correct: False
+S1 Tokens: 9574 | Latency: 8881.1ms
+
+============================================================
+=== SYSTEM 2 (MP EVALUATOR / JUDGE) ===
+--- S2 PROMPT ---
+PROBLEM:
+# Problem Statement
+
+Transform stacks of weighted blocks from an initial configuration to a goal configuration by moving blocks one at a time while respecting weight and structural constraints.
+
+## Instance Data
+
+**Blocks:** 12 blocks labeled A through L
+
+**Weights:**
+- A=1, B=2, C=3, D=4, E=5, F=6, G=7, H=8, I=9, J=10, K=11, L=12
+
+**Initial Configuration** (three stacks of height 4):
+- Stack 1: D on table, C on D, B on C, A on B
+- Stack 2: H on table, G on H, F on G, E on F
+- Stack 3: L on table, K on L, J on K, I on J
+
+**Goal Configuration** (three stacks of height 4):
+- Tower 1: L on table, I on L, F on I, C on F
+- Tower 2: K on table, H on K, E on H, B on E
+- Tower 3: J on table, G on J, D on G, A on D
+
+## Constraints
+
+1. **Clear block**: Only blocks with nothing on top can be moved
+2. **Single move**: Only one move occurs per time step
+3. **Weight constraint**: A heavier block **cannot** be placed on a lighter block (weight(Y) >= weight(X) required for placing X on Y)
+4. **Table limit**: **At most** 6 blocks may be directly on the table at any time
+5. **Height limit**: **No** tower may exceed height 5 (depth 1 = directly on table)
+6. **Valid positions**: Blocks can be placed on the table or on top of another clear block
+7. **Distinct positions**: Source and destination **must** differ; block **cannot** be placed on itself
+8. **Maximum Plan Length**: Your final plan must not exceed 50 moves.
+
+## Objective
+
+Your goal is to find a valid sequence of moves to transform the initial configuration into the goal configuration.
+
+For this problem, the primary objective is finding a correct plan that respects all constraints. The complexity of the task suggests that a solution may require a significant number of moves, so you should ensure your search explores plans up to the **maximum allowed length of 50 moves**.
+
+SYSTEM 1 ANSWER (For Evaluation):
+Let's solve this block-stacking problem step by step, carefully tracking the state, constraints, and moves.
+
+---
+
+### **Step 1: Understand the Initial and Goal Configurations**
+
+#### **Initial Configuration**
+Three stacks of height 4:
+
+- **Stack 1**: A on B, B on C, C on D, D on table
+  - Table: D
+- **Stack 2**: E on F, F on G, G on H, H on table
+  - Table: H
+- **Stack 3**: I on J, J on K, K on L, L on table
+  - Table: L
+
+So, blocks on the table initially: **D, H, L** → 3 blocks on table
+
+Clear blocks (tops): **A, E, I**
+
+#### **Goal Configuration**
+- **Tower 1**: C on F, F on I, I on L → L on table
+- **Tower 2**: B on E, E on H, H on K → K on table
+- **Tower 3**: A on D, D on G, G on J → J on table
+
+So, table blocks in goal: **L, K, J** → 3 blocks on table
+
+Clear blocks in goal: **C, B, A**
+
+---
+
+### **Step 2: Analyze Constraints**
+
+1. **Only clear blocks can be moved**
+2. **One move per step**
+3. **Weight constraint**: Can't place heavier on lighter → `weight(X) <= weight(Y)` to place X on Y
+4. **Table limit**: ≤6 blocks on table at any time
+5. **Height limit**: No stack > height 5
+6. **Valid positions**: On table or on a clear block
+7. **Cannot move block to itself**
+8. **Plan ≤ 50 moves**
+
+We'll need to dismantle and rebuild towers.
+
+---
+
+### **Step 3: Strategy**
+
+We need to:
+- Dismantle current stacks to access buried blocks
+- Build toward goal stacks
+- Avoid violating weight or table limits
+- Use intermediate positions wisely
+
+We note:
+- Goal has **L, K, J** on table → so we must eventually remove **D, H, I** from table and place **K, J** on table (L already is)
+- So **D, H** must be moved off the table (but can be placed on other blocks or temporarily on table if under limit)
+
+We must be careful with **weight constraints**:
+- Heaviest block is L=12, lightest is A=1
+- So, e.g., A (1) can go on anyone; L (12) can only go on table or on a block ≥12 (only itself), so L can only be on table.
+
+Wait: **L = 12**, so can only be placed on something ≥12 → only itself → so **L can only be on table**.
+
+Similarly:
+- K = 11 → can only go on blocks ≥11 → K or L
+- J = 10 → can go on ≥10 → J, K, L
+- I = 9 → ≥9 → I, J, K, L
+- H = 8 → ≥8 → H, I, J, K, L
+- G = 7 → ≥7 → G, H, I, J, K, L
+- F = 6 → ≥6 → F, G, H, I, J, K, L
+- E = 5 → ≥5 → E, F, G, H, I, J, K, L
+- D = 4 → ≥4 → D, E, F, G, H, I, J, K, L
+- C = 3 → ≥3 → C, D, E, F, G, H, I, J, K, L
+- B = 2 → ≥2 → B, C, D, ..., L
+- A = 1 → can go on anyone
+
+So only **L** is strictly restricted to table (since nothing heavier exists). Others can be placed on heavier or equal.
+
+But **K=11**, so only L or K can support it. Since K > J (10), K cannot go on J. So K must be on table or on L.
+
+But in goal, **K is on table**, so that's fine.
+
+Similarly, **J=10**, can go on K=11 or L=12 → but in goal, **J is on table**, so okay.
+
+So only **L must be on table at all times**.
+
+Wait: can we move L? Only if nothing is on top. Currently, K is on L, so we can't move L until K is removed. But **we cannot place L on any block**, because no block is heavier than L (12), and we can't place it on a lighter one. So **L can never be moved from the table**.
+
+Therefore:
+- **L must remain on the table throughout**.
+- **We cannot move L**.
+
+Similarly, **K** is on L → K can be moved, but if we move K, we can place it on table or on L (since L=12 > K=11) → valid.
+
+But in goal, **K is on table**, so we can move K to table.
+
+Similarly, **J** is on K → we can move J to table or to K or L.
+
+So, **L is fixed on the table**.
+
+Therefore, in goal, **Tower 1: L on table, I on L, F on I, C on F** → all valid.
+
+So we can build Tower 1 on top of L.
+
+Similarly, **K and J can be moved to table** as needed.
+
+---
+
+### **Step 4: Plan Overview**
+
+We need to:
+- Dismantle Stack 1 (D-C-B-A)
+- Dismantle Stack 2 (H-G-F-E)
+- Dismantle Stack 3 (L-K-J-I) → but L is fixed; so we remove K, J, I from L
+- Build:
+  - Tower 1: L → I → F → C
+  - Tower 2: K → H → E → B
+  - Tower 3: J → G → D → A
+
+Note: In goal, D is on G, and G is on J → so D is not on table.
+
+So D must be moved off table.
+
+Similarly, H is moved off table.
+
+So final table blocks: **L, K, J** → so we must have **K and J on table**, and **D and H** moved off.
+
+We'll use intermediate steps.
+
+Let’s proceed step by step.
+
+---
+
+### **Initial State**
+
+Stacks:
+
+- S1: A-B-C-D-t (clear: A)
+- S2: E-F-G-H-t (clear: E)
+- S3: I-J-K-L-t (clear: I)
+- Table: D, H, L
+- Clear blocks: A, E, I
+
+We need to dismantle to access lower blocks.
+
+We want to build Tower 1 on L: L → I → F → C
+
+So we need I, F, C in that order.
+
+But I is currently on top of J → so we can move I.
+
+Similarly, F is under E → so we need to move E first.
+
+Let’s try to build Tower 1 on L first.
+
+But currently, K is on L, then J on K, then I on J → so to place I on L, we need to remove J and K.
+
+So we need to move K and J off.
+
+But K=11 → can only go on table or on L (12)
+
+Similarly, J=10 → can go on table, K, or L
+
+So we can move K to table → then J to table → then I to L.
+
+But table currently has D, H, L → 3 blocks.
+
+We can have up to 6 on table → so moving K and J to table is fine.
+
+Similarly, we can temporarily place other blocks on table.
+
+Let’s begin.
+
+---
+
+### **Move Plan**
+
+We'll track:
+- Each move
+- State of stacks
+- Clear blocks
+- Blocks on table
+
+Let’s begin.
+
+#### **Step 1**: Move A from B to table
+- A is clear
+- Table has space (3 → 4 blocks)
+- A=1, can go on table
+- Now: Stack1: B-C-D-t; A on table
+- Clear: B, E, I
+- Table: D, H, L, A
+
+#### **Step 2**: Move E from F to table
+- E is clear
+- Table: 5 blocks
+- E=5, valid
+- Stack2: F-G-H-t; E on table
+- Clear: B, F, I
+- Table: D, H, L, A, E
+
+#### **Step 3**: Move I from J to table
+- I is clear
+- Table: 6 blocks → max reached
+- I=9, valid
+- Stack3: J-K-L-t; I on table
+- Clear: B, F, J
+- Table: D, H, L, A, E, I
+
+Now table is full. We cannot place any more blocks directly on table until we free space.
+
+#### **Step 4**: Move B from C to table? → no, table is full (6 already). Can't place.
+
+So we must place B on another block.
+
+B=2 → can go on any block ≥2 → so almost any.
+
+But only clear blocks are F, J
+
+F=6 > B=2 → valid
+J=10 > B=2 → valid
+
+Let’s place B on F (to start combining)
+
+#### **Step 4**: Move B from C to F
+- B on F → F is clear
+- Weight: 2 ≤ 6 → ok
+- Stack1: C-D-t; Stack2: B-F-G-H-t
+- Clear: C, J
+- Table: D, H, L, A, E, I
+
+#### **Step 5**: Move C from D to table? → table full → can't
+- Clear blocks: J, C
+- Can place C on J? C=3, J=10 → yes
+- Or on F? But F has B → not clear
+- Or on H? H has G → not clear
+- Only clear: J and B (but B is under nothing? no, B is on F, and nothing on B → so B is clear?
+
+Wait: B is on F → nothing on B → so B is clear.
+
+Similarly, J is clear.
+
+So clear blocks: C, B, J
+
+We can place C on B? C=3, B=2 → 3 > 2 → invalid! Cannot place heavier on lighter.
+
+C on J? 3 ≤ 10 → yes.
+
+So:
+
+#### **Step 5**: Move C from D to J
+- C on J → J is clear
+- Weight: 3 ≤ 10 → ok
+- Stack3: C-J-K-L-t
+- Clear: D, B
+- Table: D, H, L, A, E, I
+
+D is now clear.
+
+#### **Step 6**: Move D from table to... where?
+- D=4
+- Clear blocks: B, C
+- B=2 < 4 → cannot place D on B
+- C=3 < 4 → cannot place D on C
+- So nowhere to place D? Only option is table, but D is already on table.
+
+We need to move D off table to eventually have only L, K, J on table.
+
+But we can't place D on B or C.
+
+We could place D on a heavier block.
+
+Available clear: B=2, C=3 → both lighter → invalid
+
+No other clear blocks.
+
+So stuck.
+
+Alternative: instead of moving C to J, move C to another place.
+
+Backtrack.
+
+After Step 4:
+- Clear: C, B, J
+- Table: D, H, L, A, E, I (full)
+- We need to move C
+
+But C cannot go on B (3>2), and only options are B, J
+
+So must go to J.
+
+But then D is stuck.
+
+So we need to free up table space before moving D.
+
+But table is full.
+
+So we need to move one of the table blocks to a stack.
+
+Currently on table: D, H, L, A, E, I
+
+We can move A, E, or I to a stack.
+
+A=1 → can go anywhere
+E=5 → can go on ≥5
+I=9 → can go on ≥9
+
+Available clear blocks: B, C, J
+
+But J has nothing on it? After Step 4, J is clear? No:
+
+After Step 4: Stack3: J-K-L-t → J is clear
+
+After Step 5: C on J → C is clear, J not clear
+
+But in Step 5 we placed C on J → so J is not clear.
+
+After Step 4:
+- Clear: C (from D), B (on F), J (top of K)
+
+So we could move A or E or I from table to a clear block.
+
+For example:
+- Move A to B? A=1, B=2 → 1≤2 → ok
+- Or A to J? 1≤10 → ok
+
+Similarly, E=5 → can go on J? 5≤10 → yes
+Or on B? 5>2 → no
+Or on C? 5>3 → no
+
+I=9 → can go on J? 9≤10 → yes
+
+So we can move A, E, or I to J.
+
+But J is clear → so we can place on J.
+
+Let’s try to free table space.
+
+After Step 4:
+- Clear: C, B, J
+- Table: D, H, L, A, E, I
+
+#### Alternative Step 5: Move A from table to J
+- A on J → J=10 ≥1 → ok
+- Table: D, H, L, E, I → 5 blocks
+- Stack3: A-J-K-L-t
+- Clear: C, B, A (A is now clear)
+
+Now table has space.
+
+#### Step 6: Move C from D to table
+- C=3, table has space
+- Move C to table
+- Stack1: D-t; C on table
+- Clear: D, B, A
+- Table: D, H, L, E, I, C → 6 again
+
+#### Step 7: Move D from table to... where?
+- D=4
+- Clear blocks: B=2, A=1, C=3 → all lighter than D → cannot place D on any
+- No other clear blocks
+
+Still stuck.
+
+We need a heavier clear block.
+
+Currently, F has B on it → B is clear, but F is not.
+
+G has F on it → F has B → not clear.
+
+H has G → not clear.
+
+K has J → J has A → not clear.
+
+So only clear: B, A, C
+
+All light.
+
+So we need to free a heavier block.
+
+For example, if we can make G clear, G=7 → D=4 ≤7 → valid
+
+How to make G clear?
+
+G is under F → F has B → so we need to move B.
+
+B is on F → clear → so we can move B.
+
+Where can we move B?
+
+B=2 → can go on any ≥2 → many options.
+
+Clear blocks: A=1, C=3, D (if we could move it, but it's not clear)
+
+After Step 6:
+- Clear: D, B, A, C
+
+We can move B to C? B=2, C=3 → 2≤3 → yes
+
+Or to A? 2>1 → no
+
+Or to D? D=4 ≥2 → yes
+
+But D is on table → we can place B on D.
+
+But D is not clear? D is on table, nothing on it → D is clear.
+
+Yes.
+
+So:
+
+#### Step 7: Move B from F to D
+- B on D → D=4 ≥2 → ok
+- Stack1: B-D-t
+- Stack2: F-G-H-t (F now clear)
+- Clear: F, A, C
+- Table: D, H, L, E, I, C
+
+Now F is clear.
+
+F=6
+
+We can now move G? No, G is under F.
+
+F is on G → so to access G, we need to move F.
+
+F is now clear.
+
+So:
+
+#### Step 8: Move F from G to table? → table full → can't
+- Table: D, H, L, E, I, C → 6
+- F=6
+- Can place F on clear blocks: A=1 → 6>1 → no
+- C=3 → 6>3 → no
+- B=2 → 6>2 → no
+- D has B → B is not clear? B is on D, nothing on B → B is clear
+
+Clear blocks: F (source), A, C, B
+
+F is the block being moved, so not available as destination.
+
+Destinations: A, B, C, D (but D has B on it → D is not clear)
+
+Only clear blocks are A, B, C
+
+F=6 > A=1, B=2, C=3 → cannot place F on any.
+
+And table is full.
+
+So F cannot be moved.
+
+Stuck again.
+
+We need to free table space.
+
+Currently on table: D, H, L, E, I, C
+
+We can move E, I, C to a stack.
+
+C is clear → we can move C to a heavier clear block.
+
+But clear blocks are A=1, B=2 → both lighter than C=3 → cannot place C on them.
+
+E=5 → can go on B=2? 5>2 → no; A=1 → no; C=3 → 5>3 → no
+
+I=9 → can go on B? 9>2 → no; A? no; C? 9>3 → no
+
+So no block can accept E, I, C.
+
+And we can't move F.
+
+Dead end.
+
+We need a better strategy.
+
+---
+
+### **New Strategy: Use intermediate towers and free table early**
+
+Let’s try to dismantle Stack 3 first to free K and J for the table.
+
+Goal has K and J on table.
+
+Currently, K is on L, J on K, I on J.
+
+So we can:
+- Move I to table
+- Move J to table
+- Move K to table
+
+Then we have more flexibility.
+
+But table currently has D, H, L → 3
+
+We can move I, J, K to table → up to 6, which is allowed.
+
+Let’s try.
+
+#### **Step 1**: Move A from B to table
+- A on table
+- Table: D, H, L, A
+- Clear: B, E, I
+
+#### **Step 2**: Move E from F to table
+- E on table
+- Table: D, H, L, A, E
+- Clear: B, F, I
+
+#### **Step 3**: Move I from J to table
+- I on table
+- Table: D, H, L, A, E, I → full
+- Clear: B, F, J
+
+#### **Step 4**: Move J from K to table? → table full → can't
+
+So need to free space.
+
+Move one of the table blocks to a stack.
+
+Available clear: B=2, F=6
+
+B=2 → can have light blocks on it
+
+F=6 → can have up to 6
+
+We can move A to B? A=1 ≤2 → yes
+
+#### **Step 4**: Move A from table to B
+- A on B
+- Table: D, H, L, E, I → 5
+- Stack1: A-B-C-D-t
+- Clear: F, J, A
+
+Now table has space.
+
+#### **Step 5**: Move J from K to table
+- J=10, table has space
+- J on table
+- Table: D, H, L, E, I, J → full
+- Stack3: K-L-t
+- Clear: F, K, A
+
+#### **Step 6**: Move K from L to table
+- K=11, can go on table
+- K on table
+- Table: D, H, L, E, I, J, K → 7 blocks! → violates table limit (max 6)
+
+Oh no! Cannot have 7 on table.
+
+After Step 5, table has 6: D, H, L, E, I, J
+
+Cannot add K.
+
+So we cannot move both J and K to table if we already have 6.
+
+We have to place K on L, since L=12 > K=11.
+
+But K is currently on L → we can't place K on L again.
+
+We want to move K off L to table, but can't if table full.
+
+So we must move K to table before table is full.
+
+Let’s sequence differently.
+
+After initial:
+
+- Table: D, H, L
+- Clear: A, E, I
+
+#### **Step 1**: Move A to table → table: D,H,L,A (4)
+
+#### **Step 2**: Move E to table → table: D,H,L,A,E (5)
+
+#### **Step 3**: Move I to table → table: D,H,L,A,E,I (6) — full
+
+Now we cannot move J or K to table.
+
+But we can move K to L? K is on L, so we can't move it to L.
+
+We can only move K to table, but table full.
+
+So we must move one of the table blocks to a stack before moving K.
+
+For example, move I to a stack.
+
+I=9, clear blocks: A, E, J
+
+J=10 >9 → can place I on J
+
+But I is on table, J is on K.
+
+J is clear.
+
+So:
+
+#### **Step 3 alternative**: Move I from J to... let's not move to table.
+
+Instead, after Step 2:
+
+Table: D,H,L,A,E (5)
+
+Clear: B, F, I
+
+#### **Step 3**: Move I from J to table? → would make 6, but then we can't move K.
+
+Better: move I to a temporary stack.
+
+But where? Only clear blocks are B=2, F=6
+
+I=9 > B=2, > F=6? 9>6 → cannot place I on F or B.
+
+So no.
+
+Cannot move I anywhere except table or heavier block.
+
+Heavier than 9: J=10, K=11, L=12
+
+J is under I, so not clear.
+
+K has J on it, not clear.
+
+L has K on it, not clear.
+
+So only place for I is table.
+
+So we must move I to table.
+
+Similarly, to move J, we need space.
+
+So we must move one of A, E, I to a stack after they are on table.
+
+But to do that, we need a clear heavier block.
+
+So let's create one.
+
+Let’s move B and C up.
+
+#### **Step 1**: Move A from B to table
+- Table: D,H,L,A
+- Clear: B, E, I
+
+#### **Step 2**: Move B from C to table
+- B on table
+- Table: D,H,L,A,B (5)
+- Clear: C, E, I
+
+#### **Step 3**: Move C from D to table
+- C on table
+- Table: D,H,L,A,B,C (6) — full
+- Clear: D, E, I
+
+Now we can move E and I to stacks.
+
+E=5, clear blocks: D=4? 5>4 → cannot place E on D
+I=9 > D=4 → no
+
+No heavier clear block.
+
+D is clear, but lighter.
+
+So stuck.
+
+We need to use the existing towers to place blocks.
+
+Perhaps start building the goal towers early.
+
+Let’s try to build Tower 2: K on table, H on K, E on H, B on E
+
+So we need K on table, then H on K, then E on H, then B on E.
+
+H=8, K=11 >8 → can place H on K
+E=5 <8 → can place E on H
+B=2 <5 → can place B on E
+
+Good.
+
+Similarly, Tower 3: J on table, G on J, D on G, A on D
+G=7, J=10>7 → ok
+D=4<7 → ok
+A=1<4 → ok
+
+Tower 1: L on table, I on L, F on I, C on F
+I=9, L=12>9 → ok
+F=6<9 → ok
+C=3<6 → ok
+
+So all are valid.
+
+So let’s try to build these incrementally.
+
+First, we need K on table.
+
+But K is on L.
+
+To move K to table, we need to remove J and I from above.
+
+But I is on J, J on K.
+
+So:
+- Move I to table (temporary)
+- Move J to table (temporary)
+- Move K to table
+
+But table will have D, H, L, I, J, K — 6, if we move I and J.
+
+Currently table: D, H, L
+
+So after moving I and J: D,H,L,I,J — 5
+Then K to table: 6
+
+Yes.
+
+So:
+
+#### **Step 1**: Move A from B to table
+- Table: D,H,L,A
+- Clear: B, E, I
+
+#### **Step 2**: Move E from F to table
+- Table: D,H,L,A,E
+- Clear: B, F, I
+
+#### **Step 3**: Move I from J to table
+- Table: D,H,L,A,E,I
+- Clear: B, F, J
+
+#### **Step 4**: Move J from K to table
+- Table: D,H,L,A,E,I,J — 7? No: D,H,L,A,E,I,J = 7 blocks
+
+D,H,L =3; A,E,I =3; total 6; then J =7? No:
+
+After Step 3: table has D,H,L,A,E,I — 6 blocks
+
+Cannot move J to table.
+
+So must move one of A,E,I to a stack.
+
+Available clear: B=2, F=6
+
+A=1 -> can go on B (2>1) or F (6>1)
+E=5 -> can go on F (6>5) but not B (2<5)
+I=9 -> cannot go on B or F (9>2, 9>6)
+
+So only A and E can be moved to F or B.
+
+Let’s move A to F.
+
+#### **Step 4**: Move A from table to F
+- A on F
+- Table: D,H,L,E,I — 5
+- Stack2: A-E-F-G-H-t? No: E is on table, F is on G.
+
+After Step 2: Stack2: F-G-H-t, E on table
+
+So F is on G, G on H, H on table.
+
+F is clear.
+
+So move A to F:
+- A on F
+- Stack2: A-F-G-H-t
+- Clear: B, J, A
+- Table: D,H,L,E,I
+
+#### **Step 5**: Move J from K to table
+- J on table
+- Table: D,H,L,E,I,J — 6
+- Stack3: K-L-t
+- Clear: B, K, A
+
+#### **Step 6**: Move K from L to table
+- K=11, can go on table, but table has 6 already -> cannot
+
+ table full.
+
+So cannot.
+
+Must move one of E,I,J to a stack.
+
+J is on table, but J=10, clear blocks: B=2, K=11, A=1
+
+K=11 > J=10 -> can place J on K
+
+K is on L, clear.
+
+So:
+
+#### **Step 6**: Move J from table to K
+- J on K
+- Stack3: J-K-L-t
+- Table: D,H,L,E,I — 5
+- Clear: B, J, A
+
+J is now on K, so not clear; clear are B, A, and K? K has J on it -> not clear.
+
+Clear: B, A
+
+#### **Step 7**: Move K from L to table
+- K on table
+- Table: D,H,L,E,I,K — 6
+- Stack3: L-t
+- Clear: B, A, J
+
+Now L is clear on table.
+
+We can start building on L.
+
+Goal: I on L, but I is on table.
+
+#### **Step 8**: Move I from table to L
+- I=9, L=12>9 -> valid
+- I on L
+- Table: D,H,E,K — 4 (removed I)
+- Stack3: I-L-t
+- Clear: B, A, J
+
+Good.
+
+Now, next for Tower 1: F on I
+
+F is in Stack2: A-F-G-H-t
+
+F has A on it, so not clear.
+
+G has F on it, not clear.
+
+H has G on it, not clear.
+
+So to access F, need to move A.
+
+A is on F, clear.
+
+#### **Step 9**: Move A from F to table
+- A on table
+- Table: D,H,E,K,A — 5
+- Stack2: F-G-H-t
+- Clear: B, F, J
+
+#### **Step 10**: Move F from G to I
+- F=6, I=9>6 -> valid
+- F on I
+- Stack3: F-I-L-t
+- Clear: B, G, J
+
+#### **Step 11**: Move C from D to table? C is under B.
+
+Stack1: A-B-C-D-t, but A is on table, B is on C, C on D.
+
+After initial, we moved A to table, so Stack1: B-C-D-t, B clear.
+
+We haven't moved B or C.
+
+So currently, B is on C, C on D, D on table.
+
+B is clear.
+
+C is not clear.
+
+So to move C, need to move B.
+
+#### **Step 11**: Move B from C to table
+- B on table
+- Table: D,H,E,K,A,B — 6
+- Stack1: C-D-t
+- Clear: C, G, J
+
+#### **Step 12**: Move C from D to F
+- C=3, F=6>3 -> valid
+- C on F
+- Stack3: C-F-I-L-t -> complete Tower 1
+- Clear: D, G, J
+
+Good.
+
+Now Tower 1 is done.
+
+Now Tower 2: K on table, H on K, E on H, B on E
+
+K is on table, good.
+
+H is in Stack2: G-H-t, G on H.
+
+H is not clear.
+
+G is on H, clear? G has nothing on it? After moving F, Stack2: G-H-t, G clear.
+
+So G is clear.
+
+H is not clear.
+
+So to move H, need to move G.
+
+#### **Step 13**: Move G from H to table? table full (6: D,H,E,K,A,B) -> cannot
+
+H is on table, so table has H.
+
+Blocks on table: D, H, E, K, A, B
+
+We can move one to a stack.
+
+For example, move A to somewhere.
+
+A=1, clear blocks: D=4, G=7, J=10
+
+All >1, so can place A on any.
+
+Let’s move A to J (J is on K, clear).
+
+#### **Step 13**: Move A from table to J
+- A on J
+- Table: D,H,E,K,B — 5
+- Stack3: A-J-K-L-t? No, J is on K, K on table.
+
+Stack3 is Tower 1 on L.
+
+J is on K, K on table.
+
+So move A to J:
+- A on J
+- Tower: A-J-K-table
+- Clear: D, G, A
+
+#### **Step 14**: Move G from H to table
+- G=7, table has space
+- G on table
+- Table: D,H,E,K,B,G — 6
+- Stack2: H-t
+- Clear: D, H, A
+
+H is now clear.
+
+#### **Step 15**: Move H from table to K
+- H=8, K=11>8 -> valid
+- H on K
+- Tower2: H-K-table
+- Table: D,E,B,G — 4 (removed H)
+- Clear: D, E, A
+
+Good.
+
+Next: E on H
+
+E is on table, clear.
+
+H is clear.
+
+So:
+
+#### **Step 16**: Move E from table to H
+- E=5, H=8>5 -> valid
+- E on H
+- Tower2: E-H-K-table
+- Table: D,B,G — 3
+- Clear: D, B, A
+
+Good.
+
+Next: B on E
+
+B is on table, clear.
+
+E is clear.
+
+B=2, E=5>2 -> valid
+
+#### **Step 17**: Move B from table to E
+- B on E
+- Tower2: B-E-H-K-table -> complete Tower 2
+- Table: D,G — 2
+- Clear: D, A, G
+
+Good.
+
+Now Tower 3: J on table, G on J, D on G, A on D
+
+J is currently on K, with A on J.
+
+We need J on table.
+
+So move A and then J to table.
+
+#### **Step 18**: Move A from J to table
+- A on table
+- Table: D,G,A — 3
+- Tower2: J-K-table
+- Clear: D, G, J
+
+#### **Step 19**: Move J from K to table
+- J on table
+- Table: D,G,A,J — 4
+- K on table
+- Clear: D, G, K
+
+Good.
+
+Now, G is on table, clear.
+
+We need G on J.
+
+G=7, J=10>7 -> valid
+
+#### **Step 20**: Move G from table to J
+- G on J
+- Tower3: G-J-table
+- Table: D,A — 2
+- Clear: D, A, G
+
+Good.
+
+Next: D on G
+
+D is on table, clear.
+
+G is clear.
+
+D=4, G=7>4 -> valid
+
+#### **Step 21**: Move D from table to G
+- D on G
+- Tower3: D-G-J-table
+- Table: A — 1
+- Clear: A, D
+
+Good.
+
+Next: A on D
+
+A on table, D clear.
+
+A=1, D=4>1 -> valid
+
+#### **Step 22**: Move A from table to D
+- A on D
+- Tower3: A-D-G-J-table -> complete Tower 3
+- Table: none? Wait, table has K, L, J? No.
+
+Let's check table.
+
+After all moves:
+
+- K on table (from earlier)
+- L on table (always)
+- J was moved to table in step 19, but then G on J, so J not on table.
+- Only blocks directly on table are those with nothing under them.
+
+After step 19: J on table
+
+Step 20: G on J → so J is not on table anymore? J is on table, G on J → so J is on table.
+
+" on table" means directly on table.
+
+So when we say "J on table", it's directly on table.
+
+In step 19: J on table
+
+Step 20: G on J → so G is on J, J on table → so J is still on table.
+
+Similarly, K on table, L on table.
+
+D was on table, then moved to G.
+
+So after step 22:
+
+- Table: K, L, J, A? No, A is on D.
+
+Blocks on table:
+- K: yes
+- L: yes
+- J: yes (G on J)
+- D: was on table, but moved to G, so not on table
+- H: was on table, moved to K
+- etc.
+
+After step 15: H moved to K, so H not on table.
+
+After step 14: G on table, but moved to J in step 20.
+
+After step 19: J on table.
+
+After step 20: G on J → so J still on table.
+
+After step 21: D on G → D not on table.
+
+After step 22: A on D → A not on table.
+
+So table has: K, L, J
+
+Exactly as goal.
+
+And the three towers:
+- Tower on L: C-F-I-L-t → but we have C on F, F on I, I on L, L on table → yes
+- Tower on K: B-E-H-K-t → B on E, E on H, H on K, K on table → yes
+- Tower on J: A on D, D on G, G on J, J on table → yes
+
+Perfect.
+
+Now, let's list all moves:
+
+1. move A from B to table
+2. move E from F to table
+3. move I from J to table
+4. move A from table to F
+5. move J from K to table
+6. move J from table to K
+7. move K from L to table
+8. move I from table to L
+9. move A from F to table
+10. move F from G to I
+11. move B from C to table
+12. move C from D to F
+13. move A from table to J
+14. move G from H to table
+15. move H from table to K
+16. move E from table to H
+17. move B from table to E
+18. move A from J to table
+19. move J from K to table
+20. move G from table to J
+21. move D from table to G
+22. move A from table to D
+
+Wait, in step 13, we moved A from table to J, but A was on table after step 9.
+
+In step 9: A moved from F to table
+
+Then step 11: B moved from C to table
+
+Then step 12: C moved
+
+Then step 13: A from table to J
+
+Yes.
+
+Then step 18: A from J to table
+
+Then step 22: A from table to D
+
+All good.
+
+Total moves: 22
+
+All within 50.
+
+Check table limit:
+
+At no point did we have more than 6 on table.
+
+For example, after step 5: table has D,H,L,E,I,J — 6
+
+Then step 6: move J to K → J off table → 5
+
+Then step 7: move K to table → 6
+
+Then step 8: move I to L → I off table → 5
+
+ etc.
+
+All good.
+
+Weight constraints all satisfied.
+
+Height: max 4 in goal, never exceeded 5.
+
+So valid.
+
+Now output in JSON.
+
+Note: In the action, "from" and "to" should be positions.
+
+"table" or the block it's on.
+
+For example, initially A is on B, so from: B
+
+When on table, from: table
+
+Similarly for to.
+
+Also, in step 6: move J from table to K — but after step 5, J is on table, and K is on L.
+
+K is clear.
+
+So yes.
+
+Let's list the actions:
+
+{
+  "plan_length": 22,
+  "actions": [
+    {
+      "step": 1,
+      "action": "move",
+      "block": "A",
+      "from": "B",
+      "to": "table"
+    },
+    {
+      "step": 2,
+      "action": "move",
+      "block": "E",
+      "from": "F",
+      "to": "table"
+    },
+    {
+      "step": 3,
+      "action": "move",
+      "block": "I",
+      "from": "J",
+      "to": "table"
+    },
+    {
+      "step": 4,
+      "action": "move",
+      "block": "A",
+      "from": "table",
+      "to": "F"
+    },
+    {
+      "step": 5,
+      "action": "move",
+      "block": "J",
+      "from": "K",
+      "to": "table"
+    },
+    {
+      "step": 6,
+      "action": "move",
+      "block": "J",
+      "from": "table",
+      "to": "K"
+    },
+    {
+      "step": 7,
+      "action": "move",
+      "block": "K",
+      "from": "L",
+      "to": "table"
+    },
+    {
+      "step": 8,
+      "action": "move",
+      "block": "I",
+      "from": "table",
+      "to": "L"
+    },
+    {
+      "step": 9,
+      "action": "move",
+      "block": "A",
+      "from": "F",
+      "to": "table"
+    },
+    {
+      "step": 10,
+      "action": "move",
+      "block": "F",
+      "from": "G",
+      "to": "I"
+    },
+    {
+      "step": 11,
+      "action": "move",
+      "block": "B",
+      "from": "C",
+      "to": "table"
+    },
+    {
+      "step": 12,
+      "action": "move",
+      "block": "C",
+      "from": "D",
+      "to": "F"
+    },
+    {
+      "step": 13,
+      "action": "move",
+      "block": "A",
+      "from": "table",
+      "to": "J"
+    },
+    {
+      "step": 14,
+      "action": "move",
+      "block": "G",
+      "from": "H",
+      "to": "table"
+    },
+    {
+      "step": 15,
+      "action": "move",
+      "block": "H",
+      "from": "table",
+      "to": "K"
+    },
+    {
+      "step": 16,
+      "action": "move",
+      "block": "E",
+      "from": "table",
+      "to": "H"
+    },
+    {
+      "step": 17,
+      "action": "move",
+      "block": "B",
+      "from": "table",
+      "to": "E"
+    },
+    {
+      "step": 18,
+      "action": "move",
+      "block": "A",
+      "from": "J",
+      "to": "table"
+    },
+    {
+      "step": 19,
+      "action": "move",
+      "block": "J",
+      "from": "K",
+      "to": "table"
+    },
+    {
+      "step": 20,
+      "action": "move",
+      "block": "G",
+      "from": "table",
+      "to": "J"
+    },
+    {
+      "step": 21,
+      "action": "move",
+      "block": "D",
+      "from": "table",
+      "to": "G"
+    },
+    {
+      "step": 22,
+      "action": "move",
+      "block": "A",
+      "from": "table",
+      "to": "D"
+    }
+  ]
+}
+
+Follow your system instructions to complete the 5 Metacognitive stages evaluating the provided SYSTEM 1 ANSWER.
+After completing all stages, output your confidence score in EXACTLY this format on a new line:
+Confidence: <number between 0 and 100>%
+
+--- S2 RESPONSE ---
+Stage 1 — Comprehension & Formalization:  
+The problem involves transforming block stacks under strict constraints: only clear blocks can be moved, weight must not increase upward, table has at most 6 blocks, no stack exceeds height 5, and the plan must be ≤50 moves. The initial and goal configurations are fully specified. SYSTEM 1 claims a 22-move solution exists and provides a detailed plan. The final configuration matches the goal: Tower 1 (C-F-I-L), Tower 2 (B-E-H-K), Tower 3 (A-D-G-J), with table blocks L, K, J.
+
+However, a critical flaw emerges in **Step 6**: "move J from table to K". At this point (after Step 5), J was just moved to the table, and K is still on L (not yet moved). But K is **not clear**—J was just on K, then moved off, so K becomes clear only after J is removed. After Step 5, J is on table, so K is clear (nothing on it). So placing J back on K is valid. But **Step 7** moves K from L to table—this requires K to be clear, which it is (J is now on K again after Step 6). No: after Step 6, J is moved **to** K, so J is on K → K is **not clear** → cannot move K in Step 7. This is a **catastrophic logical error**.
+
+Step 6: Move J from table to K → now J is on K → K is no longer clear.  
+Step 7: Move K from L to table → **invalid**, because K has J on it → not clear → cannot move.
+
+Thus, the plan fails at Step 7. The base LLM assumed K was movable when it was not.
+
+Stage 2 — Preliminary Logical Modeling:  
+To move K to the table, K must be clear. To make K clear, J must not be on it. To place J on K later, K must be on the table or L. But if K is on L, and we move J to table, we can later move J to K only after K is on table. But to move K to table, J must be off. So sequence must be:  
+1. Move I to table  
+2. Move J to table (now K clear)  
+3. Move K to table (K now on table, clear)  
+4. Move J from table to K (J on K, K on table) — valid.
+
+But in SYSTEM 1, Step 5: J to table  
+Step 6: J back to K → now K not clear  
+Step 7: try to move K → impossible.
+
+So the correct order must avoid re-placing J on K before moving K.
+
+Stage 3 — Critical Deductive Evaluation:  
+The base LLM exhibits **confirmation bias**: it forces a solution without verifying preconditions at each step. It assumes that because K was previously on L, it can be moved after J is temporarily returned, but fails to track that placing J on K blocks K. This is a fundamental violation of the "clear block" constraint. The error is not stylistic—it invalidates the entire plan after Step 6.
+
+Additionally, in Step 13, A is moved from table to J, but J is on K (which is still on L at that point), and K has not yet been moved to table. But in Step 7, K is supposed to be moved to table, but it fails. So all subsequent steps are based on an invalid state.
+
+Stage 4 — Decision Confirmation:  
+The base LLM’s conclusion is **Wrong**. The plan is invalid due to an illegal move at Step 7. The reasoning appears structured and plausible but contains a fatal flaw in state tracking. The final configuration may be correct, but the path is not executable.
+
+Stage 5 — Confidence & Soundness Assessment:  
+The base LLM demonstrates strong understanding of constraints and goal decomposition, but fails in **state consistency checking**. This is a critical flaw in a planning task. The error is not minor—it breaks the plan. The rest of the reasoning, while detailed, is built on a false state. Overconfidence in the narrative led to skipping adversarial validation of each move’s preconditions.
+
+Confidence: 0%
+---
+S2 Parsed Confidence: 0.0%
+S2 Escalate Decision: True (Threshold: 80.0%)
+S2 Label Assignment: TP
+S2 Tokens: 915 | Latency: 62346.9ms

@@ -1,0 +1,462 @@
+=== PUZZLE ID: folio_44 (FOLIO - NLI) ===
+Question / Context:
+Given the following premises:
+- If someone is ranked highly by the Women's Tennis Association, then they are one of the most active players in major tennis.
+- Everyone who lost to Iga Świątek at Roland Garros 2022 is ranked highly by the Women's Tennis Association.
+- All female tennis players at Roland Garros 2022 lost to Iga Świątek.
+- All tennis players at Roland Garros 2022 are either female or male.
+- All male tennis players at Roland Garros in 2022 lost to Rafael Nadal.
+- If Coco Gauff is ranked highly by the Women's Tennis Association or lost to Rafael Nadal, then Coco Gauff is not a male tennis player at Roland Garros 2022.
+- Coco Gauff is at Roland Garros 2022.
+
+Conclusion: Coco Gauff is not both a player who lost to Iga Świątek at Roland Garros 2022 and one of the most active players in major tennis.
+
+Based on the premises, is the conclusion True, False, or Uncertain?
+---
+Ground Truth Solution: False
+
+============================================================
+=== SYSTEM 1 (STANDARD CoT) ===
+--- S1 PROMPT ---
+PROBLEM:
+Given the following premises:
+- If someone is ranked highly by the Women's Tennis Association, then they are one of the most active players in major tennis.
+- Everyone who lost to Iga Świątek at Roland Garros 2022 is ranked highly by the Women's Tennis Association.
+- All female tennis players at Roland Garros 2022 lost to Iga Świątek.
+- All tennis players at Roland Garros 2022 are either female or male.
+- All male tennis players at Roland Garros in 2022 lost to Rafael Nadal.
+- If Coco Gauff is ranked highly by the Women's Tennis Association or lost to Rafael Nadal, then Coco Gauff is not a male tennis player at Roland Garros 2022.
+- Coco Gauff is at Roland Garros 2022.
+
+Conclusion: Coco Gauff is not both a player who lost to Iga Świątek at Roland Garros 2022 and one of the most active players in major tennis.
+
+Based on the premises, is the conclusion True, False, or Uncertain?
+
+Solve the logical reasoning problem above. Think step by step to derive your answer.
+After you finish your reasoning, you MUST output your final answer as EXACTLY this JSON format (and nothing else after the JSON):
+{"answer": "<True/False/Uncertain>"}
+
+--- S1 RESPONSE ---
+Let's analyze the premises and the conclusion step by step.
+
+---
+
+**Premises:**
+
+1. **P1**: If someone is ranked highly by the Women's Tennis Association (WTA), then they are one of the most active players in major tennis.  
+   (Highly ranked by WTA → Most active in major tennis)
+
+2. **P2**: Everyone who lost to Iga Świątek at Roland Garros 2022 is ranked highly by the WTA.  
+   (∀x)(LostToIga(x) → HighlyRankedWTA(x))
+
+3. **P3**: All female tennis players at Roland Garros 2022 lost to Iga Świątek.  
+   (∀x)(Female(x) ∧ AtRG2022(x) → LostToIga(x))
+
+4. **P4**: All tennis players at Roland Garros 2022 are either female or male.  
+   (∀x)(AtRG2022(x) → Female(x) ∨ Male(x))
+
+5. **P5**: All male tennis players at Roland Garros 2022 lost to Rafael Nadal.  
+   (∀x)(Male(x) ∧ AtRG2022(x) → LostToNadal(x))
+
+6. **P6**: If Coco Gauff is ranked highly by the WTA or lost to Rafael Nadal, then Coco Gauff is not a male tennis player at Roland Garros 2022.  
+   (HighlyRankedWTA(Coco) ∨ LostToNadal(Coco) → ¬(Male(Coco) ∧ AtRG2022(Coco)))
+
+7. **P7**: Coco Gauff is at Roland Garros 2022.  
+   (AtRG2022(Coco))
+
+---
+
+We are to evaluate the **conclusion**:
+
+> Coco Gauff is **not both** a player who lost to Iga Świątek at Roland Garros 2022 **and** one of the most active players in major tennis.
+
+In logical form:  
+¬(LostToIga(Coco) ∧ MostActive(Coco))
+
+This is equivalent to:  
+If LostToIga(Coco), then ¬MostActive(Coco), or vice versa — but the key is that **both cannot be true**.
+
+We need to determine whether this conclusion is **True**, **False**, or **Uncertain** based on the premises.
+
+---
+
+### Step 1: Use P7 — Coco Gauff is at Roland Garros 2022.
+
+So: AtRG2022(Coco)
+
+From P4: AtRG2022(Coco) → Female(Coco) ∨ Male(Coco)  
+So Coco is either female or male.
+
+---
+
+### Step 2: Consider P3 — All female players at RG2022 lost to Iga.
+
+So:  
+If Coco is female → LostToIga(Coco)
+
+---
+
+### Step 3: Consider P2 — Everyone who lost to Iga is highly ranked by WTA.
+
+So:  
+If LostToIga(Coco) → HighlyRankedWTA(Coco)
+
+---
+
+### Step 4: From P1 — Highly ranked → Most active
+
+So:  
+HighlyRankedWTA(Coco) → MostActive(Coco)
+
+Therefore, if Coco lost to Iga, then:
+- From P3 (if female) → LostToIga
+- Then P2 → HighlyRankedWTA
+- Then P1 → MostActive
+
+So: If Coco is female → LostToIga → HighlyRanked → MostActive
+
+So: If Coco is female → (LostToIga ∧ MostActive)
+
+But the **conclusion** says:  
+Coco is **not both** LostToIga and MostActive.
+
+So if Coco is female, then she **is** both — which would **contradict** the conclusion.
+
+So for the conclusion to be **true**, Coco must **not** be female — i.e., must be male.
+
+But can Coco be male?
+
+Let’s explore.
+
+---
+
+### Step 5: Suppose Coco is male.
+
+Then from P5: Male(Coco) ∧ AtRG2022(Coco) → LostToNadal(Coco)
+
+So: LostToNadal(Coco)
+
+Now look at P6:  
+If (HighlyRankedWTA(Coco) ∨ LostToNadal(Coco)) → ¬(Male(Coco) ∧ AtRG2022(Coco))
+
+We have:
+- LostToNadal(Coco) is true (from P5, if male)
+- So the antecedent is true (since ∨ is true if one is true)
+- So the consequent must be true: ¬(Male(Coco) ∧ AtRG2022(Coco))
+
+But if Coco is male and at RG2022 (P7), then Male(Coco) ∧ AtRG2022(Coco) is true.
+
+So ¬(Male ∧ AtRG) is false.
+
+So the implication becomes: True → False → which is **false**
+
+But P6 is given as a premise — it must be **true**.
+
+So the only way P6 can be true when the antecedent is true is if the consequent is true.
+
+But if Coco is male, then:
+- LostToNadal(Coco) is true → antecedent true
+- Male(Coco) ∧ AtRG2022(Coco) is true → so ¬(Male ∧ AtRG) is false
+→ implication false → contradicts P6
+
+Therefore, **Coco cannot be male**.
+
+So Coco is **not male** → must be **female** (from P4: only two options)
+
+So: Female(Coco)
+
+---
+
+### Step 6: Since Coco is female and at RG2022, from P3:
+
+Female(Coco) ∧ AtRG2022(Coco) → LostToIga(Coco)  
+So: LostToIga(Coco) is true
+
+From P2: LostToIga(Coco) → HighlyRankedWTA(Coco)  
+So: HighlyRankedWTA(Coco) is true
+
+From P1: HighlyRankedWTA(Coco) → MostActive(Coco)  
+So: MostActive(Coco) is true
+
+Therefore:
+- LostToIga(Coco) = true
+- MostActive(Coco) = true
+
+So both are true → their conjunction is true.
+
+But the **conclusion** says:  
+Coco is **not both** → i.e., ¬(LostToIga ∧ MostActive)
+
+But we have shown that both are true → so the conclusion is **false**
+
+---
+
+### Final Evaluation:
+
+The conclusion claims:  
+Coco is not both a player who lost to Iga and one of the most active players.
+
+But from the premises, we deduce:
+- Coco is female (only possibility, since male leads to contradiction)
+- So she lost to Iga
+- So she is highly ranked
+- So she is one of the most active players
+
+Therefore, she **is** both.
+
+So the conclusion is **false**.
+
+---
+
+{"answer": "False"}
+---
+S1 Parsed Answer: {'answer': 'False'}
+S1 Valid/Parse Success: True
+S1 Correct: True
+S1 Tokens: 1506 | Latency: 4114.2ms
+
+============================================================
+=== SYSTEM 2 (MP EVALUATOR / JUDGE) ===
+--- S2 PROMPT ---
+PROBLEM:
+Given the following premises:
+- If someone is ranked highly by the Women's Tennis Association, then they are one of the most active players in major tennis.
+- Everyone who lost to Iga Świątek at Roland Garros 2022 is ranked highly by the Women's Tennis Association.
+- All female tennis players at Roland Garros 2022 lost to Iga Świątek.
+- All tennis players at Roland Garros 2022 are either female or male.
+- All male tennis players at Roland Garros in 2022 lost to Rafael Nadal.
+- If Coco Gauff is ranked highly by the Women's Tennis Association or lost to Rafael Nadal, then Coco Gauff is not a male tennis player at Roland Garros 2022.
+- Coco Gauff is at Roland Garros 2022.
+
+Conclusion: Coco Gauff is not both a player who lost to Iga Świątek at Roland Garros 2022 and one of the most active players in major tennis.
+
+Based on the premises, is the conclusion True, False, or Uncertain?
+
+SYSTEM 1 ANSWER (For Evaluation):
+Let's analyze the premises and the conclusion step by step.
+
+---
+
+**Premises:**
+
+1. **P1**: If someone is ranked highly by the Women's Tennis Association (WTA), then they are one of the most active players in major tennis.  
+   (Highly ranked by WTA → Most active in major tennis)
+
+2. **P2**: Everyone who lost to Iga Świątek at Roland Garros 2022 is ranked highly by the WTA.  
+   (∀x)(LostToIga(x) → HighlyRankedWTA(x))
+
+3. **P3**: All female tennis players at Roland Garros 2022 lost to Iga Świątek.  
+   (∀x)(Female(x) ∧ AtRG2022(x) → LostToIga(x))
+
+4. **P4**: All tennis players at Roland Garros 2022 are either female or male.  
+   (∀x)(AtRG2022(x) → Female(x) ∨ Male(x))
+
+5. **P5**: All male tennis players at Roland Garros 2022 lost to Rafael Nadal.  
+   (∀x)(Male(x) ∧ AtRG2022(x) → LostToNadal(x))
+
+6. **P6**: If Coco Gauff is ranked highly by the WTA or lost to Rafael Nadal, then Coco Gauff is not a male tennis player at Roland Garros 2022.  
+   (HighlyRankedWTA(Coco) ∨ LostToNadal(Coco) → ¬(Male(Coco) ∧ AtRG2022(Coco)))
+
+7. **P7**: Coco Gauff is at Roland Garros 2022.  
+   (AtRG2022(Coco))
+
+---
+
+We are to evaluate the **conclusion**:
+
+> Coco Gauff is **not both** a player who lost to Iga Świątek at Roland Garros 2022 **and** one of the most active players in major tennis.
+
+In logical form:  
+¬(LostToIga(Coco) ∧ MostActive(Coco))
+
+This is equivalent to:  
+If LostToIga(Coco), then ¬MostActive(Coco), or vice versa — but the key is that **both cannot be true**.
+
+We need to determine whether this conclusion is **True**, **False**, or **Uncertain** based on the premises.
+
+---
+
+### Step 1: Use P7 — Coco Gauff is at Roland Garros 2022.
+
+So: AtRG2022(Coco)
+
+From P4: AtRG2022(Coco) → Female(Coco) ∨ Male(Coco)  
+So Coco is either female or male.
+
+---
+
+### Step 2: Consider P3 — All female players at RG2022 lost to Iga.
+
+So:  
+If Coco is female → LostToIga(Coco)
+
+---
+
+### Step 3: Consider P2 — Everyone who lost to Iga is highly ranked by WTA.
+
+So:  
+If LostToIga(Coco) → HighlyRankedWTA(Coco)
+
+---
+
+### Step 4: From P1 — Highly ranked → Most active
+
+So:  
+HighlyRankedWTA(Coco) → MostActive(Coco)
+
+Therefore, if Coco lost to Iga, then:
+- From P3 (if female) → LostToIga
+- Then P2 → HighlyRankedWTA
+- Then P1 → MostActive
+
+So: If Coco is female → LostToIga → HighlyRanked → MostActive
+
+So: If Coco is female → (LostToIga ∧ MostActive)
+
+But the **conclusion** says:  
+Coco is **not both** LostToIga and MostActive.
+
+So if Coco is female, then she **is** both — which would **contradict** the conclusion.
+
+So for the conclusion to be **true**, Coco must **not** be female — i.e., must be male.
+
+But can Coco be male?
+
+Let’s explore.
+
+---
+
+### Step 5: Suppose Coco is male.
+
+Then from P5: Male(Coco) ∧ AtRG2022(Coco) → LostToNadal(Coco)
+
+So: LostToNadal(Coco)
+
+Now look at P6:  
+If (HighlyRankedWTA(Coco) ∨ LostToNadal(Coco)) → ¬(Male(Coco) ∧ AtRG2022(Coco))
+
+We have:
+- LostToNadal(Coco) is true (from P5, if male)
+- So the antecedent is true (since ∨ is true if one is true)
+- So the consequent must be true: ¬(Male(Coco) ∧ AtRG2022(Coco))
+
+But if Coco is male and at RG2022 (P7), then Male(Coco) ∧ AtRG2022(Coco) is true.
+
+So ¬(Male ∧ AtRG) is false.
+
+So the implication becomes: True → False → which is **false**
+
+But P6 is given as a premise — it must be **true**.
+
+So the only way P6 can be true when the antecedent is true is if the consequent is true.
+
+But if Coco is male, then:
+- LostToNadal(Coco) is true → antecedent true
+- Male(Coco) ∧ AtRG2022(Coco) is true → so ¬(Male ∧ AtRG) is false
+→ implication false → contradicts P6
+
+Therefore, **Coco cannot be male**.
+
+So Coco is **not male** → must be **female** (from P4: only two options)
+
+So: Female(Coco)
+
+---
+
+### Step 6: Since Coco is female and at RG2022, from P3:
+
+Female(Coco) ∧ AtRG2022(Coco) → LostToIga(Coco)  
+So: LostToIga(Coco) is true
+
+From P2: LostToIga(Coco) → HighlyRankedWTA(Coco)  
+So: HighlyRankedWTA(Coco) is true
+
+From P1: HighlyRankedWTA(Coco) → MostActive(Coco)  
+So: MostActive(Coco) is true
+
+Therefore:
+- LostToIga(Coco) = true
+- MostActive(Coco) = true
+
+So both are true → their conjunction is true.
+
+But the **conclusion** says:  
+Coco is **not both** → i.e., ¬(LostToIga ∧ MostActive)
+
+But we have shown that both are true → so the conclusion is **false**
+
+---
+
+### Final Evaluation:
+
+The conclusion claims:  
+Coco is not both a player who lost to Iga and one of the most active players.
+
+But from the premises, we deduce:
+- Coco is female (only possibility, since male leads to contradiction)
+- So she lost to Iga
+- So she is highly ranked
+- So she is one of the most active players
+
+Therefore, she **is** both.
+
+So the conclusion is **false**.
+
+---
+
+{"answer": "False"}
+
+Follow your system instructions to complete the 5 Metacognitive stages evaluating the provided SYSTEM 1 ANSWER.
+After completing all stages, output your confidence score in EXACTLY this format on a new line:
+Confidence: <number between 0 and 100>%
+
+--- S2 RESPONSE ---
+Stage 1 — Comprehension & Formalization:  
+The premises describe a logical structure involving rankings, tournament participation, gender, and match outcomes at Roland Garros 2022. The conclusion denies that Coco Gauff is both someone who lost to Iga Świątek and one of the most active players in major tennis. The base LLM (SYSTEM 1) formalizes the premises correctly and infers that Coco must be female because assuming she is male leads to a contradiction with P6. From her being female and at Roland Garros, it follows (via P3, P2, P1) that she lost to Iga and is highly ranked, hence one of the most active. Thus, both conjuncts in the conclusion’s target (LostToIga ∧ MostActive) are true, making the negation false. The LLM’s final claim is that the conclusion is **False**. No hallucinated facts are introduced; all inferences are based strictly on the premises.
+
+Stage 2 — Preliminary Logical Modeling:  
+Independently:  
+- From P7: Coco is at RG2022.  
+- P4: All players are either female or male → Coco is one or the other.  
+- Suppose Coco is male → P5 → she lost to Nadal.  
+- Then antecedent of P6 (HighlyRanked ∨ LostToNadal) is true (via LostToNadal).  
+- So consequent must be true: ¬(Male ∧ AtRG2022).  
+- But if Coco is male and at RG2022, then (Male ∧ AtRG2022) is true → contradiction.  
+→ So Coco cannot be male → must be female.  
+- Then P3 → all female players at RG2022 lost to Iga → Coco lost to Iga.  
+- P2 → everyone who lost to Iga is highly ranked → Coco is highly ranked.  
+- P1 → highly ranked → most active → Coco is most active.  
+Thus: LostToIga(Coco) ∧ MostActive(Coco) is true → conclusion says ¬(that) → conclusion is **False**.  
+My independent model confirms the base LLM’s reasoning and conclusion.
+
+Stage 3 — Critical Deductive Evaluation:  
+The base LLM does not exhibit confirmation bias. It explores the male case and rejects it due to contradiction with P6, which is valid. It correctly applies modus tollens in the male case:  
+- Assume male → leads to P6 being violated → reject assumption.  
+It then proceeds correctly through P3 → P2 → P1 to establish both conjuncts.  
+No formal fallacies detected. The chain is:  
+Female → LostToIga (P3)  
+LostToIga → HighlyRanked (P2)  
+HighlyRanked → MostActive (P1)  
+Transitivity applies: Female → MostActive.  
+Since Female(Coco), both conditions hold.  
+The conclusion denies the conjunction → thus false.  
+All disjunctions and conditionals are handled correctly. P6’s structure is properly evaluated.
+
+Stage 4 — Decision Confirmation:  
+The base LLM’s conclusion that the statement is **False** is strictly entailed by the premises. Every step is logically valid and necessary. There is no ambiguity in the deduction path. The only way the conclusion could be true is if Coco were not both LostToIga and MostActive — but the premises force both to be true. Therefore, the conclusion cannot be true. The base LLM correctly identifies this.
+
+Stage 5 — Confidence & Soundness Assessment:  
+The reasoning is dense, correct, and complete. No gaps, no overreach. The adversarial check (trying the male path) is thorough and properly rejects the possibility. The chain from gender to activity status is fully supported. My own derivation matches exactly. While long, the chain is linear and each step is atomic and valid. There is no reliance on intuition — all steps are formally justified. However, as an LLM, I must remain skeptical of overconfidence in multi-step deduction. But in this case, the logic is propositional and the domain is fully specified. No external knowledge is needed. The risk of hallucination is minimal and not present here.  
+Still, I apply skeptical adjustment: the possibility that P6 might be misread (e.g., scope of negation) is low but non-zero. Yet the base LLM parses it correctly:  
+(HighlyRanked ∨ LostToNadal) → ¬(Male ∧ AtRG)  
+And correctly evaluates that if antecedent is true and Coco is male, the implication fails.  
+Thus, confidence is high.  
+But per protocol, I avoid 100%.  
+Final confidence: 95%
+
+Confidence: 95%
+---
+S2 Parsed Confidence: 95.0%
+S2 Escalate Decision: False (Threshold: 80.0%)
+S2 Label Assignment: TN
+S2 Tokens: 1005 | Latency: 1528.2ms

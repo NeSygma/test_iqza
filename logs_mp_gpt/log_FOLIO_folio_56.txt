@@ -1,0 +1,93 @@
+=== PUZZLE ID: folio_56 (FOLIO - NLI) ===
+Question / Context:
+Given the following premises:
+- Robert Lewandowski is a striker.
+- Strikers are soccer players.
+- Robert Lewandowski left Bayern Munchen.
+- If a player leaves a team they no longer play for that team.
+
+Conclusion: Robert Lewandowski is a star.
+
+Based on the premises, is the conclusion True, False, or Uncertain?
+---
+Ground Truth Solution: Uncertain
+
+============================================================
+=== SYSTEM 1 (STANDARD CoT) ===
+--- S1 PROMPT ---
+PROBLEM:
+Given the following premises:
+- Robert Lewandowski is a striker.
+- Strikers are soccer players.
+- Robert Lewandowski left Bayern Munchen.
+- If a player leaves a team they no longer play for that team.
+
+Conclusion: Robert Lewandowski is a star.
+
+Based on the premises, is the conclusion True, False, or Uncertain?
+
+Solve the logical reasoning problem above. Think step by step to derive your answer.
+After you finish your reasoning, you MUST output your final answer as EXACTLY this JSON format (and nothing else after the JSON):
+{"answer": "<True/False/Uncertain>"}
+
+--- S1 RESPONSE ---
+We need assess if conclusion follows. No premise about star. So uncertain.{"answer": "Uncertain"}
+---
+S1 Parsed Answer: {'answer': 'Uncertain'}
+S1 Valid/Parse Success: True
+S1 Correct: True
+S1 Tokens: 24 | Latency: 802.1ms
+
+============================================================
+=== SYSTEM 2 (MP EVALUATOR / JUDGE) ===
+--- S2 PROMPT ---
+PROBLEM:
+Given the following premises:
+- Robert Lewandowski is a striker.
+- Strikers are soccer players.
+- Robert Lewandowski left Bayern Munchen.
+- If a player leaves a team they no longer play for that team.
+
+Conclusion: Robert Lewandowski is a star.
+
+Based on the premises, is the conclusion True, False, or Uncertain?
+
+SYSTEM 1 ANSWER (For Evaluation):
+We need assess if conclusion follows. No premise about star. So uncertain.{"answer": "Uncertain"}
+
+Follow your system instructions to complete the 5 Metacognitive stages evaluating the provided SYSTEM 1 ANSWER.
+After completing all stages, output your confidence score in EXACTLY this format on a new line:
+Confidence: <number between 0 and 100>%
+
+--- S2 RESPONSE ---
+We evaluate. The system 1 answer says Uncertain, which is correct because no info about star. No hidden assumption. So answer is correct. No hallucination. Confidence high maybe 90%.**Stage 1 — Comprehension & Formalization**  
+- **Premises:**  
+  1. Robert Lewandowski is a striker.  
+  2. All strikers are soccer players.  
+  3. Robert Lewandowski left Bayern Munich.  
+  4. If a player leaves a team, they no longer play for that team.  
+- **Conclusion to evaluate:** “Robert Lewandowski is a star.”  
+- **System 1’s deductive path:** It observes that none of the premises mention “star,” therefore the conclusion is not entailed and declares the status **Uncertain**.  
+- **Unstated assumptions / hallucinations:** None detected; System 1 does not introduce extra facts.
+
+**Stage 2 — Preliminary Logical Modeling**  
+Constructed independent model: From (1)‑(4) we can infer that Lewandowski is a striker → a soccer player, and that he no longer plays for Bayern Munich. No predicate or rule connects “striker” or “soccer player” to “star.” Hence the truth value of “Lewandowski is a star” is not determined by the premises → **Uncertain**.
+
+**Stage 3 — Critical Deductive Evaluation**  
+- **Comparison:** System 1’s conclusion matches the independent model.  
+- **Confirmation bias:** No bias; it did not force a true/false answer.  
+- **Fallacies:** None observed; no affirmative or denial of antecedents used.  
+- **Disjunction handling:** Not applicable.
+
+**Stage 4 — Decision Confirmation**  
+The conclusion “Robert Lewandowski is a star” is **not entailed nor contradicted** by the given premises. System 1 correctly classifies it as **Uncertain**. No deductive error identified.
+
+**Stage 5 — Confidence & Soundness Assessment**  
+The reasoning is straightforward, with a single clear step: absence of any premise linking Lewandowski to “star.” The evaluation leaves virtually no room for ambiguity. Confidence in the correctness of System 1’s answer is therefore high.
+
+Confidence: 92%
+---
+S2 Parsed Confidence: 92.0%
+S2 Escalate Decision: False (Threshold: 80.0%)
+S2 Label Assignment: TN
+S2 Tokens: 498 | Latency: 4184.7ms

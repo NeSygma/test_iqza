@@ -1,0 +1,104 @@
+=== PUZZLE ID: logicbench_propositional_logic_modus_tollens_16 (LogicBench - SAT) ===
+Question / Context:
+If scarlett is late for work, she will receive a warning. today, scarlett did not receive a warning.
+
+Question: In light of the context provided, what conclusion can be considered the most appropriate?
+
+Choices:
+(A) lisa isn't late for work
+(B) scarlett isn't late for walk
+(C) scarlett is late for work
+(D) scarlett isn't late for work
+---
+Ground Truth Solution: 3
+
+============================================================
+=== SYSTEM 1 (STANDARD CoT) ===
+--- S1 PROMPT ---
+PROBLEM:
+If scarlett is late for work, she will receive a warning. today, scarlett did not receive a warning.
+
+Question: In light of the context provided, what conclusion can be considered the most appropriate?
+
+Choices:
+(A) lisa isn't late for work
+(B) scarlett isn't late for walk
+(C) scarlett is late for work
+(D) scarlett isn't late for work
+
+Solve the logical reasoning problem above. Think step by step to derive your answer.
+After you finish your reasoning, you MUST output your final answer as EXACTLY this JSON format (and nothing else after the JSON):
+{"answer": "<A/B/C/D>", "answer_index": <0-3>}
+
+--- S1 RESPONSE ---
+We have premise: If scarlett is late for work, she will receive a warning. Today, scarlett did not receive a warning.
+
+From "If P then Q". Here P = scarlett is late for work, Q = she receives a warning. Given ~Q (no warning). We can infer ¬P? That's modus tollens: If P → Q, and ¬Q, then ¬P. So conclude scarlett isn't late for work.
+
+Thus answer D. Index: choices A=0, B=1, C=2, D=3. So answer_index 3.
+
+Return JSON.{"answer": "D", "answer_index": 3}
+---
+S1 Parsed Answer: {'answer': 'D', 'answer_index': 3}
+S1 Valid/Parse Success: True
+S1 Correct: True
+S1 Tokens: 112 | Latency: 1064.0ms
+
+============================================================
+=== SYSTEM 2 (MP EVALUATOR / JUDGE) ===
+--- S2 PROMPT ---
+PROBLEM:
+If scarlett is late for work, she will receive a warning. today, scarlett did not receive a warning.
+
+Question: In light of the context provided, what conclusion can be considered the most appropriate?
+
+Choices:
+(A) lisa isn't late for work
+(B) scarlett isn't late for walk
+(C) scarlett is late for work
+(D) scarlett isn't late for work
+
+SYSTEM 1 ANSWER (For Evaluation):
+We have premise: If scarlett is late for work, she will receive a warning. Today, scarlett did not receive a warning.
+
+From "If P then Q". Here P = scarlett is late for work, Q = she receives a warning. Given ~Q (no warning). We can infer ¬P? That's modus tollens: If P → Q, and ¬Q, then ¬P. So conclude scarlett isn't late for work.
+
+Thus answer D. Index: choices A=0, B=1, C=2, D=3. So answer_index 3.
+
+Return JSON.{"answer": "D", "answer_index": 3}
+
+Follow your system instructions to complete the 5 Metacognitive stages evaluating the provided SYSTEM 1 ANSWER.
+After completing all stages, output your confidence score in EXACTLY this format on a new line:
+Confidence: <number between 0 and 100>%
+
+--- S2 RESPONSE ---
+We evaluate. Premises: "If scarlett is late for work, she will receive a warning. today, scarlett did not receive a warning." That's P→W, ¬W. Modus tollens yields ¬P. So conclusion D correct. No extra assumptions. Answer correct. Confidence high.**Stage 1 — Comprehension & Formalization**  
+- Premise 1: \(P\): “Scarlett is late for work.” Premise 2: \(W\): “Scarlett receives a warning.” Given: \(P \rightarrow W\).  
+- Premise 3 (observed): \(\lnot W\) (Scarlett did not receive a warning today).  
+- Desired conclusion: which choice follows logically?  
+
+System 1’s deductive path: applied modus tollens to infer \(\lnot P\) (“Scarlett isn’t late for work”) and selected choice D. No extra assumptions are introduced.
+
+**Stage 2 — Preliminary Logical Modeling**  
+From the given conditional and the negated consequent, the only strictly entailed statement is \(\lnot P\). No other choices are forced. Thus the correct answer must be “Scarlett isn’t late for work” (choice D).  
+
+**Stage 3 — Critical Deductive Evaluation**  
+- Comparison: System 1’s conclusion matches the only logically valid inference.  
+- No confirmation bias: it did not assert any alternative (e.g., about Lisa).  
+- No formal fallacy: modus tollens is valid here.  
+- All branches of the conditional considered; the disjunction does not appear.  
+
+**Stage 4 — Decision Confirmation**  
+The base model’s answer (choice D) is strictly entailed by the premises. No deductive error is identified.
+
+**Stage 5 — Confidence & Soundness Assessment**  
+The reasoning chain is short and unambiguous; the inference follows directly from a standard logical rule. Confidence in the correctness of the base answer is therefore high.
+
+**Final Judgment**: The base LLM’s answer is correct and fully justified.  
+
+Confidence: 92%
+---
+S2 Parsed Confidence: 92.0%
+S2 Escalate Decision: False (Threshold: 80.0%)
+S2 Label Assignment: TN
+S2 Tokens: 447 | Latency: 2838.9ms

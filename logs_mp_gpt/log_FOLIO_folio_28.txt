@@ -1,0 +1,221 @@
+=== PUZZLE ID: folio_28 (FOLIO - NLI) ===
+Question / Context:
+Given the following premises:
+- All aliens are extraterrestrials.
+- If someone is from Mars, then they are an alien.
+- No extraterrestrials are human.
+- All highly intelligent beings from Earth are humans.
+- Marvin is a highly intelligent being.
+- Marvin is either from Earth and from Mars, or he is from neither.
+- If Marvin is not from Earth, then Marvin is an extraterrestrial.
+
+Conclusion: Marvin is neither a human nor from Mars.
+
+Based on the premises, is the conclusion True, False, or Uncertain?
+---
+Ground Truth Solution: True
+
+============================================================
+=== SYSTEM 1 (STANDARD CoT) ===
+--- S1 PROMPT ---
+PROBLEM:
+Given the following premises:
+- All aliens are extraterrestrials.
+- If someone is from Mars, then they are an alien.
+- No extraterrestrials are human.
+- All highly intelligent beings from Earth are humans.
+- Marvin is a highly intelligent being.
+- Marvin is either from Earth and from Mars, or he is from neither.
+- If Marvin is not from Earth, then Marvin is an extraterrestrial.
+
+Conclusion: Marvin is neither a human nor from Mars.
+
+Based on the premises, is the conclusion True, False, or Uncertain?
+
+Solve the logical reasoning problem above. Think step by step to derive your answer.
+After you finish your reasoning, you MUST output your final answer as EXACTLY this JSON format (and nothing else after the JSON):
+{"answer": "<True/False/Uncertain>"}
+
+--- S1 RESPONSE ---
+We need determine if conclusion "Marvin is neither a human nor from Mars" follows.
+
+Let’s formalize.
+
+Predicates: A(x): alien. E(x): extraterrestrial. H(x): human. I(x): highly intelligent. Earth(x): from Earth. Mars(x): from Mars.
+
+Premises:
+1. ∀x (A(x) → E(x))
+2. ∀x (Mars(x) → A(x))
+3. ∀x (E(x) → ¬H(x)) i.e., no extraterrestrials are human.
+4. ∀x ((I(x) ∧ Earth(x)) → H(x))
+5. I(Marvin)
+6. (Earth(M) ∧ Mars(M)) ∨ (¬Earth(M) ∧ ¬Mars(M))? "Marvin is either from Earth and from Mars, or he is from neither." Means (Earth ∧ Mars) ∨ (¬Earth ∧ ¬Mars).
+7. ¬Earth(M) → E(M)
+
+Goal: ¬H(M) ∧ ¬Mars(M). Need both.
+
+We need see if forced.
+
+Consider cases from 6.
+
+Case1: Earth and Mars.
+
+Then Earth true, Mars true.
+
+From Mars → A, so A true. Then A→E gives E true. Then E→¬H gives ¬H true. So not human holds. But Mars true contradict conclusion (needs ¬Mars). So conclusion false in this case.
+
+Is this case possible? Need check other premises. No conflict: Earth true, Mars true. Premise 7 applies only if ¬Earth, not triggered. Also I true, Earth true, but need I ∧ Earth → H. Since I true and Earth true, antecedent satisfied, so H must be true. Wait rule 4: All highly intelligent beings from Earth are humans. So if I and Earth then H. So from case1 we get H true. But we also have from E→¬H we got ¬H. Contradiction. So case1 leads to inconsistency (both H and ¬H). In classical logic, inconsistency makes the set unsatisfiable, but we consider whether premises allow case1? Since premises lead to contradiction, the overall theory may be inconsistent, but conclusion? Usually if premises are inconsistent, any conclusion follows (principle of explosion). But typical logical reasoning puzzle expects consistency; we must see if case1 is ruled out by consistency requirement. Since case1 leads to contradiction, the only consistent model is case2.
+
+Thus we pick case2: ¬Earth ∧ ¬Mars.
+
+Now evaluate.
+
+¬Earth true, ¬Mars true.
+
+From premise7: ¬Earth → E, so E true. Then E → ¬H, so ¬H true. So not human holds.
+
+Mars false gives ¬Mars holds.
+
+Thus conclusion true in this consistent case.
+
+Since case1 impossible (inconsistent), the only models satisfy conclusion. So conclusion is necessarily true given consistency requirement.
+
+Thus answer True.
+
+{"answer": "True"}
+---
+S1 Parsed Answer: {'answer': 'True'}
+S1 Valid/Parse Success: True
+S1 Correct: True
+S1 Tokens: 566 | Latency: 4487.6ms
+
+============================================================
+=== SYSTEM 2 (MP EVALUATOR / JUDGE) ===
+--- S2 PROMPT ---
+PROBLEM:
+Given the following premises:
+- All aliens are extraterrestrials.
+- If someone is from Mars, then they are an alien.
+- No extraterrestrials are human.
+- All highly intelligent beings from Earth are humans.
+- Marvin is a highly intelligent being.
+- Marvin is either from Earth and from Mars, or he is from neither.
+- If Marvin is not from Earth, then Marvin is an extraterrestrial.
+
+Conclusion: Marvin is neither a human nor from Mars.
+
+Based on the premises, is the conclusion True, False, or Uncertain?
+
+SYSTEM 1 ANSWER (For Evaluation):
+We need determine if conclusion "Marvin is neither a human nor from Mars" follows.
+
+Let’s formalize.
+
+Predicates: A(x): alien. E(x): extraterrestrial. H(x): human. I(x): highly intelligent. Earth(x): from Earth. Mars(x): from Mars.
+
+Premises:
+1. ∀x (A(x) → E(x))
+2. ∀x (Mars(x) → A(x))
+3. ∀x (E(x) → ¬H(x)) i.e., no extraterrestrials are human.
+4. ∀x ((I(x) ∧ Earth(x)) → H(x))
+5. I(Marvin)
+6. (Earth(M) ∧ Mars(M)) ∨ (¬Earth(M) ∧ ¬Mars(M))? "Marvin is either from Earth and from Mars, or he is from neither." Means (Earth ∧ Mars) ∨ (¬Earth ∧ ¬Mars).
+7. ¬Earth(M) → E(M)
+
+Goal: ¬H(M) ∧ ¬Mars(M). Need both.
+
+We need see if forced.
+
+Consider cases from 6.
+
+Case1: Earth and Mars.
+
+Then Earth true, Mars true.
+
+From Mars → A, so A true. Then A→E gives E true. Then E→¬H gives ¬H true. So not human holds. But Mars true contradict conclusion (needs ¬Mars). So conclusion false in this case.
+
+Is this case possible? Need check other premises. No conflict: Earth true, Mars true. Premise 7 applies only if ¬Earth, not triggered. Also I true, Earth true, but need I ∧ Earth → H. Since I true and Earth true, antecedent satisfied, so H must be true. Wait rule 4: All highly intelligent beings from Earth are humans. So if I and Earth then H. So from case1 we get H true. But we also have from E→¬H we got ¬H. Contradiction. So case1 leads to inconsistency (both H and ¬H). In classical logic, inconsistency makes the set unsatisfiable, but we consider whether premises allow case1? Since premises lead to contradiction, the overall theory may be inconsistent, but conclusion? Usually if premises are inconsistent, any conclusion follows (principle of explosion). But typical logical reasoning puzzle expects consistency; we must see if case1 is ruled out by consistency requirement. Since case1 leads to contradiction, the only consistent model is case2.
+
+Thus we pick case2: ¬Earth ∧ ¬Mars.
+
+Now evaluate.
+
+¬Earth true, ¬Mars true.
+
+From premise7: ¬Earth → E, so E true. Then E → ¬H, so ¬H true. So not human holds.
+
+Mars false gives ¬Mars holds.
+
+Thus conclusion true in this consistent case.
+
+Since case1 impossible (inconsistent), the only models satisfy conclusion. So conclusion is necessarily true given consistency requirement.
+
+Thus answer True.
+
+{"answer": "True"}
+
+Follow your system instructions to complete the 5 Metacognitive stages evaluating the provided SYSTEM 1 ANSWER.
+After completing all stages, output your confidence score in EXACTLY this format on a new line:
+Confidence: <number between 0 and 100>%
+
+--- S2 RESPONSE ---
+We evaluate. The answer claimed True. Need see if conclusion is entailed. Premises allow two possibilities, but one leads to contradiction, so inconsistent theory. In classical entailment, from inconsistent premises everything follows, so conclusion would be both True and False? Usually entailment is defined: conclusion is true in all models of premises. If no model exists, entailment vacuously true. Here premises are inconsistent? Check if there is a model satisfying all premises? Need see if any model fits case2: ¬Earth, ¬Mars, I true, then E true, ¬H true. Also need check rule 4: I ∧ Earth → H. Antecedent false (Earth false) so no requirement. All premises satisfied. So consistent model exists. Case1 impossible because leads to both H and ¬H, violating premise 3? Actually leads to contradiction, so no model with Earth & Mars. Therefore all models satisfy ¬Mars and ¬H, so conclusion entailed. The System 1 reasoning correct. No hallucination. So answer True is correct. Confidence high, but still be cautious. I'd give 5.**Stage 1 — Comprehension & Formalization**
+
+Premises (formalized):
+1. ∀x (A(x) → E(x))  
+2. ∀x (M(x) → A(x))  
+3. ∀x (E(x) → ¬H(x))  
+4. ∀x ((I(x) ∧ Earth(x)) → H(x))  
+5. I(M)  
+6. (Earth(M) ∧ M(M)) ∨ (¬Earth(M) ∧ ¬M(M))  
+7. ¬Earth(M) → E(M)
+
+Conclusion to test: ¬H(M) ∧ ¬M(M).
+
+The base answer’s core deductive path:
+- Split the disjunction in (6) into two exclusive cases.
+- Show that the “Earth ∧ Mars” case yields a contradiction (H and ¬H), thus is impossible.
+- Hence only the “¬Earth ∧ ¬Mars” case remains, from which ¬H(M) follows via (7)→(3) and ¬M(M) is given.
+- Conclude that the conclusion holds in every model of the premises → answer **True**.
+
+No extra assumptions beyond the explicit premises are introduced.
+
+**Stage 2 — Preliminary Logical Modeling**
+
+Construct independent model analysis:
+
+- Case A: Earth(M) ∧ M(M).  
+  From (2) & (1): M → A → E.  
+  From (3): E → ¬H, so ¬H.  
+  From (4) (since I and Earth true): H. Contradiction → no model satisfies all premises with this case.
+
+- Case B: ¬Earth(M) ∧ ¬M(M).  
+  From (7): ¬Earth → E, then (3) gives ¬H.  
+  M false gives ¬M directly.  
+  No other premises are violated.  
+
+Thus every *consistent* model of the premises satisfies ¬H(M) and ¬M(M). Therefore the conclusion is entailed (True).
+
+**Stage 3 — Critical Deductive Evaluation**
+
+Comparison with base answer:
+
+- Both follow identical case analysis.  
+- No confirmation bias: the answer does not force a truth value without examining both branches.  
+- No formal fallacies detected.  
+- The handling of the inconsistent “Earth ∧ Mars” branch is correct: it is excluded because it cannot coexist with all premises.
+
+**Stage 4 — Decision Confirmation**
+
+The base LLM’s conclusion (“True”) is strictly entailed by the premises. No deductive step is erroneous.
+
+**Stage 5 — Confidence & Soundness Assessment**
+
+The reasoning is short, transparent, and leaves no ambiguous branches. I am highly confident that the conclusion follows.
+
+Confidence: 95%
+---
+S2 Parsed Confidence: 95.0%
+S2 Escalate Decision: False (Threshold: 80.0%)
+S2 Label Assignment: TN
+S2 Tokens: 753 | Latency: 5081.0ms
