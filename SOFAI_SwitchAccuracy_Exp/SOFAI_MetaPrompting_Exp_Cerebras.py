@@ -33,10 +33,9 @@ class Config:
     # Model Settings
     MODEL_NAME = "qwen-3-235b-a22b-instruct-2507"
     CEREBRAS_API_KEYS = [
-        "csk-v89cft24hxm8wphfj3hc56m6x4c9ch3myw693f659n5npyck",
-        "csk-mxdn4vydfkcyep5p4x3r4jyk63342nfv45wdrpmjx9ky8c6y",
-        "csk-3krv6c4wc9edttwm48cy5rkcw3dy9hevj2k2rnh8xhr23xnd",
-        # Add more keys here
+        "<CEREBRAS_API_KEY>",
+        "<CEREBRAS_API_KEY>",
+        "<CEREBRAS_API_KEY>",
     ]
 
     # Generation settings
