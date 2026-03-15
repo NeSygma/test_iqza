@@ -39,7 +39,7 @@ class Config:
     TOP_P = 1.0
 
     # Benchmark settings
-    NUM_PUZZLES = 10
+    NUM_PUZZLES = 5
     SEED = 13092004
     CONFIDENCE_THRESHOLD = 0.8
 
@@ -403,7 +403,7 @@ meta_switch = MetacognitiveSwitch(
 print("✓ Metacognitive Switch ready")
 
 # %% [markdown]
-# ## Cell 8: Dataset Loading (SATBench + LSAT-AR + FOLIO)
+# ## Cell 8: Dataset Loading
 
 # %%
 def load_satbench(path: str, num_puzzles: int = None) -> List[Dict]:
@@ -640,6 +640,41 @@ def load_logicbench(base_path: str, num_puzzles: int = None) -> List[Dict]:
     return puzzles
 
 
+def load_puzzleclone(path: str, num_puzzles: int = None) -> List[Dict]:
+    print(f"[Dataset] Loading PuzzleClone from {path}...")
+    df = pd.read_json(path, lines=True)
+
+    puzzles = []
+    for idx, row in df.iterrows():
+        problem = str(row.get("problem", ""))
+        answer = str(row.get("answer", "")).strip()
+        eval_type = str(row.get("eval_type", "")).strip()
+        qtype = str(row.get("qtype", "")).strip().lower()
+        puzzle_id = str(row.get("id", f"puzzleclone_{idx}"))
+
+        if "multiple choice" in qtype:
+            json_format = '{"answer": "<A/B/C/D>"}'
+        else:
+            json_format = '{"answer": "<your answer>"}'
+
+        puzzles.append({
+            "id": puzzle_id,
+            "puzzle_text": problem,
+            "solution": {"answer": answer, "eval_type": eval_type},
+            "domain": "PuzzleClone",
+            "dataset": "PuzzleClone",
+            "json_format": json_format,
+        })
+
+    if num_puzzles:
+        np.random.seed(config.SEED)
+        indices = np.random.choice(len(puzzles), min(num_puzzles, len(puzzles)), replace=False)
+        puzzles = [puzzles[i] for i in sorted(indices)]
+
+    print(f"[Dataset] Loaded {len(puzzles)} PuzzleClone puzzles")
+    return puzzles
+
+
 def load_all_datasets(num_per_dataset: int = None) -> List[Dict]:
     all_puzzles = []
     satbench_path = "data/SATBench-problems.jsonl"
@@ -666,6 +701,11 @@ def load_all_datasets(num_per_dataset: int = None) -> List[Dict]:
         all_puzzles.extend(load_logicbench(logicbench_path, num_per_dataset))
     else:
         print(f"[WARNING] LogicBench not found at {logicbench_path}")
+    puzzleclone_path = "data/puzzleclone_hardest_english.jsonl"
+    if os.path.exists(puzzleclone_path):
+        all_puzzles.extend(load_puzzleclone(puzzleclone_path, num_per_dataset))
+    else:
+        print(f"[WARNING] PuzzleClone not found at {puzzleclone_path}")
     np.random.seed(config.SEED)
     np.random.shuffle(all_puzzles)
     print(f"\n[Dataset] Total puzzles loaded: {len(all_puzzles)}")
@@ -746,6 +786,53 @@ def check_correctness(predicted: Any, expected: Any, domain: str) -> bool:
         except Exception as e:
             print(f"[ASPBench Error] Subprocess validation failed: {e}")
             return False
+
+    elif domain == "PuzzleClone":
+        eval_type = expected.get("eval_type", "") if isinstance(expected, dict) else ""
+        gt_answer = expected.get("answer", "") if isinstance(expected, dict) else str(expected)
+        gt_answer = gt_answer.replace("====", ",").strip()
+
+        if isinstance(predicted, dict):
+            pred_answer = str(predicted.get("answer", "")).strip()
+        else:
+            pred_answer = str(predicted).strip()
+
+        if "option" in eval_type:
+            return pred_answer.strip().upper()[:1] == gt_answer.strip().upper()[:1]
+
+        elif "ooa_numeral" in eval_type:
+            try:
+                return json.loads(pred_answer) == json.loads(gt_answer)
+            except Exception:
+                return pred_answer == gt_answer
+
+        elif "numeral" in eval_type and "nominal" in eval_type:
+            pred_parts = [p.strip() for p in pred_answer.split(",")]
+            gt_parts = [p.strip() for p in gt_answer.split(",")]
+            if len(pred_parts) != len(gt_parts):
+                return False
+            for p, g in zip(pred_parts, gt_parts):
+                try:
+                    if abs(float(p) - float(g)) > 0.15:
+                        return False
+                except ValueError:
+                    if p.lower() != g.lower():
+                        return False
+            return True
+
+        elif "numeral" in eval_type:
+            try:
+                return abs(float(pred_answer) - float(gt_answer)) <= 0.15
+            except Exception:
+                return pred_answer.lower() == gt_answer.lower()
+
+        elif "ordered array" in eval_type:
+            pred_parts = [p.strip().lower() for p in pred_answer.split(",")]
+            gt_parts = [p.strip().lower() for p in gt_answer.split(",")]
+            return pred_parts == gt_parts
+
+        else:
+            return pred_answer.lower() == gt_answer.lower()
 
     return str(predicted).lower() == str(expected).lower()
 

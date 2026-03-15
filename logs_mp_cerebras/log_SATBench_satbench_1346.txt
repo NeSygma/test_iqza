@@ -107,278 +107,390 @@ After you finish your reasoning, you MUST output your final answer as EXACTLY th
 {"answer": "<True/False>"}
 
 --- S1 RESPONSE ---
-We are given a complex logical problem involving 3 scientists, 5 criteria (0 to 4), and 3 lab settings (0 to 2). The variable x(i, j, k) is true if scientist i meets criterion j in lab setting k.
+We are given a logical problem involving truth assignments to variables of the form:
 
-We are to determine whether there exists a consistent assignment of truth values to all x(i, j, k) such that all 40 conditions are satisfied.
+- `x(i, j, k)` = scientist `i` successfully meets criterion `j` in lab setting `k`
 
-We will proceed step by step, using the given constraints to deduce truth values of specific variables.
+Scientists:
+- 0 = Dr. Evans
+- 1 = Dr. Brown
+- 2 = Dr. Patel
 
-Let’s define some shorthand:
-- E = Dr. Evans = scientist 0
-- B = Dr. Brown = scientist 1
-- P = Dr. Patel = scientist 2
+Criteria: 0 to 4 (inclusive)  
+Settings: 0, 1, 2
 
-We will denote:
-- x(i,j,k) = true means scientist i meets criterion j in lab k.
-- We are only concerned with the values of x(i,j,k) that appear in the constraints.
+Each condition is a logical constraint on these variables.
 
-Let’s go through the constraints one by one, starting with the direct (unconditional) statements.
+Our goal: Determine whether **there exists an assignment** of true/false to all `x(i,j,k)` that satisfies **all 40 conditions**.
 
----
-
-**Step 1: Identify unconditional (direct) assertions**
-
-These are statements that directly assert a failure (negation), not part of an "or" condition.
-
-From the list:
-
-1. Dr. Brown does not meet criterion 3 in lab setting 1.  
-→ ¬x(1,3,1)
-
-7. Dr. Brown does not meet criterion 1 in lab setting 2.  
-→ ¬x(1,1,2)
-
-16. Dr. Brown does not meet criterion 3 in lab setting 2.  
-→ ¬x(1,3,2)
-
-18. Dr. Brown does not meet criterion 2 in lab setting 0.  
-→ ¬x(1,2,0)
-
-20. Dr. Patel does not meet criterion 1 in lab setting 0.  
-→ ¬x(2,1,0)
-
-30. Dr. Evans does not meet criterion 0 in lab setting 1.  
-→ ¬x(0,0,1)
-
-33. Dr. Brown does not meet criterion 1 in lab setting 1.  
-→ ¬x(1,1,1)
-
-40. Dr. Evans does not meet criterion 4 in lab setting 1.  
-→ ¬x(0,4,1)
-
-So far, we have the following definite facts:
-
-A1: ¬x(1,3,1)  
-A2: ¬x(1,1,2)  
-A3: ¬x(1,3,2)  
-A4: ¬x(1,2,0)  
-A5: ¬x(2,1,0)  
-A6: ¬x(0,0,1)  
-A7: ¬x(1,1,1)  
-A8: ¬x(0,4,1)
-
-Note: Some of these appear in multiple constraints, so we’ll use them to simplify the others.
+We'll proceed step by step, using **deductive reasoning** from the constraints, especially focusing on **direct assertions (hard facts)** and implications.
 
 ---
 
-**Step 2: Use these known values to simplify the conditional (OR) constraints**
+### Step 1: Extract direct (unconditional) statements
 
-We now go through the remaining constraints and simplify them using the known values.
+Some conditions are simple negations — they directly assert that a particular `x(i,j,k)` is **false**.
 
----
+Let’s collect these:
 
-2. Either Dr. Patel meets criterion 3 in lab setting 0, or Dr. Brown does not meet criterion 1 in lab setting 0, or Dr. Patel does not meet criterion 1 in lab setting 2.  
-→ x(2,3,0) ∨ ¬x(1,1,0) ∨ ¬x(2,1,2)
+- **Condition 1**: Dr. Brown does not meet criterion 3 in lab setting 1.  
+  → `x(1,3,1) = False`
 
-We don’t know x(2,3,0), x(1,1,0), or x(2,1,2), so leave for now.
+- **Condition 7**: Dr. Brown does not meet criterion 1 in lab setting 2.  
+  → `x(1,1,2) = False`
 
----
+- **Condition 16**: Dr. Brown does not meet criterion 3 in lab setting 2.  
+  → `x(1,3,2) = False`
 
-3. Either ¬x(1,3,1) or ¬x(1,1,2)  
-But from A1 and A2, both are true. So this is satisfied.
+- **Condition 18**: Dr. Brown does not meet criterion 2 in lab setting 0.  
+  → `x(1,2,0) = False`
 
----
+- **Condition 20**: Dr. Patel does not meet criterion 1 in lab setting 0.  
+  → `x(2,1,0) = False`
 
-4. Either ¬x(1,1,1) or ¬x(1,2,0)  
-From A7 and A4: both are true → satisfied.
+- **Condition 30**: Dr. Evans does not meet criterion 0 in lab setting 1.  
+  → `x(0,0,1) = False`
 
----
+- **Condition 33**: Dr. Brown does not meet criterion 1 in lab setting 1.  
+  → `x(1,1,1) = False`
 
-5. Either ¬x(2,1,0) or ¬x(1,3,2)  
-From A5 and A3: both true → satisfied.
+- **Condition 40**: Dr. Evans does not meet criterion 4 in lab setting 1.  
+  → `x(0,4,1) = False`
 
----
+So far, we have the following **known falses**:
 
-6. Either ¬x(1,3,1) or ¬x(0,4,1)  
-From A1 and A8: both true → satisfied.
+| Scientist | Criterion | Setting | Value |
+|---------|----------|--------|-------|
+| 1 (Brown) | 3 | 1 | False | (Cond 1)
+| 1 (Brown) | 1 | 2 | False | (Cond 7)
+| 1 (Brown) | 3 | 2 | False | (Cond 16)
+| 1 (Brown) | 2 | 0 | False | (Cond 18)
+| 2 (Patel) | 1 | 0 | False | (Cond 20)
+| 0 (Evans) | 0 | 1 | False | (Cond 30)
+| 1 (Brown) | 1 | 1 | False | (Cond 33)
+| 0 (Evans) | 4 | 1 | False | (Cond 40)
 
----
-
-8. Either ¬x(1,2,0) or ¬x(1,3,2)  
-From A4 and A3: both true → satisfied.
-
----
-
-9. Either ¬x(0,0,1) or ¬x(1,1,1)  
-From A6 and A7: both true → satisfied.
-
----
-
-10. Either ¬x(0,0,1) or ¬x(1,3,1)  
-From A6 and A1: both true → satisfied.
-
----
-
-11. Either ¬x(1,3,1) or ¬x(1,2,0)  
-From A1 and A4: both true → satisfied.
+We will use these to evaluate the other conditions, which are **disjunctions** (OR statements). In logic, an OR statement is true if **at least one** of its components is true. So if **all but one** are known false, the remaining one must be true (or else the OR fails).
 
 ---
 
-12. Either ¬x(0,0,1) or ¬x(0,4,1)  
-From A6 and A8: both true → satisfied.
+### Step 2: Use known values to evaluate disjunctions
+
+We go through each condition and simplify using known values.
 
 ---
 
-13. Either ¬x(1,1,1) or ¬x(2,1,0)  
-From A7 and A5: both true → satisfied.
+**Condition 2**:  
+Either Dr. Patel meets criterion 3 in lab setting 0,  
+or Dr. Brown does not meet criterion 1 in lab setting 0,  
+or Dr. Patel does not meet criterion 1 in lab setting 2.
+
+We don’t yet know:
+- `x(2,3,0)`
+- `x(1,1,0)`
+- `x(2,1,2)`
+
+But we **do know** `x(2,1,0) = False` (Cond 20), but that’s not this.
+
+So condition 2:  
+`x(2,3,0)` OR `¬x(1,1,0)` OR `¬x(2,1,2)`
+
+We don’t know any of these yet → **cannot conclude yet**
 
 ---
 
-14. Either ¬x(0,4,1) or ¬x(1,2,0)  
-From A8 and A4: both true → satisfied.
+**Condition 3**:  
+Either `¬x(1,3,1)` OR `¬x(1,1,2)`
+
+We already know:
+- `x(1,3,1) = False` → so `¬x(1,3,1) = True`
+- `x(1,1,2) = False` → `¬x(1,1,2) = True`
+
+So both disjuncts are true → **Condition 3 satisfied**
 
 ---
 
-15. Either ¬x(0,4,1) or ¬x(1,1,1)  
-From A8 and A7: both true → satisfied.
+**Condition 4**:  
+Either `¬x(1,1,1)` OR `¬x(1,2,0)`
+
+We know:
+- `x(1,1,1) = False` → `¬x(1,1,1) = True`
+- `x(1,2,0) = False` → `¬x(1,2,0) = True`
+
+So both true → **satisfied**
 
 ---
 
-17. Either ¬x(0,4,1) or ¬x(1,1,2)  
-From A8 and A2: both true → satisfied.
+**Condition 5**:  
+Either `¬x(2,1,0)` OR `¬x(1,3,2)`
+
+We know:
+- `x(2,1,0) = False` → `¬x(2,1,0) = True`
+- `x(1,3,2) = False` → `¬x(1,3,2) = True`
+
+So both true → **satisfied**
 
 ---
 
-19. Either ¬x(0,4,1) or ¬x(2,1,0)  
-From A8 and A5: both true → satisfied.
+**Condition 6**:  
+Either `¬x(1,3,1)` OR `¬x(0,4,1)`
+
+We know:
+- `x(1,3,1) = False` → `¬x(1,3,1) = True`
+- `x(0,4,1) = False` → `¬x(0,4,1) = True`
+
+So both true → **satisfied**
 
 ---
 
-21. Either ¬x(1,1,1) or ¬x(1,1,2)  
-From A7 and A2: both true → satisfied.
+**Condition 8**:  
+Either `¬x(1,2,0)` OR `¬x(1,3,2)`
+
+We know:
+- `x(1,2,0) = False` → `¬x(1,2,0) = True`
+- `x(1,3,2) = False` → `¬x(1,3,2) = True`
+
+→ **satisfied**
 
 ---
 
-22. Either x(2,1,0) or ¬x(1,2,2) or ¬x(1,4,0)  
-But from A5: ¬x(2,1,0) → so x(2,1,0) is false  
-Therefore, to satisfy this: ¬x(1,2,2) ∨ ¬x(1,4,0) must be true  
-→ So either Dr. Brown fails criterion 2 in lab 2, or fails criterion 4 in lab 0  
-We don't know these yet → we’ll keep this as a constraint:  
-C1: ¬x(1,2,2) ∨ ¬x(1,4,0)
+**Condition 9**:  
+Either `¬x(1,1,1)` OR `¬x(0,0,1)`
+
+We know:
+- `x(1,1,1) = False` → `¬x(1,1,1) = True`
+- `x(0,0,1) = False` → `¬x(0,0,1) = True`
+
+→ **satisfied**
 
 ---
 
-23. Either ¬x(0,0,1) or ¬x(1,2,0)  
-From A6 and A4: both true → satisfied.
+**Condition 10**:  
+Either `¬x(1,3,1)` OR `¬x(0,0,1)`
+
+Both known false → their negations are true → **satisfied**
 
 ---
 
-24. Either ¬x(1,1,2) or ¬x(1,3,2)  
-From A2 and A3: both true → satisfied.
+**Condition 11**:  
+Either `¬x(1,3,1)` OR `¬x(1,2,0)`
+
+Both known → negations true → **satisfied**
 
 ---
 
-25. Either ¬x(2,1,0) or ¬x(1,2,0)  
-From A5 and A4: both true → satisfied.
+**Condition 12**:  
+Either `¬x(0,0,1)` OR `¬x(0,4,1)`
+
+We know:
+- `x(0,0,1) = False` → negation true
+- `x(0,4,1) = False` → negation true
+
+→ **satisfied**
 
 ---
 
-26. Either ¬x(0,0,1) or ¬x(2,1,0)  
-From A6 and A5: both true → satisfied.
+**Condition 13**:  
+Either `¬x(1,1,1)` OR `¬x(2,1,0)`
+
+We know:
+- `x(1,1,1) = False` → negation true
+- `x(2,1,0) = False` → negation true
+
+→ **satisfied**
 
 ---
 
-27. Either ¬x(1,3,1) or ¬x(1,1,1)  
-From A1 and A7: both true → satisfied.
+**Condition 14**:  
+Either `¬x(0,4,1)` OR `¬x(1,2,0)`
+
+Both are false → negations true → **satisfied**
 
 ---
 
-28. Either ¬x(0,0,1) or ¬x(1,3,2)  
-From A6 and A3: both true → satisfied.
+**Condition 15**:  
+Either `¬x(0,4,1)` OR `¬x(1,1,1)`
+
+Both are false → negations true → **satisfied**
 
 ---
 
-29. Either ¬x(1,1,1) or ¬x(1,3,2)  
-From A7 and A3: both true → satisfied.
+**Condition 17**:  
+Either `¬x(0,4,1)` OR `¬x(1,1,2)`
+
+We know:
+- `x(0,4,1) = False` → negation true
+- `x(1,1,2) = False` → negation true
+
+→ **satisfied**
 
 ---
 
-31. Either ¬x(1,3,1) or ¬x(1,3,2)  
-From A1 and A3: both true → satisfied.
+**Condition 19**:  
+Either `¬x(0,4,1)` OR `¬x(2,1,0)`
+
+Both are false → negations true → **satisfied**
 
 ---
 
-32. Either ¬x(1,3,1) or ¬x(2,1,0)  
-From A1 and A5: both true → satisfied.
+**Condition 21**:  
+Either `¬x(1,1,1)` OR `¬x(1,1,2)`
+
+Both are false → negations true → **satisfied**
 
 ---
 
-34. Either ¬x(1,1,2) or ¬x(1,2,0)  
-From A2 and A4: both true → satisfied.
+**Condition 22**:  
+Either `x(2,1,0)` OR `¬x(1,2,2)` OR `¬x(1,4,0)`
+
+We know:
+- `x(2,1,0) = False` → so first term is false
+
+So for the OR to be true, **at least one** of the other two must be true:
+→ `¬x(1,2,2)` OR `¬x(1,4,0)` must be true
+
+So: either Dr. Brown **fails** criterion 2 in setting 2, or fails criterion 4 in setting 0.
+
+We don’t know those yet → **must remember this constraint**
 
 ---
 
-35. Either ¬x(1,1,2) or ¬x(2,1,0)  
-From A2 and A5: both true → satisfied.
+**Condition 23**:  
+Either `¬x(0,0,1)` OR `¬x(1,2,0)`
+
+Both known false → negations true → **satisfied**
 
 ---
 
-36. Either ¬x(0,4,1) or ¬x(1,3,2)  
-From A8 and A3: both true → satisfied.
+**Condition 24**:  
+Either `¬x(1,1,2)` OR `¬x(1,3,2)`
+
+Both are false → negations true → **satisfied**
 
 ---
 
-37. Either x(0,0,1) or x(1,3,1) or x(0,4,1) or x(1,1,1) or x(1,1,2) or x(2,1,0) or x(1,2,0) or x(1,3,2)
+**Condition 25**:  
+Either `¬x(2,1,0)` OR `¬x(1,2,0)`
 
-But from our known values:
-- x(0,0,1) = false (A6)
-- x(1,3,1) = false (A1)
-- x(0,4,1) = false (A8)
-- x(1,1,1) = false (A7)
-- x(1,1,2) = false (A2)
-- x(2,1,0) = false (A5)
-- x(1,2,0) = false (A4)
-- x(1,3,2) = false (A3)
-
-So **all disjuncts are false** → the entire OR statement is false.
-
-But constraint 37 says this OR must be true.
-
-→ CONTRADICTION.
+Both are false → negations true → **satisfied**
 
 ---
 
-**Conclusion:**
+**Condition 26**:  
+Either `¬x(0,0,1)` OR `¬x(2,1,0)`
 
-Constraint 37 requires that **at least one** of the following is true:
-- x(0,0,1) → Dr. Evans meets criterion 0 in lab 1
-- x(1,3,1) → Dr. Brown meets criterion 3 in lab 1
-- x(0,4,1) → Dr. Evans meets criterion 4 in lab 1
-- x(1,1,1) → Dr. Brown meets criterion 1 in lab 1
-- x(1,1,2) → Dr. Brown meets criterion 1 in lab 2
-- x(2,1,0) → Dr. Patel meets criterion 1 in lab 0
-- x(1,2,0) → Dr. Brown meets criterion 2 in lab 0
-- x(1,3,2) → Dr. Brown meets criterion 3 in lab 2
-
-But from the direct constraints:
-- All of these are explicitly stated to be **false** (via constraints 1, 7, 16, 18, 20, 30, 33, 40).
-
-Therefore, **every disjunct in constraint 37 is false**, making the whole statement false.
-
-But the problem requires all constraints to be true.
-
-Hence, **no such assignment exists**.
+Both are false → negations true → **satisfied**
 
 ---
 
-**Final Answer:**
+**Condition 27**:  
+Either `¬x(1,3,1)` OR `¬x(1,1,1)`
+
+Both are false → negations true → **satisfied**
+
+---
+
+**Condition 28**:  
+Either `¬x(0,0,1)` OR `¬x(1,3,2)`
+
+Both are false → negations true → **satisfied**
+
+---
+
+**Condition 29**:  
+Either `¬x(1,1,1)` OR `¬x(1,3,2)`
+
+Both are false → negations true → **satisfied**
+
+---
+
+**Condition 31**:  
+Either `¬x(1,3,1)` OR `¬x(1,3,2)`
+
+Both are false → negations true → **satisfied**
+
+---
+
+**Condition 32**:  
+Either `¬x(1,3,1)` OR `¬x(2,1,0)`
+
+Both are false → negations true → **satisfied**
+
+---
+
+**Condition 34**:  
+Either `¬x(1,1,2)` OR `¬x(1,2,0)`
+
+Both are false → negations true → **satisfied**
+
+---
+
+**Condition 35**:  
+Either `¬x(1,1,2)` OR `¬x(2,1,0)`
+
+Both are false → negations true → **satisfied**
+
+---
+
+**Condition 36**:  
+Either `¬x(0,4,1)` OR `¬x(1,3,2)`
+
+Both are false → negations true → **satisfied**
+
+---
+
+Now **Condition 37** is a big OR:
+
+> Either Dr. Evans meets criterion 0 in lab setting 1,  
+> or Dr. Brown meets criterion 3 in lab setting 1,  
+> or Dr. Evans meets criterion 4 in lab setting 1,  
+> or Dr. Brown meets criterion 1 in lab setting 1,  
+> or Dr. Brown meets criterion 1 in lab setting 2,  
+> or Dr. Patel meets criterion 1 in lab setting 0,  
+> or Dr. Brown meets criterion 2 in lab setting 0,  
+> or Dr. Brown meets criterion 3 in lab setting 2.
+
+So:
+
+`x(0,0,1)` OR `x(1,3,1)` OR `x(0,4,1)` OR `x(1,1,1)` OR `x(1,1,2)` OR `x(2,1,0)` OR `x(1,2,0)` OR `x(1,3,2)`
+
+Now check each:
+
+- `x(0,0,1)` = False (Cond 30)
+- `x(1,3,1)` = False (Cond 1)
+- `x(0,4,1)` = False (Cond 40)
+- `x(1,1,1)` = False (Cond 33)
+- `x(1,1,2)` = False (Cond 7)
+- `x(2,1,0)` = False (Cond 20)
+- `x(1,2,0)` = False (Cond 18)
+- `x(1,3,2)` = False (Cond 16)
+
+**All disjuncts are FALSE**.
+
+So the entire OR is **FALSE**.
+
+But condition 37 says this OR **must be true**.
+
+This is a **contradiction**.
+
+---
+
+### Conclusion:
+
+Condition 37 requires that **at least one** of the eight variables be **true**, but from the given conditions (1, 7, 16, 18, 20, 30, 33, 40), **all eight are false**.
+
+Therefore, **no assignment** can satisfy all conditions.
+
+---
+
+### Final Answer:
 
 {"answer": "False"}
 ---
 S1 Parsed Answer: {'answer': 'False'}
 S1 Valid/Parse Success: True
 S1 Correct: True
-S1 Tokens: 2451 | Latency: 1751.8ms
+S1 Tokens: 3185 | Latency: 2034.1ms
 
 ============================================================
 === SYSTEM 2 (MP EVALUATOR / JUDGE) ===
@@ -433,271 +545,383 @@ Conditions:
 Question: Is there a way to assign values that makes this work?
 
 SYSTEM 1 ANSWER (For Evaluation):
-We are given a complex logical problem involving 3 scientists, 5 criteria (0 to 4), and 3 lab settings (0 to 2). The variable x(i, j, k) is true if scientist i meets criterion j in lab setting k.
+We are given a logical problem involving truth assignments to variables of the form:
 
-We are to determine whether there exists a consistent assignment of truth values to all x(i, j, k) such that all 40 conditions are satisfied.
+- `x(i, j, k)` = scientist `i` successfully meets criterion `j` in lab setting `k`
 
-We will proceed step by step, using the given constraints to deduce truth values of specific variables.
+Scientists:
+- 0 = Dr. Evans
+- 1 = Dr. Brown
+- 2 = Dr. Patel
 
-Let’s define some shorthand:
-- E = Dr. Evans = scientist 0
-- B = Dr. Brown = scientist 1
-- P = Dr. Patel = scientist 2
+Criteria: 0 to 4 (inclusive)  
+Settings: 0, 1, 2
 
-We will denote:
-- x(i,j,k) = true means scientist i meets criterion j in lab k.
-- We are only concerned with the values of x(i,j,k) that appear in the constraints.
+Each condition is a logical constraint on these variables.
 
-Let’s go through the constraints one by one, starting with the direct (unconditional) statements.
+Our goal: Determine whether **there exists an assignment** of true/false to all `x(i,j,k)` that satisfies **all 40 conditions**.
 
----
-
-**Step 1: Identify unconditional (direct) assertions**
-
-These are statements that directly assert a failure (negation), not part of an "or" condition.
-
-From the list:
-
-1. Dr. Brown does not meet criterion 3 in lab setting 1.  
-→ ¬x(1,3,1)
-
-7. Dr. Brown does not meet criterion 1 in lab setting 2.  
-→ ¬x(1,1,2)
-
-16. Dr. Brown does not meet criterion 3 in lab setting 2.  
-→ ¬x(1,3,2)
-
-18. Dr. Brown does not meet criterion 2 in lab setting 0.  
-→ ¬x(1,2,0)
-
-20. Dr. Patel does not meet criterion 1 in lab setting 0.  
-→ ¬x(2,1,0)
-
-30. Dr. Evans does not meet criterion 0 in lab setting 1.  
-→ ¬x(0,0,1)
-
-33. Dr. Brown does not meet criterion 1 in lab setting 1.  
-→ ¬x(1,1,1)
-
-40. Dr. Evans does not meet criterion 4 in lab setting 1.  
-→ ¬x(0,4,1)
-
-So far, we have the following definite facts:
-
-A1: ¬x(1,3,1)  
-A2: ¬x(1,1,2)  
-A3: ¬x(1,3,2)  
-A4: ¬x(1,2,0)  
-A5: ¬x(2,1,0)  
-A6: ¬x(0,0,1)  
-A7: ¬x(1,1,1)  
-A8: ¬x(0,4,1)
-
-Note: Some of these appear in multiple constraints, so we’ll use them to simplify the others.
+We'll proceed step by step, using **deductive reasoning** from the constraints, especially focusing on **direct assertions (hard facts)** and implications.
 
 ---
 
-**Step 2: Use these known values to simplify the conditional (OR) constraints**
+### Step 1: Extract direct (unconditional) statements
 
-We now go through the remaining constraints and simplify them using the known values.
+Some conditions are simple negations — they directly assert that a particular `x(i,j,k)` is **false**.
 
----
+Let’s collect these:
 
-2. Either Dr. Patel meets criterion 3 in lab setting 0, or Dr. Brown does not meet criterion 1 in lab setting 0, or Dr. Patel does not meet criterion 1 in lab setting 2.  
-→ x(2,3,0) ∨ ¬x(1,1,0) ∨ ¬x(2,1,2)
+- **Condition 1**: Dr. Brown does not meet criterion 3 in lab setting 1.  
+  → `x(1,3,1) = False`
 
-We don’t know x(2,3,0), x(1,1,0), or x(2,1,2), so leave for now.
+- **Condition 7**: Dr. Brown does not meet criterion 1 in lab setting 2.  
+  → `x(1,1,2) = False`
 
----
+- **Condition 16**: Dr. Brown does not meet criterion 3 in lab setting 2.  
+  → `x(1,3,2) = False`
 
-3. Either ¬x(1,3,1) or ¬x(1,1,2)  
-But from A1 and A2, both are true. So this is satisfied.
+- **Condition 18**: Dr. Brown does not meet criterion 2 in lab setting 0.  
+  → `x(1,2,0) = False`
 
----
+- **Condition 20**: Dr. Patel does not meet criterion 1 in lab setting 0.  
+  → `x(2,1,0) = False`
 
-4. Either ¬x(1,1,1) or ¬x(1,2,0)  
-From A7 and A4: both are true → satisfied.
+- **Condition 30**: Dr. Evans does not meet criterion 0 in lab setting 1.  
+  → `x(0,0,1) = False`
 
----
+- **Condition 33**: Dr. Brown does not meet criterion 1 in lab setting 1.  
+  → `x(1,1,1) = False`
 
-5. Either ¬x(2,1,0) or ¬x(1,3,2)  
-From A5 and A3: both true → satisfied.
+- **Condition 40**: Dr. Evans does not meet criterion 4 in lab setting 1.  
+  → `x(0,4,1) = False`
 
----
+So far, we have the following **known falses**:
 
-6. Either ¬x(1,3,1) or ¬x(0,4,1)  
-From A1 and A8: both true → satisfied.
+| Scientist | Criterion | Setting | Value |
+|---------|----------|--------|-------|
+| 1 (Brown) | 3 | 1 | False | (Cond 1)
+| 1 (Brown) | 1 | 2 | False | (Cond 7)
+| 1 (Brown) | 3 | 2 | False | (Cond 16)
+| 1 (Brown) | 2 | 0 | False | (Cond 18)
+| 2 (Patel) | 1 | 0 | False | (Cond 20)
+| 0 (Evans) | 0 | 1 | False | (Cond 30)
+| 1 (Brown) | 1 | 1 | False | (Cond 33)
+| 0 (Evans) | 4 | 1 | False | (Cond 40)
 
----
-
-8. Either ¬x(1,2,0) or ¬x(1,3,2)  
-From A4 and A3: both true → satisfied.
-
----
-
-9. Either ¬x(0,0,1) or ¬x(1,1,1)  
-From A6 and A7: both true → satisfied.
-
----
-
-10. Either ¬x(0,0,1) or ¬x(1,3,1)  
-From A6 and A1: both true → satisfied.
-
----
-
-11. Either ¬x(1,3,1) or ¬x(1,2,0)  
-From A1 and A4: both true → satisfied.
+We will use these to evaluate the other conditions, which are **disjunctions** (OR statements). In logic, an OR statement is true if **at least one** of its components is true. So if **all but one** are known false, the remaining one must be true (or else the OR fails).
 
 ---
 
-12. Either ¬x(0,0,1) or ¬x(0,4,1)  
-From A6 and A8: both true → satisfied.
+### Step 2: Use known values to evaluate disjunctions
+
+We go through each condition and simplify using known values.
 
 ---
 
-13. Either ¬x(1,1,1) or ¬x(2,1,0)  
-From A7 and A5: both true → satisfied.
+**Condition 2**:  
+Either Dr. Patel meets criterion 3 in lab setting 0,  
+or Dr. Brown does not meet criterion 1 in lab setting 0,  
+or Dr. Patel does not meet criterion 1 in lab setting 2.
+
+We don’t yet know:
+- `x(2,3,0)`
+- `x(1,1,0)`
+- `x(2,1,2)`
+
+But we **do know** `x(2,1,0) = False` (Cond 20), but that’s not this.
+
+So condition 2:  
+`x(2,3,0)` OR `¬x(1,1,0)` OR `¬x(2,1,2)`
+
+We don’t know any of these yet → **cannot conclude yet**
 
 ---
 
-14. Either ¬x(0,4,1) or ¬x(1,2,0)  
-From A8 and A4: both true → satisfied.
+**Condition 3**:  
+Either `¬x(1,3,1)` OR `¬x(1,1,2)`
+
+We already know:
+- `x(1,3,1) = False` → so `¬x(1,3,1) = True`
+- `x(1,1,2) = False` → `¬x(1,1,2) = True`
+
+So both disjuncts are true → **Condition 3 satisfied**
 
 ---
 
-15. Either ¬x(0,4,1) or ¬x(1,1,1)  
-From A8 and A7: both true → satisfied.
+**Condition 4**:  
+Either `¬x(1,1,1)` OR `¬x(1,2,0)`
+
+We know:
+- `x(1,1,1) = False` → `¬x(1,1,1) = True`
+- `x(1,2,0) = False` → `¬x(1,2,0) = True`
+
+So both true → **satisfied**
 
 ---
 
-17. Either ¬x(0,4,1) or ¬x(1,1,2)  
-From A8 and A2: both true → satisfied.
+**Condition 5**:  
+Either `¬x(2,1,0)` OR `¬x(1,3,2)`
+
+We know:
+- `x(2,1,0) = False` → `¬x(2,1,0) = True`
+- `x(1,3,2) = False` → `¬x(1,3,2) = True`
+
+So both true → **satisfied**
 
 ---
 
-19. Either ¬x(0,4,1) or ¬x(2,1,0)  
-From A8 and A5: both true → satisfied.
+**Condition 6**:  
+Either `¬x(1,3,1)` OR `¬x(0,4,1)`
+
+We know:
+- `x(1,3,1) = False` → `¬x(1,3,1) = True`
+- `x(0,4,1) = False` → `¬x(0,4,1) = True`
+
+So both true → **satisfied**
 
 ---
 
-21. Either ¬x(1,1,1) or ¬x(1,1,2)  
-From A7 and A2: both true → satisfied.
+**Condition 8**:  
+Either `¬x(1,2,0)` OR `¬x(1,3,2)`
+
+We know:
+- `x(1,2,0) = False` → `¬x(1,2,0) = True`
+- `x(1,3,2) = False` → `¬x(1,3,2) = True`
+
+→ **satisfied**
 
 ---
 
-22. Either x(2,1,0) or ¬x(1,2,2) or ¬x(1,4,0)  
-But from A5: ¬x(2,1,0) → so x(2,1,0) is false  
-Therefore, to satisfy this: ¬x(1,2,2) ∨ ¬x(1,4,0) must be true  
-→ So either Dr. Brown fails criterion 2 in lab 2, or fails criterion 4 in lab 0  
-We don't know these yet → we’ll keep this as a constraint:  
-C1: ¬x(1,2,2) ∨ ¬x(1,4,0)
+**Condition 9**:  
+Either `¬x(1,1,1)` OR `¬x(0,0,1)`
+
+We know:
+- `x(1,1,1) = False` → `¬x(1,1,1) = True`
+- `x(0,0,1) = False` → `¬x(0,0,1) = True`
+
+→ **satisfied**
 
 ---
 
-23. Either ¬x(0,0,1) or ¬x(1,2,0)  
-From A6 and A4: both true → satisfied.
+**Condition 10**:  
+Either `¬x(1,3,1)` OR `¬x(0,0,1)`
+
+Both known false → their negations are true → **satisfied**
 
 ---
 
-24. Either ¬x(1,1,2) or ¬x(1,3,2)  
-From A2 and A3: both true → satisfied.
+**Condition 11**:  
+Either `¬x(1,3,1)` OR `¬x(1,2,0)`
+
+Both known → negations true → **satisfied**
 
 ---
 
-25. Either ¬x(2,1,0) or ¬x(1,2,0)  
-From A5 and A4: both true → satisfied.
+**Condition 12**:  
+Either `¬x(0,0,1)` OR `¬x(0,4,1)`
+
+We know:
+- `x(0,0,1) = False` → negation true
+- `x(0,4,1) = False` → negation true
+
+→ **satisfied**
 
 ---
 
-26. Either ¬x(0,0,1) or ¬x(2,1,0)  
-From A6 and A5: both true → satisfied.
+**Condition 13**:  
+Either `¬x(1,1,1)` OR `¬x(2,1,0)`
+
+We know:
+- `x(1,1,1) = False` → negation true
+- `x(2,1,0) = False` → negation true
+
+→ **satisfied**
 
 ---
 
-27. Either ¬x(1,3,1) or ¬x(1,1,1)  
-From A1 and A7: both true → satisfied.
+**Condition 14**:  
+Either `¬x(0,4,1)` OR `¬x(1,2,0)`
+
+Both are false → negations true → **satisfied**
 
 ---
 
-28. Either ¬x(0,0,1) or ¬x(1,3,2)  
-From A6 and A3: both true → satisfied.
+**Condition 15**:  
+Either `¬x(0,4,1)` OR `¬x(1,1,1)`
+
+Both are false → negations true → **satisfied**
 
 ---
 
-29. Either ¬x(1,1,1) or ¬x(1,3,2)  
-From A7 and A3: both true → satisfied.
+**Condition 17**:  
+Either `¬x(0,4,1)` OR `¬x(1,1,2)`
+
+We know:
+- `x(0,4,1) = False` → negation true
+- `x(1,1,2) = False` → negation true
+
+→ **satisfied**
 
 ---
 
-31. Either ¬x(1,3,1) or ¬x(1,3,2)  
-From A1 and A3: both true → satisfied.
+**Condition 19**:  
+Either `¬x(0,4,1)` OR `¬x(2,1,0)`
+
+Both are false → negations true → **satisfied**
 
 ---
 
-32. Either ¬x(1,3,1) or ¬x(2,1,0)  
-From A1 and A5: both true → satisfied.
+**Condition 21**:  
+Either `¬x(1,1,1)` OR `¬x(1,1,2)`
+
+Both are false → negations true → **satisfied**
 
 ---
 
-34. Either ¬x(1,1,2) or ¬x(1,2,0)  
-From A2 and A4: both true → satisfied.
+**Condition 22**:  
+Either `x(2,1,0)` OR `¬x(1,2,2)` OR `¬x(1,4,0)`
+
+We know:
+- `x(2,1,0) = False` → so first term is false
+
+So for the OR to be true, **at least one** of the other two must be true:
+→ `¬x(1,2,2)` OR `¬x(1,4,0)` must be true
+
+So: either Dr. Brown **fails** criterion 2 in setting 2, or fails criterion 4 in setting 0.
+
+We don’t know those yet → **must remember this constraint**
 
 ---
 
-35. Either ¬x(1,1,2) or ¬x(2,1,0)  
-From A2 and A5: both true → satisfied.
+**Condition 23**:  
+Either `¬x(0,0,1)` OR `¬x(1,2,0)`
+
+Both known false → negations true → **satisfied**
 
 ---
 
-36. Either ¬x(0,4,1) or ¬x(1,3,2)  
-From A8 and A3: both true → satisfied.
+**Condition 24**:  
+Either `¬x(1,1,2)` OR `¬x(1,3,2)`
+
+Both are false → negations true → **satisfied**
 
 ---
 
-37. Either x(0,0,1) or x(1,3,1) or x(0,4,1) or x(1,1,1) or x(1,1,2) or x(2,1,0) or x(1,2,0) or x(1,3,2)
+**Condition 25**:  
+Either `¬x(2,1,0)` OR `¬x(1,2,0)`
 
-But from our known values:
-- x(0,0,1) = false (A6)
-- x(1,3,1) = false (A1)
-- x(0,4,1) = false (A8)
-- x(1,1,1) = false (A7)
-- x(1,1,2) = false (A2)
-- x(2,1,0) = false (A5)
-- x(1,2,0) = false (A4)
-- x(1,3,2) = false (A3)
-
-So **all disjuncts are false** → the entire OR statement is false.
-
-But constraint 37 says this OR must be true.
-
-→ CONTRADICTION.
+Both are false → negations true → **satisfied**
 
 ---
 
-**Conclusion:**
+**Condition 26**:  
+Either `¬x(0,0,1)` OR `¬x(2,1,0)`
 
-Constraint 37 requires that **at least one** of the following is true:
-- x(0,0,1) → Dr. Evans meets criterion 0 in lab 1
-- x(1,3,1) → Dr. Brown meets criterion 3 in lab 1
-- x(0,4,1) → Dr. Evans meets criterion 4 in lab 1
-- x(1,1,1) → Dr. Brown meets criterion 1 in lab 1
-- x(1,1,2) → Dr. Brown meets criterion 1 in lab 2
-- x(2,1,0) → Dr. Patel meets criterion 1 in lab 0
-- x(1,2,0) → Dr. Brown meets criterion 2 in lab 0
-- x(1,3,2) → Dr. Brown meets criterion 3 in lab 2
-
-But from the direct constraints:
-- All of these are explicitly stated to be **false** (via constraints 1, 7, 16, 18, 20, 30, 33, 40).
-
-Therefore, **every disjunct in constraint 37 is false**, making the whole statement false.
-
-But the problem requires all constraints to be true.
-
-Hence, **no such assignment exists**.
+Both are false → negations true → **satisfied**
 
 ---
 
-**Final Answer:**
+**Condition 27**:  
+Either `¬x(1,3,1)` OR `¬x(1,1,1)`
+
+Both are false → negations true → **satisfied**
+
+---
+
+**Condition 28**:  
+Either `¬x(0,0,1)` OR `¬x(1,3,2)`
+
+Both are false → negations true → **satisfied**
+
+---
+
+**Condition 29**:  
+Either `¬x(1,1,1)` OR `¬x(1,3,2)`
+
+Both are false → negations true → **satisfied**
+
+---
+
+**Condition 31**:  
+Either `¬x(1,3,1)` OR `¬x(1,3,2)`
+
+Both are false → negations true → **satisfied**
+
+---
+
+**Condition 32**:  
+Either `¬x(1,3,1)` OR `¬x(2,1,0)`
+
+Both are false → negations true → **satisfied**
+
+---
+
+**Condition 34**:  
+Either `¬x(1,1,2)` OR `¬x(1,2,0)`
+
+Both are false → negations true → **satisfied**
+
+---
+
+**Condition 35**:  
+Either `¬x(1,1,2)` OR `¬x(2,1,0)`
+
+Both are false → negations true → **satisfied**
+
+---
+
+**Condition 36**:  
+Either `¬x(0,4,1)` OR `¬x(1,3,2)`
+
+Both are false → negations true → **satisfied**
+
+---
+
+Now **Condition 37** is a big OR:
+
+> Either Dr. Evans meets criterion 0 in lab setting 1,  
+> or Dr. Brown meets criterion 3 in lab setting 1,  
+> or Dr. Evans meets criterion 4 in lab setting 1,  
+> or Dr. Brown meets criterion 1 in lab setting 1,  
+> or Dr. Brown meets criterion 1 in lab setting 2,  
+> or Dr. Patel meets criterion 1 in lab setting 0,  
+> or Dr. Brown meets criterion 2 in lab setting 0,  
+> or Dr. Brown meets criterion 3 in lab setting 2.
+
+So:
+
+`x(0,0,1)` OR `x(1,3,1)` OR `x(0,4,1)` OR `x(1,1,1)` OR `x(1,1,2)` OR `x(2,1,0)` OR `x(1,2,0)` OR `x(1,3,2)`
+
+Now check each:
+
+- `x(0,0,1)` = False (Cond 30)
+- `x(1,3,1)` = False (Cond 1)
+- `x(0,4,1)` = False (Cond 40)
+- `x(1,1,1)` = False (Cond 33)
+- `x(1,1,2)` = False (Cond 7)
+- `x(2,1,0)` = False (Cond 20)
+- `x(1,2,0)` = False (Cond 18)
+- `x(1,3,2)` = False (Cond 16)
+
+**All disjuncts are FALSE**.
+
+So the entire OR is **FALSE**.
+
+But condition 37 says this OR **must be true**.
+
+This is a **contradiction**.
+
+---
+
+### Conclusion:
+
+Condition 37 requires that **at least one** of the eight variables be **true**, but from the given conditions (1, 7, 16, 18, 20, 30, 33, 40), **all eight are false**.
+
+Therefore, **no assignment** can satisfy all conditions.
+
+---
+
+### Final Answer:
 
 {"answer": "False"}
 
@@ -707,75 +931,53 @@ Confidence: <number between 0 and 100>%
 
 --- S2 RESPONSE ---
 Stage 1 — Comprehension & Formalization:  
-The problem presents 40 logical conditions over a ternary predicate x(i,j,k), where i ∈ {0,1,2} (scientists), j ∈ {0,1,2,3,4} (criteria), k ∈ {0,1,2} (lab settings). The goal is to determine whether there exists a truth assignment to all x(i,j,k) such that all 40 conditions are simultaneously satisfied. The conditions are expressed in propositional logic, involving negations and disjunctions.
+The problem involves determining whether a truth assignment to variables x(i,j,k) (scientist i meets criterion j in setting k) exists that satisfies 40 logical conditions. The SYSTEM 1 answer extracts 8 direct negations (Conditions 1, 7, 16, 18, 20, 30, 33, 40) and uses them to evaluate the remaining disjunctive constraints. It identifies Condition 37 as a disjunction of eight atomic propositions, all of which are individually negated by the direct conditions. Since all disjuncts are false under the assignment, the disjunction is false, violating Condition 37. Thus, the SYSTEM 1 answer concludes no satisfying assignment exists.
 
-The base LLM (SYSTEM 1) identifies eight atomic negations from unconditional statements (1,7,16,18,20,30,33,40), which are:
-
-- ¬x(1,3,1)  [Brown fails c3 in s1]
-- ¬x(1,1,2)  [Brown fails c1 in s2]
-- ¬x(1,3,2)  [Brown fails c3 in s2]
-- ¬x(1,2,0)  [Brown fails c2 in s0]
-- ¬x(2,1,0)  [Patel fails c1 in s0]
-- ¬x(0,0,1)  [Evans fails c0 in s1]
-- ¬x(1,1,1)  [Brown fails c1 in s1]
-- ¬x(0,4,1)  [Evans fails c4 in s1]
-
-It then proceeds to simplify the remaining conditions using these known truths. It correctly verifies that constraints 3–36 (except 2 and 22) are satisfied under these assignments. However, it evaluates constraint 37 and observes that all disjuncts are negated by the known falsities, leading to a contradiction: an OR of all false literals must be false, but the constraint requires it to be true. Therefore, SYSTEM 1 concludes that no satisfying assignment exists.
-
-Crucially, SYSTEM 1 does **not** introduce any external assumptions beyond the given premises. It only uses direct assertions and logical simplification via disjunction evaluation. Its reasoning is purely syntactic and truth-functional.
+The core claim is: the conjunction of the direct falsities renders Condition 37 unsatisfiable. The deductive chain hinges on the correctness of the extracted literals and their exhaustive coverage of Condition 37’s disjuncts.
 
 Stage 2 — Preliminary Logical Modeling:  
-Independently, I model the same set of constraints. From the unconditional statements (1,7,16,18,20,30,33,40), I derive the same eight literals as false. These are unambiguous: each is a direct negation, not embedded in a disjunction. Thus, they must be accepted as true in any model.
+Independently, I reconstruct the known falsities:
 
-Now consider constraint 37:
+- x(1,3,1) = False (Cond 1)
+- x(1,1,2) = False (Cond 7)
+- x(1,3,2) = False (Cond 16)
+- x(1,2,0) = False (Cond 18)
+- x(2,1,0) = False (Cond 20)
+- x(0,0,1) = False (Cond 30)
+- x(1,1,1) = False (Cond 33)
+- x(0,4,1) = False (Cond 40)
 
-37. x(0,0,1) ∨ x(1,3,1) ∨ x(0,4,1) ∨ x(1,1,1) ∨ x(1,1,2) ∨ x(2,1,0) ∨ x(1,2,0) ∨ x(1,3,2)
+Now examine Condition 37:  
+x(0,0,1) ∨ x(1,3,1) ∨ x(0,4,1) ∨ x(1,1,1) ∨ x(1,1,2) ∨ x(2,1,0) ∨ x(1,2,0) ∨ x(1,3,2)
 
-Each disjunct corresponds exactly to one of the negated literals above. Since all are false, the disjunction is false. But the constraint requires it to be true. This is a contradiction.
+Substituting the known values:  
+False ∨ False ∨ False ∨ False ∨ False ∨ False ∨ False ∨ False → False
 
-No assignment can satisfy a disjunction when all its components are false. Therefore, the set of constraints is unsatisfiable.
+But Condition 37 requires this to be **true**. Contradiction.
+
+All other conditions are disjunctions of negated literals (e.g., ¬A ∨ B), and SYSTEM 1 correctly notes that when A is false (so ¬A is true), the disjunction holds. No other condition imposes a requirement for any of these variables to be true—only Condition 37 demands a positive disjunct, and all are blocked.
 
 Stage 3 — Critical Deductive Evaluation:  
-Adversarial comparison: Is there any possibility that SYSTEM 1 misread constraint 37?
+Adversarial comparison: Did SYSTEM 1 miss any possible interpretation?
 
-Constraint 37: "Either Dr. Evans meets criterion 0 in lab setting 1, or Dr. Brown meets criterion 3 in lab setting 1, or Dr. Evans meets criterion 4 in lab setting 1, or Dr. Brown meets criterion 1 in lab setting 1, or Dr. Brown meets criterion 1 in lab setting 2, or Dr. Patel meets criterion 1 in lab setting 0, or Dr. Brown meets criterion 2 in lab setting 0, or Dr. Brown meets criterion 3 in lab setting 2."
+- Could Condition 37 be misparsed? No: it is an OR over eight atomic successes, all of which are individually negated by hard constraints.
+- Are any of the "direct" conditions actually conditional? No—Conditions 1, 7, 16, 18, 20, 30, 33, 40 are all simple negations (e.g., "Dr. X does not meet..."), so they unambiguously set the corresponding x(i,j,k) to False.
+- Could any of these be overridden by other conditions? Only if another condition required one to be true. But all other conditions are disjunctions where the negation of these literals appears—i.e., they are consistent with the literals being false.
+- For example, Condition 22 requires ¬x(1,2,2) ∨ ¬x(1,4,0), given x(2,1,0)=False. That is satisfiable without requiring any of the blocked variables to be true.
 
-This is a disjunction of eight positive literals.
-
-Each of these is directly negated by one of the unconditional statements:
-
-- x(0,0,1): negated by (30)
-- x(1,3,1): negated by (1)
-- x(0,4,1): negated by (40)
-- x(1,1,1): negated by (33)
-- x(1,1,2): negated by (7)
-- x(2,1,0): negated by (20)
-- x(1,2,0): negated by (18)
-- x(1,3,2): negated by (16)
-
-Therefore, **all disjuncts are false** in any model satisfying the unconditional constraints. Hence, the disjunction is false. But constraint 37 requires it to be true. Contradiction.
-
-No other constraint can override this, as the unconditional statements are not part of disjunctions — they are assertions of fact.
-
-SYSTEM 1 did not miss any possible truth assignment; the contradiction is structural and unavoidable.
+Thus, no conflict arises elsewhere that would force a revision of the falsities. The contradiction in Condition 37 is unavoidable.
 
 Stage 4 — Decision Confirmation:  
-The base LLM's conclusion — that no assignment satisfies all constraints — is logically entailed by the premises. The contradiction in constraint 37 is unavoidable given the direct negations. The reasoning is sound, complete, and minimal.
-
-No fallacy is present. The LLM did not affirm the consequent, deny the antecedent, or misapply disjunction. It correctly treated disjunctions as requiring at least one true disjunct and identified when all were false.
+SYSTEM 1’s conclusion is logically sound. The premises collectively entail a contradiction via Condition 37. Therefore, no satisfying assignment exists. The reasoning is complete and correct.
 
 Stage 5 — Confidence & Soundness Assessment:  
-The derivation is short, transparent, and relies only on propositional logic and direct substitution. The contradiction is explicit and verifiable. While LLMs can hallucinate in complex logic tasks, this case is simple: eight known falsities, one OR clause requiring at least one to be true. The error rate in such tasks is low when the chain is this direct.
+The deduction is short, transparent, and based on direct substitutions into a disjunction. There is no ambiguity in the parsing of the conditions. The only possible error would be a misreading of Condition 37 or one of the direct constraints, but careful rechecking confirms accuracy. The risk of hallucination or structural error is minimal.
 
-However, per metacognitive humility: Could constraint 37 have been misread as a negation? No — it begins with "Either", and lists positive conditions. The syntax matches all other "Either A or B" patterns in the list, which are disjunctions. The base LLM interpreted it correctly.
-
-Is there any ambiguity in the variable mapping? No — the scientists are clearly indexed, and the conditions reference specific (i,j,k) combinations.
-
-Confidence is high. The reasoning is flawless.
+However, per metacognitive humility: Could there be an alternative interpretation of "either...or" as exclusive? No—standard logic treats OR as inclusive unless specified, and all other conditions use it inclusively. Could a variable be undefined? No—each x(i,j,k) is a Boolean.
 
 Confidence: 98%
 ---
 S2 Parsed Confidence: 98.0%
 S2 Escalate Decision: False (Threshold: 80.0%)
 S2 Label Assignment: TN
-S2 Tokens: 1394 | Latency: 1759.8ms
+S2 Tokens: 1037 | Latency: 62027.8ms

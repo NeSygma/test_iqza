@@ -84,415 +84,433 @@ After you finish your reasoning, you MUST output your final answer as EXACTLY th
 --- S1 RESPONSE ---
 Let's solve the cryptarithmetic puzzle **DONALD + GERALD = ROBERT** step by step.
 
----
-
-### Step 1: Understand the structure
-
 We are given:
 
 ```
-    D O N A L D
-  + G E R A L D
-  -------------
-  = R O B E R T
+  D O N A L D
++ G E R A L D
+-------------
+= R O B E R T
 ```
 
-This is a column-wise addition from right to left, with possible carries.
+Letters: D, O, N, A, L, G, E, R, B, T — 10 unique letters → each digit 0–9 used exactly once.
 
-Let’s label the columns from right to left (starting at position 0):
+Leading digits: D ≠ 0, G ≠ 0, R ≠ 0.
 
-```
-Position:  5 4 3 2 1 0
-           D O N A L D
-         + G E R A L D
-         -------------
-         = R O B E R T
-```
+We will analyze column by column from right to left (units to higher places), considering carries.
 
-So:
-- Position 0 (units): D + D = T (possibly + carry)
-- Position 1 (tens): L + L = R (possibly + carry)
-- Position 2 (hundreds): A + A = E (possibly + carry)
-- Position 3 (thousands): N + R = B (possibly + carry)
-- Position 4 (ten thousands): O + E = O (possibly + carry)
-- Position 5 (hundred thousands): D + G = R (possibly + carry)
-- And possibly a carry into a 7th digit (but ROBERT is 6 digits, so no carry beyond position 5)
+Label the columns (from right to left, starting at 0):
 
-Note: All letters D, O, N, A, L, G, E, R, B, T represent **distinct digits** from 0 to 9. All 10 digits are used exactly once.
+- Column 0 (units): D + D = T (mod 10), carry c0
+- Column 1 (tens): L + L + c0 = R (mod 10), carry c1
+- Column 2 (hundreds): A + A + c1 = E (mod 10), carry c2
+- Column 3 (thousands): N + R + c2 = B (mod 10), carry c3
+- Column 4 (ten thousands): O + E + c3 = O (mod 10), carry c4
+- Column 5 (hundred thousands): D + G + c4 = R
 
-Also, **D ≠ 0**, **G ≠ 0**, **R ≠ 0** (leading digits).
+Let’s proceed step by step.
 
 ---
 
-### Step 2: Analyze column by column
-
-We'll denote carry into column i as **C_i**, where C_0 = 0.
-
-#### Column 0 (units): D + D = T + 10*C1
-→ 2D = T + 10*C1  
-C1 can be 0 or 1 (since 2D ≤ 18 → max carry 1)
-
-So:
-- T = (2D) mod 10
-- C1 = floor(2D / 10)
-
-#### Column 1 (tens): L + L + C1 = R + 10*C2  
-→ 2L + C1 = R + 10*C2
-
-C2 ∈ {0,1,2} (since max: 2*9 + 1 = 19 → carry 1, so C2 ≤ 1)
-
-Wait: 2L + C1 ≤ 2*9 + 1 = 19 → C2 ≤ 1
-
-So C2 ∈ {0,1}
-
-#### Column 2 (hundreds): A + A + C2 = E + 10*C3  
-→ 2A + C2 = E + 10*C3
-
-C3 ∈ {0,1}
-
-#### Column 3 (thousands): N + R + C3 = B + 10*C4  
-→ N + R + C3 = B + 10*C4
-
-C4 ∈ {0,1} (since N,R ≤ 9 → max sum 9+9+1 = 19)
-
-#### Column 4 (ten thousands): O + E + C4 = O + 10*C5  
-→ O + E + C4 = O + 10*C5  
-Subtract O from both sides:
-→ E + C4 = 10*C5
-
-So:
-- E + C4 must be a multiple of 10
-- E is digit 0-9, C4 ∈ {0,1} → E + C4 ∈ {0,1,...,10}
-→ So E + C4 = 10 (since E ≥ 0, and if E=0, C4=0 → 0, but then C5=0, but let’s see)
-
-So two cases:
-- E + C4 = 0 → E=0, C4=0 → C5=0
-- E + C4 = 10 → C5=1
-
-But E = 0 and C4 = 0 → E=0 is possible, but let's see.
-
-But if E + C4 = 0 → E=0, C4=0 → C5=0
-
-But E + C4 = 10 → E = 10 - C4 → so if C4=1 → E=9; if C4=0 → E=10 (invalid)
-
-So only possibilities:
-- E = 0, C4 = 0 → C5 = 0
-- E = 9, C4 = 1 → C5 = 1
-
-So:
-→ Either:
-  - Case A: E = 0, C4 = 0, C5 = 0
-  - Case B: E = 9, C4 = 1, C5 = 1
-
-We'll explore both.
-
-But note: R is the leading digit of the sum → R ≠ 0
-
-Also D ≠ 0, G ≠ 0
-
-Now look at **Column 5**:
-
-#### Column 5 (hundred thousands): D + G + C5 = R + 10*C6
-
-But ROBERT is 6 digits, same as DONALD and GERALD → so no extra digit → C6 must be 0
-
-So:
-→ D + G + C5 = R
-
-But D and G are at least 1 → D + G ≥ 2, and R is a single digit → so D + G + C5 ≤ 9
-
-Since C5 is either 0 or 1:
-
-- If C5 = 0 → D + G = R → but D ≥ 1, G ≥ 1 → R ≥ 2, but D and G are at least 1 → but D + G = R → since R is single digit, D + G ≤ 9
-- If C5 = 1 → D + G + 1 = R → R = D + G + 1
-
-But D and G ≥ 1 → so R ≥ 3
-
-But also, D + G + C5 = R < 10 → so D + G ≤ 9 if C5=0, or D + G ≤ 8 if C5=1
-
-But also, from column 4, we have two cases.
-
-Let’s consider **Case B** first: E = 9, C4 = 1, C5 = 1
-
-This is more likely because E = 0 might conflict with T or others.
-
-So assume:
-→ E = 9
-→ C4 = 1
-→ C5 = 1
-
-Then from column 5:
-→ D + G + 1 = R  → R = D + G + 1
-
-So R > D and R > G
-
-Also D ≥ 1, G ≥ 1 → R ≥ 1 + 1 + 1 = 3 → OK
-
-Now go back to column 0: 2D = T + 10*C1
-
-Possible values for D (1-9), D ≠ 0
-
-Let’s try possible D and compute T and C1.
-
-We can make a table:
-
-| D | 2D | T | C1 |
-|---|----|----|-----|
-| 1 | 2  | 2  | 0   |
-| 2 | 4  | 4  | 0   |
-| 3 | 6  | 6  | 0   |
-| 4 | 8  | 8  | 0   |
-| 5 | 10 | 0  | 1   |
-| 6 | 12 | 2  | 1   |
-| 7 | 14 | 4  | 1   |
-| 8 | 16 | 6  | 1   |
-| 9 | 18 | 8  | 1   |
-
-So T is even in all cases, and C1 = 1 if D ≥ 5
-
-Now column 1: 2L + C1 = R + 10*C2
-
-C2 ∈ {0,1}
-
-So R = (2L + C1) mod 10, and C2 = floor((2L + C1)/10)
-
-Now column 2: 2A + C2 = E + 10*C3
-
-But E = 9 → so:
-
-2A + C2 = 9 + 10*C3
-
-C3 ∈ {0,1}
-
-So:
-- If C3 = 0 → 2A + C2 = 9 → 2A = 9 - C2 → so C2 must be odd → C2 = 1 → 2A = 8 → A = 4
-- If C3 = 1 → 2A + C2 = 19 → 2A = 19 - C2 → max 2A = 18 → 19 - C2 ≤ 18 → C2 ≥ 1 → C2=1 → 2A = 18 → A = 9
-
-But E = 9 → so A cannot be 9 → conflict
-
-So only possibility: C3 = 0, C2 = 1, A = 4
-
-So:
-→ A = 4
-→ C2 = 1
-→ C3 = 0
-
-Now back to column 1: 2L + C1 = R + 10*C2 = R + 10*1 = R + 10
-
-So:
-→ 2L + C1 = R + 10
-→ R = 2L + C1 - 10
-
-Since R ≥ 1, so 2L + C1 ≥ 11
-
-C1 is either 0 or 1 (from column 0)
-
-So:
-- If C1 = 0 → 2L ≥ 11 → L ≥ 5.5 → L ≥ 6
-- If C1 = 1 → 2L ≥ 10 → L ≥ 5
-
-But R = 2L + C1 - 10 must be digit 1-9
-
-Now from column 0, C1 = 1 if D ≥ 5
-
-Let’s suppose D ≥ 5 → C1 = 1
-
-Then R = 2L + 1 - 10 = 2L - 9
-
-L ≥ 5 → try L = 5 → R = 10 - 9 = 1
-L = 6 → R = 12 - 9 = 3
-L = 7 → R = 14 - 9 = 5
-L = 8 → R = 16 - 9 = 7
-L = 9 → R = 18 - 9 = 9
-
-But E = 9 → so R ≠ 9 → L ≠ 9
-
-So possible (L, R): (5,1), (6,3), (7,5), (8,7)
-
-Now from column 5: R = D + G + 1
-
-So R = D + G + 1 ≥ 1 + 1 + 1 = 3 → so R ≥ 3 → eliminate (L=5, R=1)
-
-So possible: (6,3), (7,5), (8,7)
-
-Now from column 0: D ≥ 5 → D ∈ {5,6,7,8,9}
-
-But T = (2D) mod 10
-
-Also, R = D + G + 1 → G = R - D - 1
-
-G ≥ 1 → R - D - 1 ≥ 1 → R ≥ D + 2
-
-So R > D + 1
-
-Let’s try each possible (L,R) pair:
+### Step 1: Column 0 (units)
+D + D = T + 10*c0  
+So: 2D = T + 10*c0  
+c0 ∈ {0,1} (since 2D ≤ 18 → max carry 1)
+
+So T = (2D) mod 10  
+c0 = floor(2D / 10)
 
 ---
 
-#### Try (L=6, R=3)
+### Step 2: Column 1 (tens)
+L + L + c0 = R + 10*c1  
+2L + c0 = R + 10*c1
 
-Then R = 3
+c1 ∈ {0,1,2} but realistically max 2L + 1 = 2*9 + 1 = 19 → c1 ∈ {0,1}
 
-But R = D + G + 1 → D + G = 2 → D ≥ 5 → impossible
+So: R = (2L + c0) mod 10  
+c1 = floor((2L + c0)/10)
 
-Reject.
+---
 
-#### Try (L=7, R=5)
+### Step 3: Column 2 (hundreds)
+A + A + c1 = E + 10*c2  
+2A + c1 = E + 10*c2
 
-Then R = 5
+E = (2A + c1) mod 10  
+c2 = floor((2A + c1)/10)
 
-So D + G = R - 1 = 4
+---
 
-But D ≥ 5 → D ≥ 5 → D + G ≥ 5 → cannot be 4 → impossible
+### Step 4: Column 3 (thousands)
+N + R + c2 = B + 10*c3  
+B = (N + R + c2) mod 10  
+c3 = floor((N + R + c2)/10)
 
-Reject.
+---
 
-#### Try (L=8, R=7)
+### Step 5: Column 4 (ten thousands)
+O + E + c3 = O + 10*c4  
+Subtract O from both sides:  
+E + c3 = 10*c4
 
-Then R = 7
+So: E + c3 is a multiple of 10.
 
-So D + G = R - 1 = 6
+E is a digit 0–9, c3 ∈ {0,1,2} (max: N+R+c2 ≤ 9+9+1 = 19 → c3 ≤ 1? Wait: N + R + c2 ≤ 9 + 9 + 1 = 19 → c3 ≤ 1 → c3 ∈ {0,1}
 
-D ≥ 5 → possible D = 5 → G = 1
-D = 6 → G = 0 → but G ≠ 0 → invalid
-D = 7 → G = -1 → invalid
+Wait: 2A + c1 ≤ 18 + 1 = 19 → c2 ≤ 1  
+Then N + R + c2 ≤ 9 + 9 + 1 = 19 → c3 ≤ 1
 
-So only possibility: D = 5, G = 1
+So c3 ∈ {0,1}
 
-Now check column 0: D = 5 → 2D = 10 → T = 0, C1 = 1 → OK
+Then E + c3 = 10*c4 → possible only if:
 
-T = 0
+- c4 = 0 → E + c3 = 0 → E = 0, c3 = 0 → possible
+- c4 = 1 → E + c3 = 10 → E = 10 - c3 → since c3 ∈ {0,1}, E = 10 or 9 → E=9 if c3=1, E=10 invalid → so E=9, c3=1
+- c4 = 2 → E + c3 = 20 → impossible since E ≤ 9, c3 ≤ 1 → max 10
 
-Now L = 8
+So possibilities:
+- Case A: c4 = 0 → E = 0, c3 = 0
+- Case B: c4 = 1 → E = 9, c3 = 1
 
-A = 4
+Let’s analyze both.
 
-E = 9
+But E = 0? Possible, but E is not a leading digit (GERALD → G is leading, not E), so E can be 0.
 
-R = 7
+But let’s see.
 
-D = 5
+Also, D, G, R ≠ 0.
 
-G = 1
+Now, in column 5:
 
-T = 0
+### Step 6: Column 5 (hundred thousands)
+D + G + c4 = R + 10*c5
 
-Now check column 1: 2L + C1 = 2*8 + 1 = 17 → R + 10*C2 = 7 + 10*1 = 17 → OK, C2 = 1
+But this is the leftmost column, so c5 must be 0 (no higher digit). So:
 
-Column 2: 2A + C2 = 2*4 + 1 = 9 = E → E = 9 → OK, C3 = 0
+D + G + c4 = R
 
-Now column 3: N + R + C3 = B + 10*C4
+But D and G are at least 1, so D + G ≥ 2, R is a single digit → so D + G + c4 ≤ 9 → since R ≤ 9.
+
+But D and G ≥ 1 → D + G ≥ 2 → R ≥ 2 + c4
+
+But D + G + c4 = R → and D + G ≥ 2 → so R ≥ 2 + c4
+
+But R is a single digit → R ≤ 9
+
+So D + G + c4 = R → implies that D + G + c4 ≤ 9
+
+But D and G are at least 1 → minimum D + G = 2 → so R ≥ 2 + c4
+
+But R = D + G + c4 → so R is exactly D + G + c4
+
+So R > D and R > G, unless c4 is large.
+
+But D + G ≥ 2 → so R ≥ 2 + c4
+
+Now, recall from column 4: E + c3 = 10*c4
+
+So c4 is either 0 or 1.
+
+Try **Case B**: c4 = 1 → then E = 9, c3 = 1
+
+Then R = D + G + 1
+
+Since D ≥ 1, G ≥ 1 → D + G ≥ 2 → R ≥ 3
+
+Also R = D + G + 1 ≤ 9 → so D + G ≤ 8
+
+So D and G are small digits.
+
+Also, E = 9 → so digit 9 is taken.
+
+Now, Case A: c4 = 0 → E = 0, c3 = 0 → then R = D + G
+
+But D ≥ 1, G ≥ 1 → R ≥ 2
+
+Also R = D + G ≤ 9 → D + G ≤ 9
+
+But let’s see which case is more promising.
+
+Let’s try **Case B**: c4 = 1, E = 9, c3 = 1
+
+So E = 9
+
+c3 = 1 → from column 3: N + R + c2 = B + 10*c3 = B + 10 → so:
+N + R + c2 = B + 10 → B = N + R + c2 - 10
+
+c2 ∈ {0,1} → from column 2: 2A + c1 = E + 10*c2 = 9 + 10*c2
+
+So 2A + c1 = 9 or 19
+
+But 2A ≤ 18 → 2A + c1 ≤ 19 → so possible.
+
+- If c2 = 0 → 2A + c1 = 9
+- If c2 = 1 → 2A + c1 = 19 → 2A = 19 - c1 ≥ 18 → so A = 9, c1 = 1
+
+But E = 9 → A cannot be 9 → so A ≠ 9 → so 2A ≤ 18 → 2A = 18 → A = 9 → only possibility → but E=9 → conflict.
+
+So c2 = 1 → 2A + c1 = 19 → only possible if A = 9, c1 = 1 → but E = 9 → A = 9 → conflict.
+
+So c2 = 1 impossible in Case B.
+
+Thus c2 = 0 → 2A + c1 = 9
+
+So 2A = 9 - c1
+
+c1 ∈ {0,1} → so:
+
+- c1 = 1 → 2A = 8 → A = 4
+- c1 = 0 → 2A = 9 → A = 4.5 → invalid
+
+So only possibility: c1 = 1, A = 4
+
+So far:
+- E = 9
+- A = 4
+- c1 = 1
+- c2 = 0
+- c3 = 1
+- c4 = 1
+
+Now go back to column 1 (tens):
+2L + c0 = R + 10*c1 = R + 10*1 = R + 10
+
+So 2L + c0 = R + 10 → R = 2L + c0 - 10
+
+L ≥ 0 → 2L ≥ 0 → R ≥ 0 + c0 - 10 → but R ≥ 1
+
+So 2L + c0 ≥ 10 → since R ≥ 1 → 2L + c0 ≥ 11? Not necessarily, R ≥ 1 → so 2L + c0 ≥ 11 → min R=1 → 2L + c0 = 11 → R=1
+
+But 2L + c0 ≥ 10
+
+c0 ∈ {0,1} → from column 0: 2D = T + 10*c0
+
+So R = 2L + c0 - 10
+
+R must be between 1 and 9.
+
+So 2L + c0 ≥ 10 → L ≥ 5 (since 2*5=10)
+
+Try L = 5 → 2L = 10 → R = 10 + c0 - 10 = c0 → so R = 0 or 1
+
+But R ≠ 0 → so R = 1 if c0 = 1
+
+L = 6 → 2L = 12 → R = 12 + c0 - 10 = 2 + c0 → R = 2 or 3
+
+L = 7 → R = 4 + c0 → 4 or 5
+
+L = 8 → R = 6 + c0 → 6 or 7
+
+L = 9 → R = 8 + c0 → 8 or 9 → but E = 9 → R ≠ 9 → so R = 8 if c0 = 0, or invalid if c0 = 1 → R = 9 → conflict
+
+So possible L values: 5,6,7,8,9 (but 9 only if c0 = 0)
+
+Now column 0: 2D = T + 10*c0
+
+D ≠ 0
+
+Try possible D.
+
+We also have from column 5: R = D + G + c4 = D + G + 1
+
+So R = D + G + 1
+
+D ≥ 1, G ≥ 1 → D + G ≥ 2 → R ≥ 3
+
+Also D + G ≤ 8 → since R ≤ 9
+
+So D and G are small digits.
+
+Now, R = D + G + 1 → so R ≥ 3
+
+Also from column 1: R = 2L + c0 - 10
+
+So combine:
+D + G + 1 = 2L + c0 - 10 → D + G = 2L + c0 - 11
+
+But D + G ≥ 2 → so 2L + c0 - 11 ≥ 2 → 2L + c0 ≥ 13
+
+So 2L ≥ 13 - c0 ≥ 12 (if c0=1) or 13 (if c0=0)
+
+So:
+- If c0 = 0 → 2L ≥ 13 → L ≥ 6.5 → L ≥ 7
+- If c0 = 1 → 2L ≥ 12 → L ≥ 6
+
+But also from earlier: R = 2L + c0 - 10 ≥ 3 → 2L + c0 ≥ 13 → same as above.
+
+So 2L + c0 ≥ 13
+
+Now, 2D = T + 10*c0 → T = 2D mod 10
+
+Let’s try possible L values with 2L + c0 ≥ 13
+
+Try L = 7 → 2L = 14 → 14 + c0 ≥ 13 → always true
+
+Then R = 14 + c0 - 10 = 4 + c0 → so R = 4 or 5
+
+But A = 4 → so R ≠ 4 → so R = 5 → c0 = 1
+
+So L = 7, c0 = 1, R = 5
+
+Then D + G = R - 1 = 4 (since R = D + G + 1)
+
+So D + G = 4
+
+D ≥ 1, G ≥ 1, D ≠ G, both ≠ 0
+
+Possible pairs: (1,3), (3,1), (2,2) invalid
+
+So D and G ∈ {1,2,3}, sum to 4
+
+Now c0 = 1 → from column 0: 2D = T + 10*1 → T = 2D - 10
+
+D ≥ 1 → T = 2D - 10 ≥ 0 → 2D ≥ 10 → D ≥ 5
+
+But D is at most 3 from above → D ≤ 3 → 2D ≤ 6 < 10 → T negative → impossible
+
+Contradiction.
+
+So L = 7 fails.
+
+Try L = 8 → 2L = 16 → R = 16 + c0 - 10 = 6 + c0 → R = 6 or 7
+
+A = 4, E = 9 → so R can be 6 or 7
+
+Now 2L + c0 = 16 + c0 ≥ 13 → always true
+
+c0 ∈ {0,1}
+
+R = 6 + c0
+
+Also R = D + G + 1 → D + G = R - 1 = 5 + c0
+
+So D + G = 5 + c0
+
+Now from column 0: T = 2D - 10*c0
+
+c0 = 0 or 1
+
+But T must be digit 0–9, D ≠ 0
+
+Also D + G = 5 + c0
+
+Try c0 = 1 → then R = 7, D + G = 6
+
+T = 2D - 10
+
+T ≥ 0 → 2D ≥ 10 → D ≥ 5
+
+D ≥ 5, G ≥ 1, D + G = 6 → so D ≤ 5 → D = 5, G = 1
+
+Then T = 2*5 - 10 = 0
+
+So T = 0
+
+So far:
+- L = 8
+- c0 = 1
+- R = 7
+- D = 5
+- G = 1
+- T = 0
+- A = 4
+- E = 9
+
+Used digits: D=5, G=1, R=7, L=8, A=4, E=9, T=0 → used: 0,1,4,5,7,8,9
+
+Available: 2,3,6
+
+Letters left: O, N, B
+
+Now column 3: N + R + c2 = B + 10*c3
 
 We have:
-R = 7, C3 = 0
-
-So N + 7 = B + 10*C4
-
-Also, from column 4, we had C4 = 1 (because E=9 → C4=1)
-
-So:
-N + 7 = B + 10*1 → N + 7 = B + 10 → N = B + 3
-
-Now N and B are digits, 0-9, not used yet.
-
-Used so far:
-- D = 5
-- O = ?
-- N = ?
-- A = 4
-- L = 8
-- G = 1
-- E = 9
 - R = 7
-- B = ?
-- T = 0
+- c2 = 0 (from earlier)
+- c3 = 1 (from column 4)
+- So: N + 7 + 0 = B + 10*1 → N + 7 = B + 10 → B = N - 3
 
-Used digits: 0(T),1(G),4(A),5(D),7(R),8(L),9(E) → missing: 2,3,6
+B ≥ 0 → N ≥ 3
 
-So available digits: 2,3,6
+N and B are from remaining digits: 2,3,6
 
-Now N = B + 3
+Possible N: 3,6 (since N ≥ 3)
 
-Possible B values from {2,3,6} such that N = B+3 also in {2,3,6}
+If N = 3 → B = 0 → but T = 0 → conflict
 
-Try:
-- B = 2 → N = 5 → but D=5 → taken
-- B = 3 → N = 6 → both available
-- B = 6 → N = 9 → E=9 → taken
+If N = 6 → B = 3
 
-So only possibility: B = 3, N = 6
+So N = 6, B = 3
 
-Now only one digit left: 2 → assign to O
+Then O must be the remaining digit: 2
 
 So O = 2
 
-Now check column 4: O + E + C4 = ?
+Now check column 4: O + E + c3 = O + 10*c4
 
-O = 2, E = 9, C4 = 1 → 2 + 9 + 1 = 12
-
-But column 4: O + E + C4 = O + 10*C5 → 2 + 9 + 1 = 12 → should equal O + 10*C5 = 2 + 10*C5
-
-So 12 = 2 + 10*C5 → 10*C5 = 10 → C5 = 1 → OK
-
-Now column 5: D + G + C5 = 5 + 1 + 1 = 7 = R → R = 7 → OK
-
-Now let’s verify the full addition:
-
-DONALD = D O N A L D = 5 2 6 4 8 5 → 526485
-
-GERALD = G E R A L D = 1 9 7 4 8 5 → 197485
-
-Sum: 526485 + 197485 = ?
-
-Calculate:
-
-526485
-+197485
-= ?
-
-485 + 485 = 970 → write 970
-6485 + 7485 = better to add:
-
-  526485
-+ 197485
---------
-Start from right:
-5+5=10 → 0 carry 1
-8+8+1=17 → 7 carry 1
-4+4+1=9 → 9 carry 0
-6+7+0=13 → 3 carry 1
-2+9+1=12 → 2 carry 1
-5+1+1=7 → 7
-
-So result: 723970
-
-Now ROBERT = R O B E R T = 7 2 3 9 7 0 → 723970 → matches!
-
-Perfect.
-
-Now check uniqueness:
-
-Letters:
-- D = 5
+We have:
 - O = 2
-- N = 6
-- A = 4
-- L = 8
-- G = 1
 - E = 9
-- R = 7
-- B = 3
-- T = 0
+- c3 = 1
+- c4 = 1
 
-All digits 0-9 used exactly once.
+Left: O + E + c3 = 2 + 9 + 1 = 12
 
-Leading digits: D=5≠0, G=1≠0, R=7≠0 → OK
+Right: O + 10*c4 = 2 + 10*1 = 12 → matches.
+
+Now check column 5: D + G + c4 = 5 + 1 + 1 = 7 = R → yes, R=7 → good.
+
+Now check column 2: A + A + c1 = E + 10*c2
+
+A = 4 → 4 + 4 = 8
+
+c1 = 1 → so left: 8 + 1 = 9
+
+E = 9, c2 = 0 → right: 9 + 0 = 9 → good.
+
+Column 1: L + L + c0 = 8 + 8 + 1 = 17
+
+R = 7, c1 = 1 → 7 + 10*1 = 17 → good.
+
+Column 0: D + D = 5 + 5 = 10 → T = 0, c0 = 1 → good.
+
+Now check the full numbers:
+
+DONALD = D O N A L D = 5 2 6 4 8 5 = 526485
+
+GERALD = G E R A L D = 1 9 7 4 8 5 = 197485
+
+Sum: 526485 + 197485 = 723970
+
+ROBERT = R O B E R T = 7 2 3 9 7 0 = 723970 → matches!
+
+All digits used exactly once:
+
+Digits: A=4, B=3, D=5, E=9, G=1, L=8, N=6, O=2, R=7, T=0 → all 0–9 used once.
+
+Leading digits: D=5≠0, G=1≠0, R=7≠0 → good.
 
 All constraints satisfied.
 
 ---
 
-### Final Answer
+Final assignment:
+
+- A = 4
+- B = 3
+- D = 5
+- E = 9
+- G = 1
+- L = 8
+- N = 6
+- O = 2
+- R = 7
+- T = 0
+
+Equation: 526485 + 197485 = 723970
+
+Valid: true
 
 {
   "assignment": {
@@ -514,7 +532,7 @@ All constraints satisfied.
 S1 Parsed Answer: {'assignment': {'A': 4, 'B': 3, 'D': 5, 'E': 9, 'G': 1, 'L': 8, 'N': 6, 'O': 2, 'R': 7, 'T': 0}, 'equation': 'DONALD + GERALD = ROBERT becomes 526485 + 197485 = 723970', 'valid': True}
 S1 Valid/Parse Success: True
 S1 Correct: True
-S1 Tokens: 3958 | Latency: 3242.0ms
+S1 Tokens: 4485 | Latency: 3791.4ms
 
 ============================================================
 === SYSTEM 2 (MP EVALUATOR / JUDGE) ===
@@ -551,415 +569,433 @@ Find **any** valid digit assignment that satisfies all constraints.
 SYSTEM 1 ANSWER (For Evaluation):
 Let's solve the cryptarithmetic puzzle **DONALD + GERALD = ROBERT** step by step.
 
----
-
-### Step 1: Understand the structure
-
 We are given:
 
 ```
-    D O N A L D
-  + G E R A L D
-  -------------
-  = R O B E R T
+  D O N A L D
++ G E R A L D
+-------------
+= R O B E R T
 ```
 
-This is a column-wise addition from right to left, with possible carries.
+Letters: D, O, N, A, L, G, E, R, B, T — 10 unique letters → each digit 0–9 used exactly once.
 
-Let’s label the columns from right to left (starting at position 0):
+Leading digits: D ≠ 0, G ≠ 0, R ≠ 0.
 
-```
-Position:  5 4 3 2 1 0
-           D O N A L D
-         + G E R A L D
-         -------------
-         = R O B E R T
-```
+We will analyze column by column from right to left (units to higher places), considering carries.
 
-So:
-- Position 0 (units): D + D = T (possibly + carry)
-- Position 1 (tens): L + L = R (possibly + carry)
-- Position 2 (hundreds): A + A = E (possibly + carry)
-- Position 3 (thousands): N + R = B (possibly + carry)
-- Position 4 (ten thousands): O + E = O (possibly + carry)
-- Position 5 (hundred thousands): D + G = R (possibly + carry)
-- And possibly a carry into a 7th digit (but ROBERT is 6 digits, so no carry beyond position 5)
+Label the columns (from right to left, starting at 0):
 
-Note: All letters D, O, N, A, L, G, E, R, B, T represent **distinct digits** from 0 to 9. All 10 digits are used exactly once.
+- Column 0 (units): D + D = T (mod 10), carry c0
+- Column 1 (tens): L + L + c0 = R (mod 10), carry c1
+- Column 2 (hundreds): A + A + c1 = E (mod 10), carry c2
+- Column 3 (thousands): N + R + c2 = B (mod 10), carry c3
+- Column 4 (ten thousands): O + E + c3 = O (mod 10), carry c4
+- Column 5 (hundred thousands): D + G + c4 = R
 
-Also, **D ≠ 0**, **G ≠ 0**, **R ≠ 0** (leading digits).
+Let’s proceed step by step.
 
 ---
 
-### Step 2: Analyze column by column
-
-We'll denote carry into column i as **C_i**, where C_0 = 0.
-
-#### Column 0 (units): D + D = T + 10*C1
-→ 2D = T + 10*C1  
-C1 can be 0 or 1 (since 2D ≤ 18 → max carry 1)
-
-So:
-- T = (2D) mod 10
-- C1 = floor(2D / 10)
-
-#### Column 1 (tens): L + L + C1 = R + 10*C2  
-→ 2L + C1 = R + 10*C2
-
-C2 ∈ {0,1,2} (since max: 2*9 + 1 = 19 → carry 1, so C2 ≤ 1)
-
-Wait: 2L + C1 ≤ 2*9 + 1 = 19 → C2 ≤ 1
-
-So C2 ∈ {0,1}
-
-#### Column 2 (hundreds): A + A + C2 = E + 10*C3  
-→ 2A + C2 = E + 10*C3
-
-C3 ∈ {0,1}
-
-#### Column 3 (thousands): N + R + C3 = B + 10*C4  
-→ N + R + C3 = B + 10*C4
-
-C4 ∈ {0,1} (since N,R ≤ 9 → max sum 9+9+1 = 19)
-
-#### Column 4 (ten thousands): O + E + C4 = O + 10*C5  
-→ O + E + C4 = O + 10*C5  
-Subtract O from both sides:
-→ E + C4 = 10*C5
-
-So:
-- E + C4 must be a multiple of 10
-- E is digit 0-9, C4 ∈ {0,1} → E + C4 ∈ {0,1,...,10}
-→ So E + C4 = 10 (since E ≥ 0, and if E=0, C4=0 → 0, but then C5=0, but let’s see)
-
-So two cases:
-- E + C4 = 0 → E=0, C4=0 → C5=0
-- E + C4 = 10 → C5=1
-
-But E = 0 and C4 = 0 → E=0 is possible, but let's see.
-
-But if E + C4 = 0 → E=0, C4=0 → C5=0
-
-But E + C4 = 10 → E = 10 - C4 → so if C4=1 → E=9; if C4=0 → E=10 (invalid)
-
-So only possibilities:
-- E = 0, C4 = 0 → C5 = 0
-- E = 9, C4 = 1 → C5 = 1
-
-So:
-→ Either:
-  - Case A: E = 0, C4 = 0, C5 = 0
-  - Case B: E = 9, C4 = 1, C5 = 1
-
-We'll explore both.
-
-But note: R is the leading digit of the sum → R ≠ 0
-
-Also D ≠ 0, G ≠ 0
-
-Now look at **Column 5**:
-
-#### Column 5 (hundred thousands): D + G + C5 = R + 10*C6
-
-But ROBERT is 6 digits, same as DONALD and GERALD → so no extra digit → C6 must be 0
-
-So:
-→ D + G + C5 = R
-
-But D and G are at least 1 → D + G ≥ 2, and R is a single digit → so D + G + C5 ≤ 9
-
-Since C5 is either 0 or 1:
-
-- If C5 = 0 → D + G = R → but D ≥ 1, G ≥ 1 → R ≥ 2, but D and G are at least 1 → but D + G = R → since R is single digit, D + G ≤ 9
-- If C5 = 1 → D + G + 1 = R → R = D + G + 1
-
-But D and G ≥ 1 → so R ≥ 3
-
-But also, D + G + C5 = R < 10 → so D + G ≤ 9 if C5=0, or D + G ≤ 8 if C5=1
-
-But also, from column 4, we have two cases.
-
-Let’s consider **Case B** first: E = 9, C4 = 1, C5 = 1
-
-This is more likely because E = 0 might conflict with T or others.
-
-So assume:
-→ E = 9
-→ C4 = 1
-→ C5 = 1
-
-Then from column 5:
-→ D + G + 1 = R  → R = D + G + 1
-
-So R > D and R > G
-
-Also D ≥ 1, G ≥ 1 → R ≥ 1 + 1 + 1 = 3 → OK
-
-Now go back to column 0: 2D = T + 10*C1
-
-Possible values for D (1-9), D ≠ 0
-
-Let’s try possible D and compute T and C1.
-
-We can make a table:
-
-| D | 2D | T | C1 |
-|---|----|----|-----|
-| 1 | 2  | 2  | 0   |
-| 2 | 4  | 4  | 0   |
-| 3 | 6  | 6  | 0   |
-| 4 | 8  | 8  | 0   |
-| 5 | 10 | 0  | 1   |
-| 6 | 12 | 2  | 1   |
-| 7 | 14 | 4  | 1   |
-| 8 | 16 | 6  | 1   |
-| 9 | 18 | 8  | 1   |
-
-So T is even in all cases, and C1 = 1 if D ≥ 5
-
-Now column 1: 2L + C1 = R + 10*C2
-
-C2 ∈ {0,1}
-
-So R = (2L + C1) mod 10, and C2 = floor((2L + C1)/10)
-
-Now column 2: 2A + C2 = E + 10*C3
-
-But E = 9 → so:
-
-2A + C2 = 9 + 10*C3
-
-C3 ∈ {0,1}
-
-So:
-- If C3 = 0 → 2A + C2 = 9 → 2A = 9 - C2 → so C2 must be odd → C2 = 1 → 2A = 8 → A = 4
-- If C3 = 1 → 2A + C2 = 19 → 2A = 19 - C2 → max 2A = 18 → 19 - C2 ≤ 18 → C2 ≥ 1 → C2=1 → 2A = 18 → A = 9
-
-But E = 9 → so A cannot be 9 → conflict
-
-So only possibility: C3 = 0, C2 = 1, A = 4
-
-So:
-→ A = 4
-→ C2 = 1
-→ C3 = 0
-
-Now back to column 1: 2L + C1 = R + 10*C2 = R + 10*1 = R + 10
-
-So:
-→ 2L + C1 = R + 10
-→ R = 2L + C1 - 10
-
-Since R ≥ 1, so 2L + C1 ≥ 11
-
-C1 is either 0 or 1 (from column 0)
-
-So:
-- If C1 = 0 → 2L ≥ 11 → L ≥ 5.5 → L ≥ 6
-- If C1 = 1 → 2L ≥ 10 → L ≥ 5
-
-But R = 2L + C1 - 10 must be digit 1-9
-
-Now from column 0, C1 = 1 if D ≥ 5
-
-Let’s suppose D ≥ 5 → C1 = 1
-
-Then R = 2L + 1 - 10 = 2L - 9
-
-L ≥ 5 → try L = 5 → R = 10 - 9 = 1
-L = 6 → R = 12 - 9 = 3
-L = 7 → R = 14 - 9 = 5
-L = 8 → R = 16 - 9 = 7
-L = 9 → R = 18 - 9 = 9
-
-But E = 9 → so R ≠ 9 → L ≠ 9
-
-So possible (L, R): (5,1), (6,3), (7,5), (8,7)
-
-Now from column 5: R = D + G + 1
-
-So R = D + G + 1 ≥ 1 + 1 + 1 = 3 → so R ≥ 3 → eliminate (L=5, R=1)
-
-So possible: (6,3), (7,5), (8,7)
-
-Now from column 0: D ≥ 5 → D ∈ {5,6,7,8,9}
-
-But T = (2D) mod 10
-
-Also, R = D + G + 1 → G = R - D - 1
-
-G ≥ 1 → R - D - 1 ≥ 1 → R ≥ D + 2
-
-So R > D + 1
-
-Let’s try each possible (L,R) pair:
+### Step 1: Column 0 (units)
+D + D = T + 10*c0  
+So: 2D = T + 10*c0  
+c0 ∈ {0,1} (since 2D ≤ 18 → max carry 1)
+
+So T = (2D) mod 10  
+c0 = floor(2D / 10)
 
 ---
 
-#### Try (L=6, R=3)
+### Step 2: Column 1 (tens)
+L + L + c0 = R + 10*c1  
+2L + c0 = R + 10*c1
 
-Then R = 3
+c1 ∈ {0,1,2} but realistically max 2L + 1 = 2*9 + 1 = 19 → c1 ∈ {0,1}
 
-But R = D + G + 1 → D + G = 2 → D ≥ 5 → impossible
+So: R = (2L + c0) mod 10  
+c1 = floor((2L + c0)/10)
 
-Reject.
+---
 
-#### Try (L=7, R=5)
+### Step 3: Column 2 (hundreds)
+A + A + c1 = E + 10*c2  
+2A + c1 = E + 10*c2
 
-Then R = 5
+E = (2A + c1) mod 10  
+c2 = floor((2A + c1)/10)
 
-So D + G = R - 1 = 4
+---
 
-But D ≥ 5 → D ≥ 5 → D + G ≥ 5 → cannot be 4 → impossible
+### Step 4: Column 3 (thousands)
+N + R + c2 = B + 10*c3  
+B = (N + R + c2) mod 10  
+c3 = floor((N + R + c2)/10)
 
-Reject.
+---
 
-#### Try (L=8, R=7)
+### Step 5: Column 4 (ten thousands)
+O + E + c3 = O + 10*c4  
+Subtract O from both sides:  
+E + c3 = 10*c4
 
-Then R = 7
+So: E + c3 is a multiple of 10.
 
-So D + G = R - 1 = 6
+E is a digit 0–9, c3 ∈ {0,1,2} (max: N+R+c2 ≤ 9+9+1 = 19 → c3 ≤ 1? Wait: N + R + c2 ≤ 9 + 9 + 1 = 19 → c3 ≤ 1 → c3 ∈ {0,1}
 
-D ≥ 5 → possible D = 5 → G = 1
-D = 6 → G = 0 → but G ≠ 0 → invalid
-D = 7 → G = -1 → invalid
+Wait: 2A + c1 ≤ 18 + 1 = 19 → c2 ≤ 1  
+Then N + R + c2 ≤ 9 + 9 + 1 = 19 → c3 ≤ 1
 
-So only possibility: D = 5, G = 1
+So c3 ∈ {0,1}
 
-Now check column 0: D = 5 → 2D = 10 → T = 0, C1 = 1 → OK
+Then E + c3 = 10*c4 → possible only if:
 
-T = 0
+- c4 = 0 → E + c3 = 0 → E = 0, c3 = 0 → possible
+- c4 = 1 → E + c3 = 10 → E = 10 - c3 → since c3 ∈ {0,1}, E = 10 or 9 → E=9 if c3=1, E=10 invalid → so E=9, c3=1
+- c4 = 2 → E + c3 = 20 → impossible since E ≤ 9, c3 ≤ 1 → max 10
 
-Now L = 8
+So possibilities:
+- Case A: c4 = 0 → E = 0, c3 = 0
+- Case B: c4 = 1 → E = 9, c3 = 1
 
-A = 4
+Let’s analyze both.
 
-E = 9
+But E = 0? Possible, but E is not a leading digit (GERALD → G is leading, not E), so E can be 0.
 
-R = 7
+But let’s see.
 
-D = 5
+Also, D, G, R ≠ 0.
 
-G = 1
+Now, in column 5:
 
-T = 0
+### Step 6: Column 5 (hundred thousands)
+D + G + c4 = R + 10*c5
 
-Now check column 1: 2L + C1 = 2*8 + 1 = 17 → R + 10*C2 = 7 + 10*1 = 17 → OK, C2 = 1
+But this is the leftmost column, so c5 must be 0 (no higher digit). So:
 
-Column 2: 2A + C2 = 2*4 + 1 = 9 = E → E = 9 → OK, C3 = 0
+D + G + c4 = R
 
-Now column 3: N + R + C3 = B + 10*C4
+But D and G are at least 1, so D + G ≥ 2, R is a single digit → so D + G + c4 ≤ 9 → since R ≤ 9.
+
+But D and G ≥ 1 → D + G ≥ 2 → R ≥ 2 + c4
+
+But D + G + c4 = R → and D + G ≥ 2 → so R ≥ 2 + c4
+
+But R is a single digit → R ≤ 9
+
+So D + G + c4 = R → implies that D + G + c4 ≤ 9
+
+But D and G are at least 1 → minimum D + G = 2 → so R ≥ 2 + c4
+
+But R = D + G + c4 → so R is exactly D + G + c4
+
+So R > D and R > G, unless c4 is large.
+
+But D + G ≥ 2 → so R ≥ 2 + c4
+
+Now, recall from column 4: E + c3 = 10*c4
+
+So c4 is either 0 or 1.
+
+Try **Case B**: c4 = 1 → then E = 9, c3 = 1
+
+Then R = D + G + 1
+
+Since D ≥ 1, G ≥ 1 → D + G ≥ 2 → R ≥ 3
+
+Also R = D + G + 1 ≤ 9 → so D + G ≤ 8
+
+So D and G are small digits.
+
+Also, E = 9 → so digit 9 is taken.
+
+Now, Case A: c4 = 0 → E = 0, c3 = 0 → then R = D + G
+
+But D ≥ 1, G ≥ 1 → R ≥ 2
+
+Also R = D + G ≤ 9 → D + G ≤ 9
+
+But let’s see which case is more promising.
+
+Let’s try **Case B**: c4 = 1, E = 9, c3 = 1
+
+So E = 9
+
+c3 = 1 → from column 3: N + R + c2 = B + 10*c3 = B + 10 → so:
+N + R + c2 = B + 10 → B = N + R + c2 - 10
+
+c2 ∈ {0,1} → from column 2: 2A + c1 = E + 10*c2 = 9 + 10*c2
+
+So 2A + c1 = 9 or 19
+
+But 2A ≤ 18 → 2A + c1 ≤ 19 → so possible.
+
+- If c2 = 0 → 2A + c1 = 9
+- If c2 = 1 → 2A + c1 = 19 → 2A = 19 - c1 ≥ 18 → so A = 9, c1 = 1
+
+But E = 9 → A cannot be 9 → so A ≠ 9 → so 2A ≤ 18 → 2A = 18 → A = 9 → only possibility → but E=9 → conflict.
+
+So c2 = 1 → 2A + c1 = 19 → only possible if A = 9, c1 = 1 → but E = 9 → A = 9 → conflict.
+
+So c2 = 1 impossible in Case B.
+
+Thus c2 = 0 → 2A + c1 = 9
+
+So 2A = 9 - c1
+
+c1 ∈ {0,1} → so:
+
+- c1 = 1 → 2A = 8 → A = 4
+- c1 = 0 → 2A = 9 → A = 4.5 → invalid
+
+So only possibility: c1 = 1, A = 4
+
+So far:
+- E = 9
+- A = 4
+- c1 = 1
+- c2 = 0
+- c3 = 1
+- c4 = 1
+
+Now go back to column 1 (tens):
+2L + c0 = R + 10*c1 = R + 10*1 = R + 10
+
+So 2L + c0 = R + 10 → R = 2L + c0 - 10
+
+L ≥ 0 → 2L ≥ 0 → R ≥ 0 + c0 - 10 → but R ≥ 1
+
+So 2L + c0 ≥ 10 → since R ≥ 1 → 2L + c0 ≥ 11? Not necessarily, R ≥ 1 → so 2L + c0 ≥ 11 → min R=1 → 2L + c0 = 11 → R=1
+
+But 2L + c0 ≥ 10
+
+c0 ∈ {0,1} → from column 0: 2D = T + 10*c0
+
+So R = 2L + c0 - 10
+
+R must be between 1 and 9.
+
+So 2L + c0 ≥ 10 → L ≥ 5 (since 2*5=10)
+
+Try L = 5 → 2L = 10 → R = 10 + c0 - 10 = c0 → so R = 0 or 1
+
+But R ≠ 0 → so R = 1 if c0 = 1
+
+L = 6 → 2L = 12 → R = 12 + c0 - 10 = 2 + c0 → R = 2 or 3
+
+L = 7 → R = 4 + c0 → 4 or 5
+
+L = 8 → R = 6 + c0 → 6 or 7
+
+L = 9 → R = 8 + c0 → 8 or 9 → but E = 9 → R ≠ 9 → so R = 8 if c0 = 0, or invalid if c0 = 1 → R = 9 → conflict
+
+So possible L values: 5,6,7,8,9 (but 9 only if c0 = 0)
+
+Now column 0: 2D = T + 10*c0
+
+D ≠ 0
+
+Try possible D.
+
+We also have from column 5: R = D + G + c4 = D + G + 1
+
+So R = D + G + 1
+
+D ≥ 1, G ≥ 1 → D + G ≥ 2 → R ≥ 3
+
+Also D + G ≤ 8 → since R ≤ 9
+
+So D and G are small digits.
+
+Now, R = D + G + 1 → so R ≥ 3
+
+Also from column 1: R = 2L + c0 - 10
+
+So combine:
+D + G + 1 = 2L + c0 - 10 → D + G = 2L + c0 - 11
+
+But D + G ≥ 2 → so 2L + c0 - 11 ≥ 2 → 2L + c0 ≥ 13
+
+So 2L ≥ 13 - c0 ≥ 12 (if c0=1) or 13 (if c0=0)
+
+So:
+- If c0 = 0 → 2L ≥ 13 → L ≥ 6.5 → L ≥ 7
+- If c0 = 1 → 2L ≥ 12 → L ≥ 6
+
+But also from earlier: R = 2L + c0 - 10 ≥ 3 → 2L + c0 ≥ 13 → same as above.
+
+So 2L + c0 ≥ 13
+
+Now, 2D = T + 10*c0 → T = 2D mod 10
+
+Let’s try possible L values with 2L + c0 ≥ 13
+
+Try L = 7 → 2L = 14 → 14 + c0 ≥ 13 → always true
+
+Then R = 14 + c0 - 10 = 4 + c0 → so R = 4 or 5
+
+But A = 4 → so R ≠ 4 → so R = 5 → c0 = 1
+
+So L = 7, c0 = 1, R = 5
+
+Then D + G = R - 1 = 4 (since R = D + G + 1)
+
+So D + G = 4
+
+D ≥ 1, G ≥ 1, D ≠ G, both ≠ 0
+
+Possible pairs: (1,3), (3,1), (2,2) invalid
+
+So D and G ∈ {1,2,3}, sum to 4
+
+Now c0 = 1 → from column 0: 2D = T + 10*1 → T = 2D - 10
+
+D ≥ 1 → T = 2D - 10 ≥ 0 → 2D ≥ 10 → D ≥ 5
+
+But D is at most 3 from above → D ≤ 3 → 2D ≤ 6 < 10 → T negative → impossible
+
+Contradiction.
+
+So L = 7 fails.
+
+Try L = 8 → 2L = 16 → R = 16 + c0 - 10 = 6 + c0 → R = 6 or 7
+
+A = 4, E = 9 → so R can be 6 or 7
+
+Now 2L + c0 = 16 + c0 ≥ 13 → always true
+
+c0 ∈ {0,1}
+
+R = 6 + c0
+
+Also R = D + G + 1 → D + G = R - 1 = 5 + c0
+
+So D + G = 5 + c0
+
+Now from column 0: T = 2D - 10*c0
+
+c0 = 0 or 1
+
+But T must be digit 0–9, D ≠ 0
+
+Also D + G = 5 + c0
+
+Try c0 = 1 → then R = 7, D + G = 6
+
+T = 2D - 10
+
+T ≥ 0 → 2D ≥ 10 → D ≥ 5
+
+D ≥ 5, G ≥ 1, D + G = 6 → so D ≤ 5 → D = 5, G = 1
+
+Then T = 2*5 - 10 = 0
+
+So T = 0
+
+So far:
+- L = 8
+- c0 = 1
+- R = 7
+- D = 5
+- G = 1
+- T = 0
+- A = 4
+- E = 9
+
+Used digits: D=5, G=1, R=7, L=8, A=4, E=9, T=0 → used: 0,1,4,5,7,8,9
+
+Available: 2,3,6
+
+Letters left: O, N, B
+
+Now column 3: N + R + c2 = B + 10*c3
 
 We have:
-R = 7, C3 = 0
-
-So N + 7 = B + 10*C4
-
-Also, from column 4, we had C4 = 1 (because E=9 → C4=1)
-
-So:
-N + 7 = B + 10*1 → N + 7 = B + 10 → N = B + 3
-
-Now N and B are digits, 0-9, not used yet.
-
-Used so far:
-- D = 5
-- O = ?
-- N = ?
-- A = 4
-- L = 8
-- G = 1
-- E = 9
 - R = 7
-- B = ?
-- T = 0
+- c2 = 0 (from earlier)
+- c3 = 1 (from column 4)
+- So: N + 7 + 0 = B + 10*1 → N + 7 = B + 10 → B = N - 3
 
-Used digits: 0(T),1(G),4(A),5(D),7(R),8(L),9(E) → missing: 2,3,6
+B ≥ 0 → N ≥ 3
 
-So available digits: 2,3,6
+N and B are from remaining digits: 2,3,6
 
-Now N = B + 3
+Possible N: 3,6 (since N ≥ 3)
 
-Possible B values from {2,3,6} such that N = B+3 also in {2,3,6}
+If N = 3 → B = 0 → but T = 0 → conflict
 
-Try:
-- B = 2 → N = 5 → but D=5 → taken
-- B = 3 → N = 6 → both available
-- B = 6 → N = 9 → E=9 → taken
+If N = 6 → B = 3
 
-So only possibility: B = 3, N = 6
+So N = 6, B = 3
 
-Now only one digit left: 2 → assign to O
+Then O must be the remaining digit: 2
 
 So O = 2
 
-Now check column 4: O + E + C4 = ?
+Now check column 4: O + E + c3 = O + 10*c4
 
-O = 2, E = 9, C4 = 1 → 2 + 9 + 1 = 12
-
-But column 4: O + E + C4 = O + 10*C5 → 2 + 9 + 1 = 12 → should equal O + 10*C5 = 2 + 10*C5
-
-So 12 = 2 + 10*C5 → 10*C5 = 10 → C5 = 1 → OK
-
-Now column 5: D + G + C5 = 5 + 1 + 1 = 7 = R → R = 7 → OK
-
-Now let’s verify the full addition:
-
-DONALD = D O N A L D = 5 2 6 4 8 5 → 526485
-
-GERALD = G E R A L D = 1 9 7 4 8 5 → 197485
-
-Sum: 526485 + 197485 = ?
-
-Calculate:
-
-526485
-+197485
-= ?
-
-485 + 485 = 970 → write 970
-6485 + 7485 = better to add:
-
-  526485
-+ 197485
---------
-Start from right:
-5+5=10 → 0 carry 1
-8+8+1=17 → 7 carry 1
-4+4+1=9 → 9 carry 0
-6+7+0=13 → 3 carry 1
-2+9+1=12 → 2 carry 1
-5+1+1=7 → 7
-
-So result: 723970
-
-Now ROBERT = R O B E R T = 7 2 3 9 7 0 → 723970 → matches!
-
-Perfect.
-
-Now check uniqueness:
-
-Letters:
-- D = 5
+We have:
 - O = 2
-- N = 6
-- A = 4
-- L = 8
-- G = 1
 - E = 9
-- R = 7
-- B = 3
-- T = 0
+- c3 = 1
+- c4 = 1
 
-All digits 0-9 used exactly once.
+Left: O + E + c3 = 2 + 9 + 1 = 12
 
-Leading digits: D=5≠0, G=1≠0, R=7≠0 → OK
+Right: O + 10*c4 = 2 + 10*1 = 12 → matches.
+
+Now check column 5: D + G + c4 = 5 + 1 + 1 = 7 = R → yes, R=7 → good.
+
+Now check column 2: A + A + c1 = E + 10*c2
+
+A = 4 → 4 + 4 = 8
+
+c1 = 1 → so left: 8 + 1 = 9
+
+E = 9, c2 = 0 → right: 9 + 0 = 9 → good.
+
+Column 1: L + L + c0 = 8 + 8 + 1 = 17
+
+R = 7, c1 = 1 → 7 + 10*1 = 17 → good.
+
+Column 0: D + D = 5 + 5 = 10 → T = 0, c0 = 1 → good.
+
+Now check the full numbers:
+
+DONALD = D O N A L D = 5 2 6 4 8 5 = 526485
+
+GERALD = G E R A L D = 1 9 7 4 8 5 = 197485
+
+Sum: 526485 + 197485 = 723970
+
+ROBERT = R O B E R T = 7 2 3 9 7 0 = 723970 → matches!
+
+All digits used exactly once:
+
+Digits: A=4, B=3, D=5, E=9, G=1, L=8, N=6, O=2, R=7, T=0 → all 0–9 used once.
+
+Leading digits: D=5≠0, G=1≠0, R=7≠0 → good.
 
 All constraints satisfied.
 
 ---
 
-### Final Answer
+Final assignment:
+
+- A = 4
+- B = 3
+- D = 5
+- E = 9
+- G = 1
+- L = 8
+- N = 6
+- O = 2
+- R = 7
+- T = 0
+
+Equation: 526485 + 197485 = 723970
+
+Valid: true
 
 {
   "assignment": {
@@ -984,145 +1020,72 @@ Confidence: <number between 0 and 100>%
 
 --- S2 RESPONSE ---
 Stage 1 — Comprehension & Formalization:  
-The problem is a cryptarithmetic puzzle: DONALD + GERALD = ROBERT, with 10 unique letters (D, O, N, A, L, G, E, R, B, T), each representing a distinct digit from 0–9, all used exactly once. Leading digits D, G, R ≠ 0. The addition must hold column-wise with carries.
+The problem is a cryptarithmetic puzzle: DONALD + GERALD = ROBERT, with 10 unique letters (D, O, N, A, L, G, E, R, B, T), each representing a distinct digit 0–9, all used exactly once. Leading digits D, G, R ≠ 0. The columnar addition must hold with carries.
 
-The base LLM claims a solution:
-- D=5, O=2, N=6, A=4, L=8, G=1, E=9, R=7, B=3, T=0
-- Equation: 526485 + 197485 = 723970
+The base LLM provides a full deductive path, identifying constraints per column, analyzing carry propagation, and exploring logical cases. It concludes with an assignment and verifies all columns and constraints. The final assignment is:  
+D=5, O=2, N=6, A=4, L=8, G=1, E=9, R=7, B=3, T=0.
 
-It derived this via column-wise analysis, focusing on constraints from carry propagation, especially using the critical deduction from column 4: E + C4 = 10×C5, leading to two cases, and selecting E=9, C4=1, C5=1.
+Key assumptions in the LLM’s reasoning:
+- It correctly identifies that c5 = 0 (no carry beyond hundred thousands).
+- It derives E + c3 = 10*c4 from column 4, correctly eliminating O from both sides.
+- It explores two cases (c4=0 and c4=1), eliminates c4=0 implicitly, and proceeds with c4=1, E=9, c3=1.
+- It deduces c2=0 due to conflict with E=9 if A=9, which is valid.
+- It uses R = D + G + c4 from column 5, which is correct under c5=0.
 
-It introduces no external facts and only uses constraints from the problem. No hallucinated premises.
+No hallucinated facts are introduced. All deductions are based strictly on the arithmetic structure.
 
 Stage 2 — Preliminary Logical Modeling:  
-Independently modeling:
-- Column 0: 2D ≡ T mod 10, carry C1 = floor(2D/10)
-- Column 1: 2L + C1 = R + 10×C2
-- Column 2: 2A + C2 = E + 10×C3
-- Column 3: N + R + C3 = B + 10×C4
-- Column 4: O + E + C4 = O + 10×C5 ⇒ E + C4 = 10×C5 ⇒ E = 10×C5 − C4
-  - C4 ∈ {0,1}, C5 ∈ {0,1}
-  - So (C5=0 ⇒ E=0, C4=0); (C5=1 ⇒ E=10−C4 ⇒ E=9 or 10) ⇒ only E=9, C4=1, C5=1 valid
-- Column 5: D + G + C5 = R (no carry out, so C6=0)
-  - So R = D + G + 1 if C5=1
+Reconstructing independently:
+- Column 4: O + E + c3 = O + 10*c4 ⇒ E + c3 = 10*c4 ⇒ c4 ∈ {0,1}, so E + c3 ∈ {0,10}.
+- c3 ≤ 1 (from N+R+c2 ≤ 9+9+1=19), so E=0 (c3=0, c4=0) or E=9 (c3=1, c4=1).
+- Column 5: D + G + c4 = R (since c5=0), and D,G ≥1 ⇒ R ≥ 2 + c4.
+- If E=9 ⇒ c4=1 ⇒ R = D + G + 1 ≥ 3, D+G ≤8.
+- Column 2: 2A + c1 = E + 10*c2. If E=9, then 2A + c1 = 9 or 19. 19 ⇒ A=9, conflict. So only 2A + c1 = 9 ⇒ c1=1, A=4.
+- Column 1: 2L + c0 = R + 10*c1 = R + 10 ⇒ R = 2L + c0 -10 ⇒ 2L + c0 ≥10.
+- Column 0: 2D = T + 10*c0 ⇒ T = (2D) mod 10, c0 = floor(2D/10).
+- Then R = D + G + 1 and R = 2L + c0 -10 ⇒ D + G = 2L + c0 -11.
+- D + G ≥2 ⇒ 2L + c0 ≥13.
+- Try L=8 ⇒ 2L=16 ⇒ R=6+c0. A=4, E=9 ⇒ R≠4,9 ⇒ R=6 or 7.
+- D + G = 5 + c0.
+- If c0=1 ⇒ D≥5 (from 2D≥10), D+G=6 ⇒ D=5, G=1 ⇒ T=0.
+- Then R=7.
+- Proceeding: c2=0, c3=1 ⇒ N + R = B + 10 ⇒ B = N - 3.
+- Available digits after assigning D=5, G=1, R=7, L=8, A=4, E=9, T=0 ⇒ left: 2,3,6.
+- N=6 ⇒ B=3, O=2.
+- Verify column 4: O + E + c3 = 2 + 9 + 1 = 12; O + 10*c4 = 2 + 10 = 12 ⇒ OK.
+- Full sum: 526485 + 197485 = 723970 = ROBERT ⇒ correct.
 
-Thus, E=9 is logically forced. This matches the LLM’s Case B.
-
-Then from column 2: 2A + C2 = 9 + 10×C3  
-Try C3=1 ⇒ 2A + C2 = 19 ⇒ max 2A=18 ⇒ C2=1 ⇒ A=9 ⇒ conflict with E=9 ⇒ invalid  
-So C3=0 ⇒ 2A + C2 = 9 ⇒ C2=1 ⇒ A=4
-
-Thus, A=4, C2=1, C3=0 is also forced.
-
-Column 1: 2L + C1 = R + 10×1 ⇒ R = 2L + C1 − 10  
-C1 = 1 iff D ≥ 5
-
-Column 5: R = D + G + 1 ⇒ R > D, R > G
-
-LLM proceeds correctly.
+This matches the LLM’s solution. No contradictions.
 
 Stage 3 — Critical Deductive Evaluation:  
-The LLM tests (L,R) pairs under R = 2L + C1 − 10 and C1=1 (D≥5).  
-Valid (L,R): (5,1), (6,3), (7,5), (8,7), (9,9) → exclude R=9 ⇒ L≠9, and R≥3 ⇒ (5,1) invalid.  
-Then R = D + G + 1 and D≥5 ⇒ D + G = R −1
+The LLM did not exhibit confirmation bias. It:
+- Systematically eliminated cases (e.g., c2=1 impossible due to A=9 conflict).
+- Did not assume values without justification.
+- Correctly handled carry logic.
+- Verified all columns at the end.
 
-Only (L=8, R=7) allows D=5, G=1 (since D=6 ⇒ G=0 invalid)
+No formal fallacies detected. All disjunctions (e.g., L values) were explored with constraints. The elimination of L=7 due to D≥5 vs D≤3 contradiction is valid.
 
-Then D=5 ⇒ 2D=10 ⇒ T=0, C1=1 ⇒ consistent
-
-Then column 3: N + R + C3 = B + 10×C4  
-R=7, C3=0, C4=1 ⇒ N + 7 = B + 10 ⇒ N = B + 3
-
-Used digits: D=5, G=1, A=4, L=8, E=9, R=7, T=0 → used: 0,1,4,5,7,8,9 → available: 2,3,6
-
-Try B=2 ⇒ N=5 (taken), B=3 ⇒ N=6 (available), B=6 ⇒ N=9 (taken) ⇒ only B=3, N=6
-
-Then O=2 (only digit left)
-
-Verify column 4: O + E + C4 = 2 + 9 + 1 = 12  
-Must equal O + 10×C5 = 2 + 10×1 = 12 ⇒ OK
-
-Column 5: D + G + C5 = 5 + 1 + 1 = 7 = R ⇒ OK
-
-Full addition: 526485 + 197485 = 723970  
-ROBERT = 7 2 3 9 7 0 ⇒ matches
-
-All digits unique, no leading zero, all constraints satisfied.
-
-No fallacies detected. The LLM did not affirm the consequent or ignore disjunctive branches. It considered both cases for E, eliminated one correctly, and exhaustively tested feasible (L,R) pairs.
+The only minor omission: it does not explicitly consider Case A (c4=0, E=0), but this is acceptable since Case B leads to a valid solution, and the task asks for *any* valid assignment. Exhaustive case enumeration is not required.
 
 Stage 4 — Decision Confirmation:  
-The base LLM’s conclusion is **strictly entailed** by the premises. Every step follows from arithmetic and constraint logic. No assumptions beyond what is deducible. The solution is valid and complete.
+The LLM’s conclusion is strictly entailed by the premises. Every step follows from arithmetic and constraint logic. The final assignment satisfies all conditions: uniqueness, no leading zero, correct sum.
 
 Stage 5 — Confidence & Soundness Assessment:  
-The reasoning is dense, correct, and exhaustive. The LLM avoids overconfidence by testing cases and rejecting invalid paths. It verifies the final sum numerically. The derivation aligns perfectly with independent reconstruction.
+The reasoning is dense, correct, and self-consistent. No hallucinations. Minor lack of symmetry in not rejecting Case A explicitly, but not required. The verification of all columns and digit usage is complete.
 
-However, as a metacognitive safeguard: Could there be an alternative solution?  
-Suppose E=0 (Case A): then C4=0, C5=0  
-Then column 5: D + G = R  
-But column 4: O + E + C4 = O ⇒ O + 0 + 0 = O ⇒ OK  
-But column 2: 2A + C2 = E + 10×C3 = 0 + 10×C3  
-So 2A + C2 = 10×C3  
-C3 ∈ {0,1}  
-If C3=0 ⇒ 2A + C2 = 0 ⇒ A=0, C2=0 ⇒ A=E=0 ⇒ conflict  
-If C3=1 ⇒ 2A + C2 = 10  
-Possible: A=5,C2=0; A=4,C2=2 (invalid); A=5,C2=0; A=4,C2=2 no; A=5,C2=0; A=6,C2=−2 no; A=5,C2=0; or A=4,C2=2 invalid; A=5,C2=0; or A=6,C2=−2; wait:  
-2A + C2 = 10, C2 ∈ {0,1}  
-So A=5, C2=0; A=4, C2=2 invalid; A=5,C2=0; A=6,C2=−2 no; A=5,C2=0; or A=4.5 no  
-So only A=5, C2=0 or A=4, C2=2 invalid → so A=5, C2=0  
-Then column 1: 2L + C1 = R + 10×C2 = R ⇒ 2L + C1 = R  
-But R = D + G (from col5)  
-Also column 0: 2D = T + 10×C1  
-Now E=0, A=5  
-But D ≠ 0, G ≠ 0, R ≠ 0  
-Now column 1: R = 2L + C1 ≤ 2×9 + 1 = 19, but R < 10  
-But R = D + G ≤ 9 (since no carry)  
-But D ≥ 1, G ≥ 1 ⇒ R ≥ 2  
-But also R = 2L + C1 — small  
-But now column 4: O + 0 + 0 = O ⇒ OK  
-But column 3: N + R + C3 = B + 10×C4 = B (since C4=0)  
-C3=1 (from earlier), so N + R + 1 = B  
-But B ≤ 9, N ≥ 0, R ≥ 2 ⇒ B ≥ 2, but N + R + 1 ≥ 0 + 2 + 1 = 3, but B = N + R + 1 ≤ 9 ⇒ N + R ≤ 8  
-Possible, but now we have E=0, and T from 2D — if D=5, T=0 ⇒ T=E=0 ⇒ conflict  
-D=1 ⇒ T=2, C1=0  
-Then R = 2L + C1 = 2L  
-So R even  
-Also R = D + G = 1 + G ⇒ R = G + 1  
-So 2L = G + 1  
-G ≥ 1 ⇒ R ≥ 2  
-Try L=1 ⇒ R=2 ⇒ G=1 ⇒ G=L=1 ⇒ conflict  
-L=2 ⇒ R=4 ⇒ G=3  
-D=1, G=3, R=4  
-A=5, E=0  
-T=2 (from 2D=2)  
-So T=2, L=2 ⇒ conflict  
-D=2 ⇒ 2D=4 ⇒ T=4, C1=0  
-Then R=2L  
-R = D + G = 2 + G  
-So 2L = 2 + G ⇒ G = 2L − 2  
-L=1 ⇒ G=0 ⇒ invalid (G≠0)  
-L=2 ⇒ G=2 ⇒ G=D=2 ⇒ conflict  
-L=3 ⇒ G=4 ⇒ R=6  
-Then D=2, G=4, R=6, A=5, E=0, T=4 ⇒ G=T=4 ⇒ conflict  
-D=3 ⇒ 2D=6 ⇒ T=6, C1=0  
-R=2L, R=3+G  
-G=2L−3  
-L=2 ⇒ G=1, R=4  
-Then T=6  
-Digits: D=3, G=1, R=4, A=5, E=0, T=6, L=2  
-Used: 0,1,2,3,4,5,6 → available: 7,8,9  
-Column 3: N + R + C3 = B ⇒ N + 4 + 1 = B ⇒ N + 5 = B  
-N and B in {7,8,9}  
-N=7 ⇒ B=12 invalid; N=8 ⇒ B=13; N=9 ⇒ B=14 → all invalid  
-No solution in this path. Continuing would show no valid assignment in Case A.
+However, as a self-check: could there be an error in assuming c3 ≤1?  
+N + R + c2 ≤ 9 + 9 + 1 = 19 ⇒ c3 ≤1 ⇒ yes.  
+E + c3 = 10*c4 ⇒ only possibilities are 0 or 10 ⇒ correct.  
+R = D + G + c4 ⇒ correct since no higher carry.
 
-Thus, Case B is the only feasible path, and the LLM found the unique solution.
+No gaps. The derivation is flawless.
 
-No flaws detected. Confidence is maximized.
+But per metacognitive humility: could the LLM have missed an alternative path? Possibly, but the question only asks for *any* solution, and this one is valid.
 
-Confidence: 98%
+Confidence: 100%
 ---
-S2 Parsed Confidence: 98.0%
+S2 Parsed Confidence: 100.0%
 S2 Escalate Decision: False (Threshold: 80.0%)
 S2 Label Assignment: TN
-S2 Tokens: 2529 | Latency: 63201.4ms
+S2 Tokens: 1399 | Latency: 63422.6ms

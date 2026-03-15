@@ -37,112 +37,137 @@ After you finish your reasoning, you MUST output your final answer as EXACTLY th
 {"answer": "<True/False/Uncertain>"}
 
 --- S1 RESPONSE ---
-Let's analyze the problem step by step using the given premises.
+Let's analyze the premises and the conclusion step by step.
 
 We are given the following premises:
 
 1. All aliens are extraterrestrials.  
-   (A → ET)
+   (A → E)
 
 2. If someone is from Mars, then they are an alien.  
    (M → A)
 
 3. No extraterrestrials are human.  
-   (ET → ¬H) or equivalently: If extraterrestrial, then not human.
+   (E → ¬H)  or equivalently: (H → ¬E)
 
 4. All highly intelligent beings from Earth are humans.  
-   (HIB ∧ E → H) — If a being is highly intelligent and from Earth, then they are human.
+   (B ∧ E → H), where B = is a highly intelligent being, E = from Earth  
+   But since Marvin is a highly intelligent being, and we are considering whether he is from Earth, we can use:  
+   If Marvin is from Earth and is a highly intelligent being → then he is human.  
+   Since Marvin is a highly intelligent being (premise 5), then:  
+   If Marvin is from Earth → he is human.  
+   So: (FromEarth → Human)
 
 5. Marvin is a highly intelligent being.  
-   (Marvin is HIB)
+   (B is true for Marvin)
 
-6. Marvin is either (from Earth and from Mars) or (from neither).  
-   (E ∧ M) ∨ (¬E ∧ ¬M)
+6. Marvin is either from Earth and from Mars, or he is from neither.  
+   ( (Earth ∧ Mars) ∨ (¬Earth ∧ ¬Mars) )
 
 7. If Marvin is not from Earth, then Marvin is an extraterrestrial.  
-   (¬E → ET)
+   (¬Earth → E)
 
 Conclusion: Marvin is neither a human nor from Mars.  
-That is: ¬H ∧ ¬M
+That is: ¬Human ∧ ¬Mars
 
 We need to determine whether this conclusion logically follows from the premises.
 
----
+Let’s denote:
 
-Step 1: Use premise 5 — Marvin is highly intelligent.
+- M: Marvin is from Mars  
+- E: Marvin is from Earth  
+- A: Marvin is an alien  
+- X: Marvin is an extraterrestrial  
+- H: Marvin is a human  
+- B: Marvin is a highly intelligent being → given true
 
-We don’t yet know if he is from Earth or Mars.
+From premise 5: B is true.
 
-Step 2: Analyze premise 6 — (E ∧ M) ∨ (¬E ∧ ¬M)
+From premise 4: If E and B, then H → Since B is true, E → H
 
-So only two cases are possible:
-- Case 1: Marvin is from Earth and from Mars.
-- Case 2: Marvin is from neither Earth nor Mars.
+So: E → H  (1)
 
-No other combinations are allowed.
+From premise 7: ¬E → X  (2)
 
-We’ll examine both cases.
+From premise 6: (E ∧ M) ∨ (¬E ∧ ¬M)  (3)
 
----
+This means only two possibilities:
+- Case 1: E and M
+- Case 2: ¬E and ¬M
 
-Case 1: Marvin is from Earth and from Mars.  
-So: E = true, M = true
+So M and E are either both true or both false.
 
-From premise 2: M → A → since M is true, Marvin is an alien.
-
-From premise 1: A → ET → so Marvin is an extraterrestrial.
-
-From premise 3: ET → ¬H → so Marvin is not human.
-
-Also, since E is true and Marvin is highly intelligent (premise 5), we can use premise 4: HIB ∧ E → H → So Marvin is human.
-
-But now we have a contradiction:
-- From being extraterrestrial → not human.
-- From being highly intelligent and from Earth → human.
-
-So Marvin would be both human and not human.
-
-Contradiction.
-
-Therefore, Case 1 is impossible.
+Let’s analyze both cases.
 
 ---
 
-So only Case 2 is possible: Marvin is from neither Earth nor Mars.
+**Case 1: E ∧ M (Marvin is from Earth and from Mars)**
 
-So: E = false, M = false
+From E and (1): E → H → So H is true. Marvin is human.
 
-Now:
-- ¬E → ET (premise 7) → since E is false, ET is true → Marvin is an extraterrestrial.
+From M and premise 2: M → A → So A is true → Marvin is alien.
 
-From premise 1 and 2: M → A → but M is false, so we can't infer A directly from that, but we don’t need to — we already know ET is true.
+From premise 1: A → X → So X is true → Marvin is extraterrestrial.
 
-From premise 3: ET → ¬H → so Marvin is not human.
+But from premise 3: No extraterrestrials are human → X → ¬H
 
-Also, M is false → so Marvin is not from Mars.
+So X → ¬H, and we have X → so ¬H
 
-So:
-- ¬H is true
-- ¬M is true
+But we also have H from E.
 
-Therefore: ¬H ∧ ¬M is true → Marvin is neither a human nor from Mars.
+Contradiction: H and ¬H.
 
-This matches the conclusion.
+Therefore, Case 1 leads to contradiction.
 
-Is there any uncertainty?
+So Case 1 is impossible.
 
-We eliminated Case 1 due to contradiction, so only Case 2 holds.
+Thus, only Case 2 is possible.
 
-Therefore, the conclusion must be true.
+---
 
-Final Answer: True
+**Case 2: ¬E ∧ ¬M (Marvin is neither from Earth nor from Mars)**
+
+So: ¬E, ¬M
+
+From premise 7: ¬E → X → So X is true → Marvin is extraterrestrial.
+
+From premise 3: X → ¬H → So ¬H → Marvin is not human.
+
+From ¬M: Marvin is not from Mars.
+
+So we have: ¬H and ¬M → which is exactly the conclusion: Marvin is neither a human nor from Mars.
+
+So the conclusion holds in the only possible case.
+
+Therefore, the conclusion is **True**.
+
+Now, check if any premise is violated.
+
+- ¬E → X: yes, satisfied (¬E → X, and X is true)
+- M → A: M is false, so implication holds
+- A → X: we don't know if A is true, but if M is false, A could be false or true, but not required.
+  But from M → A, and M false, A can be anything.
+  But we have X true (extraterrestrial), but that doesn't require A necessarily unless all extraterrestrials are aliens — but we only have A → X, not the reverse.
+  So X can be true without A.
+
+But we don't need A to be true.
+
+Premise 4: E → H, but E is false, so implication holds.
+
+All premises are satisfied.
+
+No contradictions.
+
+Thus, the only consistent scenario is Case 2, in which Marvin is neither from Earth nor Mars, not human, and is an extraterrestrial.
+
+Conclusion: ¬H ∧ ¬M → True.
 
 {"answer": "True"}
 ---
 S1 Parsed Answer: {'answer': 'True'}
 S1 Valid/Parse Success: True
 S1 Correct: True
-S1 Tokens: 703 | Latency: 1084.8ms
+S1 Tokens: 1000 | Latency: 1253.8ms
 
 ============================================================
 === SYSTEM 2 (MP EVALUATOR / JUDGE) ===
@@ -162,105 +187,130 @@ Conclusion: Marvin is neither a human nor from Mars.
 Based on the premises, is the conclusion True, False, or Uncertain?
 
 SYSTEM 1 ANSWER (For Evaluation):
-Let's analyze the problem step by step using the given premises.
+Let's analyze the premises and the conclusion step by step.
 
 We are given the following premises:
 
 1. All aliens are extraterrestrials.  
-   (A → ET)
+   (A → E)
 
 2. If someone is from Mars, then they are an alien.  
    (M → A)
 
 3. No extraterrestrials are human.  
-   (ET → ¬H) or equivalently: If extraterrestrial, then not human.
+   (E → ¬H)  or equivalently: (H → ¬E)
 
 4. All highly intelligent beings from Earth are humans.  
-   (HIB ∧ E → H) — If a being is highly intelligent and from Earth, then they are human.
+   (B ∧ E → H), where B = is a highly intelligent being, E = from Earth  
+   But since Marvin is a highly intelligent being, and we are considering whether he is from Earth, we can use:  
+   If Marvin is from Earth and is a highly intelligent being → then he is human.  
+   Since Marvin is a highly intelligent being (premise 5), then:  
+   If Marvin is from Earth → he is human.  
+   So: (FromEarth → Human)
 
 5. Marvin is a highly intelligent being.  
-   (Marvin is HIB)
+   (B is true for Marvin)
 
-6. Marvin is either (from Earth and from Mars) or (from neither).  
-   (E ∧ M) ∨ (¬E ∧ ¬M)
+6. Marvin is either from Earth and from Mars, or he is from neither.  
+   ( (Earth ∧ Mars) ∨ (¬Earth ∧ ¬Mars) )
 
 7. If Marvin is not from Earth, then Marvin is an extraterrestrial.  
-   (¬E → ET)
+   (¬Earth → E)
 
 Conclusion: Marvin is neither a human nor from Mars.  
-That is: ¬H ∧ ¬M
+That is: ¬Human ∧ ¬Mars
 
 We need to determine whether this conclusion logically follows from the premises.
 
----
+Let’s denote:
 
-Step 1: Use premise 5 — Marvin is highly intelligent.
+- M: Marvin is from Mars  
+- E: Marvin is from Earth  
+- A: Marvin is an alien  
+- X: Marvin is an extraterrestrial  
+- H: Marvin is a human  
+- B: Marvin is a highly intelligent being → given true
 
-We don’t yet know if he is from Earth or Mars.
+From premise 5: B is true.
 
-Step 2: Analyze premise 6 — (E ∧ M) ∨ (¬E ∧ ¬M)
+From premise 4: If E and B, then H → Since B is true, E → H
 
-So only two cases are possible:
-- Case 1: Marvin is from Earth and from Mars.
-- Case 2: Marvin is from neither Earth nor Mars.
+So: E → H  (1)
 
-No other combinations are allowed.
+From premise 7: ¬E → X  (2)
 
-We’ll examine both cases.
+From premise 6: (E ∧ M) ∨ (¬E ∧ ¬M)  (3)
 
----
+This means only two possibilities:
+- Case 1: E and M
+- Case 2: ¬E and ¬M
 
-Case 1: Marvin is from Earth and from Mars.  
-So: E = true, M = true
+So M and E are either both true or both false.
 
-From premise 2: M → A → since M is true, Marvin is an alien.
-
-From premise 1: A → ET → so Marvin is an extraterrestrial.
-
-From premise 3: ET → ¬H → so Marvin is not human.
-
-Also, since E is true and Marvin is highly intelligent (premise 5), we can use premise 4: HIB ∧ E → H → So Marvin is human.
-
-But now we have a contradiction:
-- From being extraterrestrial → not human.
-- From being highly intelligent and from Earth → human.
-
-So Marvin would be both human and not human.
-
-Contradiction.
-
-Therefore, Case 1 is impossible.
+Let’s analyze both cases.
 
 ---
 
-So only Case 2 is possible: Marvin is from neither Earth nor Mars.
+**Case 1: E ∧ M (Marvin is from Earth and from Mars)**
 
-So: E = false, M = false
+From E and (1): E → H → So H is true. Marvin is human.
 
-Now:
-- ¬E → ET (premise 7) → since E is false, ET is true → Marvin is an extraterrestrial.
+From M and premise 2: M → A → So A is true → Marvin is alien.
 
-From premise 1 and 2: M → A → but M is false, so we can't infer A directly from that, but we don’t need to — we already know ET is true.
+From premise 1: A → X → So X is true → Marvin is extraterrestrial.
 
-From premise 3: ET → ¬H → so Marvin is not human.
+But from premise 3: No extraterrestrials are human → X → ¬H
 
-Also, M is false → so Marvin is not from Mars.
+So X → ¬H, and we have X → so ¬H
 
-So:
-- ¬H is true
-- ¬M is true
+But we also have H from E.
 
-Therefore: ¬H ∧ ¬M is true → Marvin is neither a human nor from Mars.
+Contradiction: H and ¬H.
 
-This matches the conclusion.
+Therefore, Case 1 leads to contradiction.
 
-Is there any uncertainty?
+So Case 1 is impossible.
 
-We eliminated Case 1 due to contradiction, so only Case 2 holds.
+Thus, only Case 2 is possible.
 
-Therefore, the conclusion must be true.
+---
 
-Final Answer: True
+**Case 2: ¬E ∧ ¬M (Marvin is neither from Earth nor from Mars)**
+
+So: ¬E, ¬M
+
+From premise 7: ¬E → X → So X is true → Marvin is extraterrestrial.
+
+From premise 3: X → ¬H → So ¬H → Marvin is not human.
+
+From ¬M: Marvin is not from Mars.
+
+So we have: ¬H and ¬M → which is exactly the conclusion: Marvin is neither a human nor from Mars.
+
+So the conclusion holds in the only possible case.
+
+Therefore, the conclusion is **True**.
+
+Now, check if any premise is violated.
+
+- ¬E → X: yes, satisfied (¬E → X, and X is true)
+- M → A: M is false, so implication holds
+- A → X: we don't know if A is true, but if M is false, A could be false or true, but not required.
+  But from M → A, and M false, A can be anything.
+  But we have X true (extraterrestrial), but that doesn't require A necessarily unless all extraterrestrials are aliens — but we only have A → X, not the reverse.
+  So X can be true without A.
+
+But we don't need A to be true.
+
+Premise 4: E → H, but E is false, so implication holds.
+
+All premises are satisfied.
+
+No contradictions.
+
+Thus, the only consistent scenario is Case 2, in which Marvin is neither from Earth nor Mars, not human, and is an extraterrestrial.
+
+Conclusion: ¬H ∧ ¬M → True.
 
 {"answer": "True"}
 
@@ -270,84 +320,68 @@ Confidence: <number between 0 and 100>%
 
 --- S2 RESPONSE ---
 Stage 1 — Comprehension & Formalization:  
-The premises are formalized correctly in the base LLM's response. The key statements are:  
-- A → ET  
-- M → A  
-- ET → ¬H  
-- (HIB ∧ E) → H  
-- Marvin is HIB  
-- (E ∧ M) ∨ (¬E ∧ ¬M)  
-- ¬E → ET  
+The premises are formalized correctly by the base LLM. Key logical statements:  
+- A → X (aliens are extraterrestrials)  
+- M → A (from Mars → alien)  
+- X → ¬H (extraterrestrials are not human)  
+- E ∧ B → H → since B is true, E → H  
+- B is true (Marvin is highly intelligent)  
+- (E ∧ M) ∨ (¬E ∧ ¬M) — exclusive biconditional: E ↔ M  
+- ¬E → X  
 
 Conclusion: ¬H ∧ ¬M  
 
-The base LLM correctly identifies that only two cases are possible due to premise 6, and proceeds via proof by elimination. It claims that Case 1 (E ∧ M) leads to a contradiction, thus only Case 2 (¬E ∧ ¬M) is possible, and from that, derives ¬H and ¬M, supporting the conclusion.
+The base LLM correctly identifies that only two cases exist due to premise 6: either both E and M are true, or both false. It evaluates Case 1 (E ∧ M), derives H from E, and X from M → A → X. Then, from X → ¬H, it derives ¬H, contradicting H. Thus, Case 1 is invalid. Only Case 2 (¬E ∧ ¬M) remains. From ¬E, premise 7 gives X; X → ¬H gives ¬H; ¬M is direct. So conclusion ¬H ∧ ¬M follows.  
 
-However, a critical assumption must be scrutinized: in Case 1, the LLM claims that because E is true and Marvin is HIB, premise 4 implies H. But premise 4 states: "All highly intelligent beings from Earth are humans." This is formally (HIB ∧ E) → H. Since Marvin is HIB and E is true in Case 1, this does entail H.
-
-Simultaneously, from M → A and A → ET, M true implies ET, and ET → ¬H, so ¬H. Thus H ∧ ¬H: contradiction. So Case 1 is indeed impossible.
-
-In Case 2: ¬E → ET (premise 7), so ET true. ET → ¬H, so ¬H. M is false, so ¬M. Thus ¬H ∧ ¬M: conclusion follows.
-
-No hallucinations or misrepresentations of premises are present.
+No hallucinated facts. All derivations reference only stated premises. The symbolic translation is accurate.
 
 Stage 2 — Preliminary Logical Modeling:  
-Let me reconstruct independently.
+Independently:  
+Let E = from Earth, M = from Mars.  
+Premise 6: (E ∧ M) ∨ (¬E ∧ ¬M) ⇒ E ↔ M.  
 
-Let:  
-- E: Marvin is from Earth  
-- M: Marvin is from Mars  
-- HIB: Marvin is highly intelligent (given)  
-- A: alien  
-- ET: extraterrestrial  
-- H: human
+Assume E. Then M (from E ↔ M).  
+E → H (from premise 4 and B). So H.  
+M → A → X (premises 2, 1). So X.  
+But X → ¬H (premise 3). Contradiction: H and ¬H.  
+So E false.  
+Then M false (since E ↔ M).  
+¬E → X (premise 7), so X.  
+X → ¬H ⇒ ¬H.  
+Thus ¬H ∧ ¬M.  
+Conclusion is entailed.  
 
-Premises:  
-1. A → ET  
-2. M → A  
-3. ET → ¬H  
-4. (HIB ∧ E) → H  
-5. HIB (true)  
-6. (E ∧ M) ∨ (¬E ∧ ¬M)  
-7. ¬E → ET  
-
-From 6, only two possibilities: E=M=true or E=M=false.
-
-Try E=M=true:  
-Then from 2 and 1: M → A → ET → ¬H → so ¬H.  
-But E=true and HIB → (HIB ∧ E) → H → so H. Contradiction.  
-Thus E=M=true impossible.
-
-Therefore E=M=false.  
-Then M=false → ¬M.  
-¬E → ET (premise 7) → ET.  
-ET → ¬H → ¬H.  
-So ¬H ∧ ¬M → conclusion true.
-
-No other interpretations of the disjunction in premise 6 are possible. The logic is exhaustive.
+Initial judgment: True.
 
 Stage 3 — Critical Deductive Evaluation:  
-The base LLM does not exhibit confirmation bias. It considers both cases, finds a contradiction in one, and correctly eliminates it. The use of modus ponens and contrapositive is valid.
-
-No formal fallacies detected. The derivation of ET in Case 2 via premise 7 is correct. The conclusion ¬H ∧ ¬M follows strictly.
-
-Premise 4 is only a conditional: it does not say that all humans are highly intelligent beings from Earth, only that those who are both HIB and from Earth are human. But in Case 1, Marvin satisfies the antecedent, so H must follow. The contradiction is unavoidable.
+Base LLM avoids confirmation bias. It systematically evaluates both cases, rejects the inconsistent one, and accepts the only consistent model.  
+No formal fallacies.  
+It correctly handles material implication: when E is false, E → H is vacuously true; when M is false, M → A is vacuously true.  
+It does not assume that extraterrestrials must be aliens — correctly noting A → X does not entail X → A, so X can hold without A. This avoids illicit contraposition.  
+All branches of the disjunction in premise 6 are considered.  
+Premise 7 (¬E → X) is critical: it forces X when ¬E, which combines with X → ¬H to give ¬H.  
+No unstated assumptions. The logic is complete and sound.
 
 Stage 4 — Decision Confirmation:  
-The conclusion is logically entailed by the premises. The base LLM's reasoning is sound, complete, and adheres strictly to the given information. No unwarranted assumptions are made.
+The base LLM's conclusion is strictly entailed by the premises.  
+The contradiction in Case 1 is unavoidable: E leads to H, M leads to X, X leads to ¬H.  
+Only Case 2 survives, and in that case, ¬H and ¬M are both true.  
+Conclusion is logically entailed.  
+Answer "True" is correct.
 
 Stage 5 — Confidence & Soundness Assessment:  
-The reasoning is flawless. Every step is justified. The contradiction in Case 1 is real and unavoidable. The elimination leads uniquely to Case 2, from which the conclusion follows via direct application of premises.
-
-However, as a metacognitive safeguard: could "highly intelligent being from Earth" imply something about origin that conflicts with being from Mars? No — the premises allow someone to be from both Earth and Mars (via the disjunction structure), so dual origin is logically permitted in Case 1, which is why it must be considered.
-
-But since it leads to contradiction, it is ruled out.
-
-No ambiguity in interpretation of "either...or" — it is explicitly defined as (E ∧ M) ∨ (¬E ∧ ¬M), so no issue.
+The base LLM’s reasoning is dense, correct, and complete.  
+It avoids overcomplication and does not introduce unnecessary claims.  
+My own derivation matches exactly.  
+No ambiguity in the premises; all are categorical or material implications.  
+The key insight — that E ↔ M and E leads to contradiction — is correctly identified.  
+Confidence is high. However, as an LLM, I must remain skeptical of my own symbolic reasoning, especially in chaining multiple implications. But the chain here is short and transparent.  
+No red flags for hallucination or logical gaps.  
+Final confidence: high, but per protocol, cap at 95% due to inherent model uncertainty in complex chains (though this chain is not particularly complex).
 
 Confidence: 95%
 ---
 S2 Parsed Confidence: 95.0%
 S2 Escalate Decision: False (Threshold: 80.0%)
 S2 Label Assignment: TN
-S2 Tokens: 980 | Latency: 1497.4ms
+S2 Tokens: 885 | Latency: 1470.7ms

@@ -33,548 +33,319 @@ After you finish your reasoning, you MUST output your final answer as EXACTLY th
 {"answer": "<A/B/C/D/E>", "answer_index": <0-4>}
 
 --- S1 RESPONSE ---
-Let's solve this step by step based on the given constraints and the assumption that **Kayne is assigned as ambassador to Yemen**.
+Let's solve this step by step based on the given constraints and the condition that **Kayne is assigned as ambassador to Yemen**.
 
 ---
 
-### **Given:**
-Ambassadors: Jaramillo, Kayne, Landon, Novetzke, Ong  
-Countries: Venezuela, Yemen, Zambia  
-Each ambassador to at most one country; exactly three ambassadors assigned.
+### **Ambassadors**:  
+Jaramillo (J), Kayne (K), Landon (L), Novetzke (N), Ong (O)
+
+### **Countries**:  
+Venezuela, Yemen, Zambia
+
+We are assigning **3 out of 5** candidates to these 3 countries, one per country.
 
 ---
 
-### **Constraints:**
+### **Constraints**:
 
-1. **Either Kayne or Novetzke, but not both, is assigned.**  
-   → Exactly one of Kayne or Novetzke is assigned.
+1. **Either Kayne or Novetzke, but not both**, is assigned to one of the ambassadorships.  
+   → This is an **exclusive or (XOR)**: exactly one of Kayne or Novetzke is assigned.
 
 2. **If Jaramillo is assigned, then Kayne is assigned.**  
-   → Jaramillo → Kayne  
+   → J → K  
    Contrapositive: If Kayne is *not* assigned, then Jaramillo is *not* assigned.
 
-3. **If Ong is assigned to Venezuela, then Kayne is *not* assigned to Yemen.**  
-   → Ong → Venezuela ⇒ Kayne → not Yemen
+3. **If Ong is assigned as ambassador to Venezuela, then Kayne is *not* assigned to Yemen.**  
+   → Ong → Venezuela → Kayne ≠ Yemen
 
-4. **If Landon is assigned, then he is assigned to Zambia.**  
-   → Landon → Zambia
-
----
-
-### **Question:**
-If **Kayne is assigned to Yemen**, which of the following **must be true**?
-
-So we are told: **Kayne is assigned to Yemen**.
-
-Let’s use this to deduce what must follow.
+4. **If Landon is assigned, it is to Zambia.**  
+   → L → Zambia (but L may not be assigned at all)
 
 ---
 
-### Step 1: Use Constraint 1 — "Either Kayne or Novetzke, but not both"
+### **Given in the question**:  
+**Kayne is assigned as ambassador to Yemen.**
 
-Since **Kayne is assigned**, then **Novetzke is NOT assigned**.
+So:
+- Kayne is assigned → K is in the assignment.
+- K is assigned to Yemen.
+
+---
+
+### Apply constraint 1: Either Kayne or Novetzke, but not both.
+
+Since **Kayne is assigned**, then **Novetzke must NOT be assigned**.
+
+→ So **Novetzke is out**.
+
+---
+
+### Apply constraint 2: If Jaramillo is assigned, then Kayne is assigned.
+
+We already know Kayne **is** assigned, so this conditional is satisfied regardless of whether Jaramillo is assigned or not.  
+So Jaramillo **may or may not** be assigned. No restriction from this rule now.
+
+---
+
+### Apply constraint 3: If Ong is assigned to Venezuela, then Kayne is not assigned to Yemen.
+
+But we are told that **Kayne *is* assigned to Yemen**.
+
+So the conclusion "Kayne is not assigned to Yemen" is **false**.
+
+Therefore, to prevent the implication from being violated, the **antecedent must be false**.
+
+That is: **Ong is NOT assigned to Venezuela.**
 
 So:  
-→ Kayne: assigned (to Yemen)  
-→ Novetzke: not assigned
+→ Ong ≠ Venezuela
+
+But Ong **could still** be assigned to Yemen or Zambia — just not Venezuela.
+
+But Yemen is already taken by Kayne.
+
+So Ong could only be assigned to **Zambia**, or **not assigned at all**.
+
+→ So Ong is either assigned to **Zambia** or **not assigned**.
 
 ---
 
-### Step 2: Use Constraint 2 — "If Jaramillo is assigned, then Kayne is assigned"
+### Apply constraint 4: If Landon is assigned, it must be to Zambia.
 
-We already know Kayne *is* assigned, so this conditional is satisfied regardless of whether Jaramillo is assigned or not.  
-So Jaramillo **may or may not** be assigned. No restriction from this.
+Zambia is still available.
 
-So Jaramillo could be assigned or not — not determined yet.
-
----
-
-### Step 3: Use Constraint 3 — "If Ong is assigned to Venezuela, then Kayne is not assigned to Yemen"
-
-But we are told: **Kayne *is* assigned to Yemen**.
-
-So the conclusion of the implication ("Kayne is not assigned to Yemen") is **false**.
-
-Therefore, for the implication to hold, the premise must be **false**.
-
-So: "Ong is assigned to Venezuela" → false  
-→ Therefore, **Ong is NOT assigned to Venezuela**
-
-So Ong either:
-- is not assigned at all, or
-- is assigned to a country other than Venezuela → i.e., Yemen or Zambia
-
-But Yemen is already taken by Kayne → so only possibility is Zambia.
-
-So:  
-→ Ong is **not** assigned to Venezuela  
-→ So if Ong is assigned, it must be to **Zambia**
-
-But Ong might not be assigned at all.
-
-So far:  
-→ Ong ∉ Venezuela  
-→ Ong ∈ {Zambia} if assigned  
-→ Ong may not be assigned
+So if Landon is assigned, he must go to Zambia.
 
 ---
 
-### Step 4: Use Constraint 4 — "If Landon is assigned, then he is assigned to Zambia"
+Now, we are to determine what **must be true** given that Kayne is assigned to Yemen.
 
-So Landon → Zambia
+We already have:
 
-So if Landon is assigned, it must be to Zambia.
+- Kayne → Yemen
+- Novetzke → not assigned (from constraint 1)
+- Ong ≠ Venezuela (from constraint 3)
+- Ong can be in Zambia or not assigned
+- Landon, if assigned, must be to Zambia
 
-Zambia can only have one ambassador.
+We have 3 positions: Venezuela, Yemen (taken), Zambia.
 
----
+So we need to assign 2 more people (besides Kayne) from: Jaramillo, Landon, Ong (Novetzke is out).
 
-### Now: We have 3 countries: Venezuela, Yemen, Zambia  
-Yemen: Kayne  
-So Venezuela and Zambia are open.
+So the three people assigned will be Kayne and two others from {J, L, O}, with constraints.
 
-We need to assign 2 more ambassadors from the remaining pool:
-
-Remaining candidates:  
-- Jaramillo: possible  
-- Landon: possible  
-- Novetzke: **not assigned** (from constraint 1)  
-- Ong: possible  
-- Kayne: already assigned
-
-So available: Jaramillo, Landon, Ong
-
-We need to pick **2** from these 3 to assign to Venezuela and Zambia.
-
-But we have constraints.
-
-Let’s consider the possibilities.
-
-We are to determine what **must be true** if Kayne is assigned to Yemen.
-
-So we look for something that is **always true** in every valid assignment under this condition.
-
-Let’s test the answer choices.
+Let’s evaluate each choice.
 
 ---
 
-### Choice (A): Jaramillo is assigned as ambassador to Venezuela.
+### **Choice (A): Jaramillo is assigned as ambassador to Venezuela.**
 
 Is this **must be true**?
 
-Could Jaramillo be unassigned?
+No. Jaramillo may or may not be assigned.
 
-Yes. For example:
+Suppose Jaramillo is **not** assigned. Is that possible?
 
-Suppose we assign:
-- Yemen: Kayne
-- Venezuela: Ong
-- Zambia: Landon
+Yes. We only need 3 people. Kayne is in. We can pick Landon and Ong.
 
-Check constraints:
+Is that valid?
 
-- Kayne assigned, Novetzke not → OK (only one of them)
-- Jaramillo not assigned → so "if Jaramillo then Kayne" is vacuously true → OK
-- Ong is assigned to Venezuela → but then Kayne should **not** be in Yemen → **violation!**
+- Kayne → Yemen (given)
+- Ong → Zambia (allowed, since Ong ≠ Venezuela)
+- Landon → Zambia? Wait — Zambia can't have two people.
 
-Ah! This is invalid.
+So Ong and Landon both want Zambia? Conflict.
 
-Because: Ong → Venezuela ⇒ Kayne ∉ Yemen
+So if both Landon and Ong are assigned, one must go to Venezuela and one to Zambia.
 
-But Kayne **is** in Yemen → so Ong **cannot** be in Venezuela.
+But Ong cannot go to Venezuela (from constraint 3, since Kayne is in Yemen).
 
-So Ong cannot be assigned to Venezuela.
+So Ong ≠ Venezuela → Ong must go to Zambia (if assigned).
 
-So in any valid assignment, Ong ∉ Venezuela
+Landon, if assigned, must go to Zambia.
 
-So in the above example, Ong cannot go to Venezuela.
+But only one person per country.
 
-So let’s try:
+So **both Landon and Ong cannot be assigned**, because both would have to go to Zambia.
 
-Option 1:
-- Yemen: Kayne
-- Venezuela: Jaramillo
-- Zambia: Ong
+→ So at most one of Landon or Ong can be assigned.
 
-Check:
-- Kayne assigned, Novetzke not → OK
-- Jaramillo assigned → Kayne assigned → OK
-- Ong assigned to Zambia → not Venezuela → so Ong → Venezuela is false → implication holds (antecedent false) → OK
-- Landon not assigned → OK
-- Landon constraint not triggered
+Now, we need **two** people besides Kayne.
 
-Valid.
-
-Now, can we have **Jaramillo not assigned**?
-
-Try:
-
-Option 2:
-- Yemen: Kayne
-- Venezuela: Ong
-- Zambia: Landon
-
-But Ong → Venezuela → then Kayne should not be in Yemen → but Kayne **is** → violation.
-
-So **Ong cannot be assigned to Venezuela**
-
-So Ong cannot go to Venezuela.
-
-So if we want to assign Ong, it must be to Zambia.
-
-But Zambia only has one slot.
-
-So if we assign Ong to Zambia, then Venezuela must be assigned to someone else.
-
-Available: Jaramillo, Landon, Ong
-
-We need two.
-
-Try:
-
-Option 3: Assign Landon and Ong
-
-Then:
-- Yemen: Kayne
-- Venezuela: ??? → only Landon and Ong assigned → but Ong can't go to Venezuela (as above), so Ong → Zambia
-- Landon → must go to Venezuela? But Landon can only go to Zambia (constraint 4)
-
-Landon → only Zambia
-
-But Zambia already has Ong → conflict.
-
-So cannot assign both Landon and Ong.
-
-Because:
-- Ong → can't go to Venezuela → so must go to Zambia if assigned
-- Landon → can only go to Zambia if assigned
-
-But only one person can go to Zambia.
-
-So **Landon and Ong cannot both be assigned**.
-
-Now, can we assign neither?
-
-Option 4: Assign only Jaramillo and one other?
-
-We need two more ambassadors.
-
-We have to pick two from: Jaramillo, Landon, Ong
-
-We just saw:
-- Cannot assign both Landon and Ong → conflict over Zambia
-- Cannot assign Ong to Venezuela
+So we need two from {J, L, O}, but L and O cannot both be assigned.
 
 So possibilities:
 
-**Option A**: Jaramillo and Landon  
-→ Yemen: Kayne  
-→ Venezuela: Jaramillo  
-→ Zambia: Landon  
-→ Ong not assigned  
-Check:
-- Kayne assigned, Novetzke not → OK
-- Jaramillo assigned → Kayne assigned → OK
-- Ong not assigned → so "Ong to Venezuela" is false → implication holds → OK
-- Landon assigned → to Zambia → OK
+1. Assign Jaramillo and Landon  
+   - J → ? (Venezuela or Zambia)  
+   - L → must be Zambia  
+   - So J → Venezuela  
+   - Ong not assigned  
+   - Valid?
 
-Valid.
+   Check constraints:
+   - Kayne assigned, Novetzke not → OK (XOR satisfied)
+   - J assigned → Kayne assigned → OK
+   - Ong not assigned → constraint 3 irrelevant
+   - L → Zambia → OK
 
-**Option B**: Jaramillo and Ong  
-→ Yemen: Kayne  
-→ Venezuela: Jaramillo  
-→ Zambia: Ong  
-→ Landon not assigned  
-Check:
-- Kayne assigned, Novetzke not → OK
-- Jaramillo → Kayne → OK
-- Ong → Zambia → not Venezuela → so antecedent false → OK
-- Landon not assigned → OK
+   → Valid.
 
-Valid.
+2. Assign Jaramillo and Ong  
+   - Ong → must be Zambia (can't go to Venezuela)
+   - Jaramillo → Venezuela
+   - Landon not assigned
+   - Valid?
 
-**Option C**: Landon and Ong → impossible, as both need Zambia → conflict
+   - Ong → Zambia → OK (not Venezuela)
+   - J → assigned, K → assigned → OK
+   - Landon not assigned → constraint 4 irrelevant
+   - Kayne assigned, Novetzke not → OK
 
-**Option D**: Only Jaramillo and someone? We need two.
+   → Valid.
 
-Wait — only three candidates: Jaramillo, Landon, Ong
+3. Assign Landon and Ong → both want Zambia → conflict → impossible.
 
-We can't assign only one — we need two more.
+So the only valid combinations are:
+- Kayne, Jaramillo, Landon
+- Kayne, Jaramillo, Ong
 
-So possible pairs:
-- Jaramillo + Landon → OK (Option A)
-- Jaramillo + Ong → OK (Option B)
-- Landon + Ong → impossible (both need Zambia)
-- Jaramillo only → no, need two people
+In both cases, **Jaramillo is assigned**.
 
-So only two valid assignments:
+Wait! Is that right?
 
-1. Venezuela: Jaramillo, Zambia: Landon, Yemen: Kayne → Ong not assigned
-2. Venezuela: Jaramillo, Zambia: Ong, Yemen: Kayne → Landon not assigned
+We need two from {J, L, O}, but L and O cannot both be assigned.
 
-Wait — in both cases, **Venezuela is assigned to Jaramillo**?
+So the only possible pairs are:
+- J and L
+- J and O
+- L only and someone else? But only J, L, O available (Novetzke out)
 
-Is that necessary?
+We need **two** people besides Kayne.
 
-Wait — can we assign Venezuela to someone else?
+Available candidates: J, L, O (N is out)
 
-Who else?
+We cannot pick L and O together.
 
-We have only Jaramillo, Landon, Ong as candidates (Novetzke out).
+So the only possible combinations are:
+- J and L
+- J and O
 
-Ong cannot go to Venezuela (as established).
+We **cannot** have L and O without J, because that’s only two people: L and O → but they both need Zambia → conflict.
 
-Landon cannot go to Venezuela — because Landon can only go to Zambia.
+Wait — we need **three ambassadors**: one per country.
 
-So:
-- Ong: cannot go to Venezuela
-- Landon: cannot go to Venezuela (only Zambia)
-- So only possible person for Venezuela is **Jaramillo**
+Kayne is one.
 
-Yes!
+We need **two more**.
 
-So Venezuela must be assigned to **Jaramillo**
+So possible sets:
+- {K, J, L}
+- {K, J, O}
+- {K, L, O} → invalid (both L and O need Zambia)
+- {K, L, N} → N is out
+- {K, O, N} → N is out
+- {K, J, N} → N is out
 
-Because:
-- Ong cannot go to Venezuela (due to constraint 3, since Kayne is in Yemen)
-- Landon cannot go to Venezuela (only Zambia)
-- Novetzke is not assigned
-- Kayne is in Yemen
+So only two possible valid sets:
+1. K, J, L
+2. K, J, O
 
-So only remaining possibility: **Jaramillo must be assigned to Venezuela**
+In **both**, **Jaramillo is assigned**.
 
-Therefore, **Jaramillo is assigned to Venezuela** in all valid cases.
+So **Jaramillo must be assigned**.
 
-So (A) must be true.
+But does he have to be in Venezuela?
 
-Now let’s check the other choices to confirm.
+Let’s see.
+
+In option 1: K → Yemen, L → Zambia, so J → Venezuela
+
+In option 2: K → Yemen, O → Zambia, so J → Venezuela
+
+In both cases, Venezuela is the only country left, so Jaramillo must go to Venezuela.
+
+So in **all valid assignments**, Jaramillo is assigned to **Venezuela**.
+
+So (A) says: **Jaramillo is assigned as ambassador to Venezuela.**
+
+This **must be true**.
+
+But let’s check the other choices to make sure.
 
 ---
 
-### Choice (A): Jaramillo is assigned as ambassador to Venezuela.  
-→ We just deduced this **must be true** — only possible person for Venezuela.
+### **Choice (B): Landon is assigned as ambassador to Zambia.**
 
-But let’s check others.
+Is this **must be true**?
 
----
+No. In the case where Ong is assigned (with Jaramillo and Kayne), Landon is **not** assigned.
 
-### Choice (B): Landon is assigned as ambassador to Zambia.
-
-Is this must be true?
-
-No.
-
-In Option B: Landon is **not assigned at all** → Ong is in Zambia.
-
-So Landon may not be assigned.
+So Landon may not be assigned at all.
 
 So (B) is not necessarily true.
 
+→ Not must be true.
+
 ---
 
-### Choice (C): Ong is assigned as ambassador to Zambia.
+### **Choice (C): Ong is assigned as ambassador to Zambia.**
 
-No — in Option A, Ong is not assigned at all.
+Similarly, in the case where Landon is assigned (with Jaramillo and Kayne), Ong is **not** assigned.
 
 So Ong may not be assigned.
 
-So (C) is not necessarily true.
+→ Not must be true.
 
 ---
 
-### Choice (D): Jaramillo is not assigned to an ambassadorship.
+### **Choice (D): Jaramillo is not assigned to an ambassadorship.**
 
-No — we just saw that Jaramillo **must** be assigned to Venezuela.
+We just concluded that **Jaramillo must be assigned** in all valid cases.
 
-So this is false.
+So this is **false**.
 
----
-
-### Choice (E): Ong is not assigned to an ambassadorship.
-
-Is this must be true?
-
-No — in Option B, Ong **is** assigned (to Zambia).
-
-So Ong may be assigned.
-
-So not necessarily true.
+→ Cannot be true.
 
 ---
 
-### Therefore, only (A) must be true.
+### **Choice (E): Ong is not assigned to an ambassadorship.**
 
-Wait — but let's double-check: is Jaramillo necessarily assigned?
+But in one valid case, Ong **is** assigned (to Zambia).
 
-Yes — because:
-- Venezuela needs someone
-- Candidates: only Jaramillo, Landon, Ong available (Kayne taken, Novetzke excluded)
-- Ong cannot go to Venezuela (constraint 3)
-- Landon cannot go to Venezuela (constraint 4: only Zambia)
-- So only Jaramillo can go to Venezuela
+So Ong **can** be assigned.
 
-Therefore, Jaramillo **must** be assigned to Venezuela.
+So it's not **must be true** that Ong is not assigned.
 
-So (A) is correct.
+→ False.
 
-But wait — what if Landon is assigned to Zambia and Ong not assigned?
+---
 
-Then Venezuela: Jaramillo → yes.
+### Therefore, the only statement that **must be true** is:
 
-Or if Ong is assigned to Zambia, Landon not → Venezuela: Jaramillo → yes.
+**(A) Jaramillo is assigned as ambassador to Venezuela.**
 
-No other option.
+Because:
+- Novetzke is out (since Kayne is in)
+- Only J, L, O available besides K
+- L and O cannot both be assigned (both need Zambia)
+- So we must pick Jaramillo and one of L or O
+- So Jaramillo is always assigned
+- The countries: Yemen → K, so Venezuela and Zambia left
+- The other person (L or O) must go to Zambia (L must, O can't go to Venezuela)
+- So Venezuela → Jaramillo
 
-So in **all valid cases**, Jaramillo is assigned to Venezuela.
+Thus, Jaramillo is always assigned to Venezuela.
 
-Hence, (A) must be true.
-
-But let’s confirm constraint 3 again.
-
-Constraint 3: If Ong is assigned to Venezuela, then Kayne is not in Yemen.
-
-But we are in a world where Kayne **is** in Yemen → so Ong cannot be in Venezuela → correct.
-
-So Ong ∉ Venezuela.
-
-Landon ∉ Venezuela (only Zambia).
-
-So Venezuela: only Jaramillo possible.
-
-Yes.
-
-So (A) is correct.
-
-But wait — is there a possibility that Jaramillo is not used?
-
-Only if we assign someone else to Venezuela.
-
-But no one else can.
-
-Unless Novetzke, but Novetzke is excluded because Kayne is assigned → constraint 1: only one of Kayne or Novetzke.
-
-So Novetzke is out.
-
-So no.
-
-Therefore, Jaramillo must be assigned to Venezuela.
-
-So answer is (A).
-
-But let’s see the choices again.
-
-Wait — is there a trick?
-
-What if Landon is not assigned, Ong is not assigned?
-
-Then only Jaramillo is available — but we need two people.
-
-We have to assign two more.
-
-If both Landon and Ong are not assigned, then only Jaramillo is left — but we need two ambassadors — impossible.
-
-So at least one of Landon or Ong must be assigned.
-
-But we cannot assign both — conflict over Zambia.
-
-So exactly one of Landon or Ong is assigned.
-
-Case 1: Landon assigned → to Zambia → Ong not assigned → Venezuela: Jaramillo
-
-Case 2: Ong assigned → to Zambia → Landon not assigned → Venezuela: Jaramillo
-
-In both cases, Venezuela: Jaramillo
-
-So yes — Jaramillo is always assigned to Venezuela.
-
-Therefore, (A) must be true.
-
-But let's check if (D) or (E) could be argued.
-
-(D): Jaramillo is not assigned → clearly false
-
-(E): Ong is not assigned → not necessarily true — Ong could be assigned (to Zambia)
-
-So only (A) must be true.
-
-Wait — but the question is: "which one of the following must be true?"
-
-And (A) says: "Jaramillo is assigned as ambassador to Venezuela."
-
-Yes — we have established this.
-
-But let me see if there's any flaw.
-
-Is it possible that Jaramillo is assigned to Zambia?
-
-Suppose:
-- Zambia: Jaramillo
-- Venezuela: ??? → who?
-
-Ong? → cannot, because Ong to Venezuela → Kayne not in Yemen → but Kayne is → invalid
-
-Landon? → Landon must be in Zambia → but Zambia has Jaramillo → conflict
-
-So no one for Venezuela.
-
-So impossible.
-
-So Jaramillo cannot be in Zambia.
-
-Similarly, Jaramillo cannot be in Yemen — taken.
-
-So Jaramillo must be in Venezuela.
-
-Yes.
-
-So (A) is correct.
-
-But wait — earlier I thought (B) might be tempting, but no — Landon may not be assigned.
-
-Similarly, (C) — Ong may not be assigned.
-
-So only (A) must be true.
-
-But let me see the answer choices again.
-
-(A) Jaramillo is assigned as ambassador to Venezuela. → Yes
-
-(B) Landon is assigned as ambassador to Zambia. → Not necessarily
-
-(C) Ong is assigned as ambassador to Zambia. → Not necessarily
-
-(D) Jaramillo is not assigned → False
-
-(E) Ong is not assigned → Not necessarily
-
-So only (A) is always true.
-
-Therefore, answer is (A)
-
-But wait — I recall that in some logic games, the answer might be something else.
-
-Let me see if constraint 2 affects anything.
-
-Constraint 2: If Jaramillo is assigned, then Kayne is assigned.
-
-But Kayne **is** assigned, so no issue.
-
-And we are forcing Jaramillo to be assigned — which is fine.
-
-So no contradiction.
-
-All constraints satisfied in both scenarios.
-
-So yes.
-
-Final answer: (A)
+✅ (A) must be true.
 
 {"answer": "A", "answer_index": 0}
 ---
 S1 Parsed Answer: {'answer': 'A', 'answer_index': 0}
 S1 Valid/Parse Success: True
 S1 Correct: True
-S1 Tokens: 3379 | Latency: 3837.9ms
+S1 Tokens: 2144 | Latency: 2732.5ms
 
 ============================================================
 === SYSTEM 2 (MP EVALUATOR / JUDGE) ===
@@ -592,541 +363,312 @@ Choices:
 (E) Ong is not assigned to an ambassadorship.
 
 SYSTEM 1 ANSWER (For Evaluation):
-Let's solve this step by step based on the given constraints and the assumption that **Kayne is assigned as ambassador to Yemen**.
+Let's solve this step by step based on the given constraints and the condition that **Kayne is assigned as ambassador to Yemen**.
 
 ---
 
-### **Given:**
-Ambassadors: Jaramillo, Kayne, Landon, Novetzke, Ong  
-Countries: Venezuela, Yemen, Zambia  
-Each ambassador to at most one country; exactly three ambassadors assigned.
+### **Ambassadors**:  
+Jaramillo (J), Kayne (K), Landon (L), Novetzke (N), Ong (O)
+
+### **Countries**:  
+Venezuela, Yemen, Zambia
+
+We are assigning **3 out of 5** candidates to these 3 countries, one per country.
 
 ---
 
-### **Constraints:**
+### **Constraints**:
 
-1. **Either Kayne or Novetzke, but not both, is assigned.**  
-   → Exactly one of Kayne or Novetzke is assigned.
+1. **Either Kayne or Novetzke, but not both**, is assigned to one of the ambassadorships.  
+   → This is an **exclusive or (XOR)**: exactly one of Kayne or Novetzke is assigned.
 
 2. **If Jaramillo is assigned, then Kayne is assigned.**  
-   → Jaramillo → Kayne  
+   → J → K  
    Contrapositive: If Kayne is *not* assigned, then Jaramillo is *not* assigned.
 
-3. **If Ong is assigned to Venezuela, then Kayne is *not* assigned to Yemen.**  
-   → Ong → Venezuela ⇒ Kayne → not Yemen
+3. **If Ong is assigned as ambassador to Venezuela, then Kayne is *not* assigned to Yemen.**  
+   → Ong → Venezuela → Kayne ≠ Yemen
 
-4. **If Landon is assigned, then he is assigned to Zambia.**  
-   → Landon → Zambia
-
----
-
-### **Question:**
-If **Kayne is assigned to Yemen**, which of the following **must be true**?
-
-So we are told: **Kayne is assigned to Yemen**.
-
-Let’s use this to deduce what must follow.
+4. **If Landon is assigned, it is to Zambia.**  
+   → L → Zambia (but L may not be assigned at all)
 
 ---
 
-### Step 1: Use Constraint 1 — "Either Kayne or Novetzke, but not both"
+### **Given in the question**:  
+**Kayne is assigned as ambassador to Yemen.**
 
-Since **Kayne is assigned**, then **Novetzke is NOT assigned**.
+So:
+- Kayne is assigned → K is in the assignment.
+- K is assigned to Yemen.
+
+---
+
+### Apply constraint 1: Either Kayne or Novetzke, but not both.
+
+Since **Kayne is assigned**, then **Novetzke must NOT be assigned**.
+
+→ So **Novetzke is out**.
+
+---
+
+### Apply constraint 2: If Jaramillo is assigned, then Kayne is assigned.
+
+We already know Kayne **is** assigned, so this conditional is satisfied regardless of whether Jaramillo is assigned or not.  
+So Jaramillo **may or may not** be assigned. No restriction from this rule now.
+
+---
+
+### Apply constraint 3: If Ong is assigned to Venezuela, then Kayne is not assigned to Yemen.
+
+But we are told that **Kayne *is* assigned to Yemen**.
+
+So the conclusion "Kayne is not assigned to Yemen" is **false**.
+
+Therefore, to prevent the implication from being violated, the **antecedent must be false**.
+
+That is: **Ong is NOT assigned to Venezuela.**
 
 So:  
-→ Kayne: assigned (to Yemen)  
-→ Novetzke: not assigned
+→ Ong ≠ Venezuela
+
+But Ong **could still** be assigned to Yemen or Zambia — just not Venezuela.
+
+But Yemen is already taken by Kayne.
+
+So Ong could only be assigned to **Zambia**, or **not assigned at all**.
+
+→ So Ong is either assigned to **Zambia** or **not assigned**.
 
 ---
 
-### Step 2: Use Constraint 2 — "If Jaramillo is assigned, then Kayne is assigned"
+### Apply constraint 4: If Landon is assigned, it must be to Zambia.
 
-We already know Kayne *is* assigned, so this conditional is satisfied regardless of whether Jaramillo is assigned or not.  
-So Jaramillo **may or may not** be assigned. No restriction from this.
+Zambia is still available.
 
-So Jaramillo could be assigned or not — not determined yet.
-
----
-
-### Step 3: Use Constraint 3 — "If Ong is assigned to Venezuela, then Kayne is not assigned to Yemen"
-
-But we are told: **Kayne *is* assigned to Yemen**.
-
-So the conclusion of the implication ("Kayne is not assigned to Yemen") is **false**.
-
-Therefore, for the implication to hold, the premise must be **false**.
-
-So: "Ong is assigned to Venezuela" → false  
-→ Therefore, **Ong is NOT assigned to Venezuela**
-
-So Ong either:
-- is not assigned at all, or
-- is assigned to a country other than Venezuela → i.e., Yemen or Zambia
-
-But Yemen is already taken by Kayne → so only possibility is Zambia.
-
-So:  
-→ Ong is **not** assigned to Venezuela  
-→ So if Ong is assigned, it must be to **Zambia**
-
-But Ong might not be assigned at all.
-
-So far:  
-→ Ong ∉ Venezuela  
-→ Ong ∈ {Zambia} if assigned  
-→ Ong may not be assigned
+So if Landon is assigned, he must go to Zambia.
 
 ---
 
-### Step 4: Use Constraint 4 — "If Landon is assigned, then he is assigned to Zambia"
+Now, we are to determine what **must be true** given that Kayne is assigned to Yemen.
 
-So Landon → Zambia
+We already have:
 
-So if Landon is assigned, it must be to Zambia.
+- Kayne → Yemen
+- Novetzke → not assigned (from constraint 1)
+- Ong ≠ Venezuela (from constraint 3)
+- Ong can be in Zambia or not assigned
+- Landon, if assigned, must be to Zambia
 
-Zambia can only have one ambassador.
+We have 3 positions: Venezuela, Yemen (taken), Zambia.
 
----
+So we need to assign 2 more people (besides Kayne) from: Jaramillo, Landon, Ong (Novetzke is out).
 
-### Now: We have 3 countries: Venezuela, Yemen, Zambia  
-Yemen: Kayne  
-So Venezuela and Zambia are open.
+So the three people assigned will be Kayne and two others from {J, L, O}, with constraints.
 
-We need to assign 2 more ambassadors from the remaining pool:
-
-Remaining candidates:  
-- Jaramillo: possible  
-- Landon: possible  
-- Novetzke: **not assigned** (from constraint 1)  
-- Ong: possible  
-- Kayne: already assigned
-
-So available: Jaramillo, Landon, Ong
-
-We need to pick **2** from these 3 to assign to Venezuela and Zambia.
-
-But we have constraints.
-
-Let’s consider the possibilities.
-
-We are to determine what **must be true** if Kayne is assigned to Yemen.
-
-So we look for something that is **always true** in every valid assignment under this condition.
-
-Let’s test the answer choices.
+Let’s evaluate each choice.
 
 ---
 
-### Choice (A): Jaramillo is assigned as ambassador to Venezuela.
+### **Choice (A): Jaramillo is assigned as ambassador to Venezuela.**
 
 Is this **must be true**?
 
-Could Jaramillo be unassigned?
+No. Jaramillo may or may not be assigned.
 
-Yes. For example:
+Suppose Jaramillo is **not** assigned. Is that possible?
 
-Suppose we assign:
-- Yemen: Kayne
-- Venezuela: Ong
-- Zambia: Landon
+Yes. We only need 3 people. Kayne is in. We can pick Landon and Ong.
 
-Check constraints:
+Is that valid?
 
-- Kayne assigned, Novetzke not → OK (only one of them)
-- Jaramillo not assigned → so "if Jaramillo then Kayne" is vacuously true → OK
-- Ong is assigned to Venezuela → but then Kayne should **not** be in Yemen → **violation!**
+- Kayne → Yemen (given)
+- Ong → Zambia (allowed, since Ong ≠ Venezuela)
+- Landon → Zambia? Wait — Zambia can't have two people.
 
-Ah! This is invalid.
+So Ong and Landon both want Zambia? Conflict.
 
-Because: Ong → Venezuela ⇒ Kayne ∉ Yemen
+So if both Landon and Ong are assigned, one must go to Venezuela and one to Zambia.
 
-But Kayne **is** in Yemen → so Ong **cannot** be in Venezuela.
+But Ong cannot go to Venezuela (from constraint 3, since Kayne is in Yemen).
 
-So Ong cannot be assigned to Venezuela.
+So Ong ≠ Venezuela → Ong must go to Zambia (if assigned).
 
-So in any valid assignment, Ong ∉ Venezuela
+Landon, if assigned, must go to Zambia.
 
-So in the above example, Ong cannot go to Venezuela.
+But only one person per country.
 
-So let’s try:
+So **both Landon and Ong cannot be assigned**, because both would have to go to Zambia.
 
-Option 1:
-- Yemen: Kayne
-- Venezuela: Jaramillo
-- Zambia: Ong
+→ So at most one of Landon or Ong can be assigned.
 
-Check:
-- Kayne assigned, Novetzke not → OK
-- Jaramillo assigned → Kayne assigned → OK
-- Ong assigned to Zambia → not Venezuela → so Ong → Venezuela is false → implication holds (antecedent false) → OK
-- Landon not assigned → OK
-- Landon constraint not triggered
+Now, we need **two** people besides Kayne.
 
-Valid.
-
-Now, can we have **Jaramillo not assigned**?
-
-Try:
-
-Option 2:
-- Yemen: Kayne
-- Venezuela: Ong
-- Zambia: Landon
-
-But Ong → Venezuela → then Kayne should not be in Yemen → but Kayne **is** → violation.
-
-So **Ong cannot be assigned to Venezuela**
-
-So Ong cannot go to Venezuela.
-
-So if we want to assign Ong, it must be to Zambia.
-
-But Zambia only has one slot.
-
-So if we assign Ong to Zambia, then Venezuela must be assigned to someone else.
-
-Available: Jaramillo, Landon, Ong
-
-We need two.
-
-Try:
-
-Option 3: Assign Landon and Ong
-
-Then:
-- Yemen: Kayne
-- Venezuela: ??? → only Landon and Ong assigned → but Ong can't go to Venezuela (as above), so Ong → Zambia
-- Landon → must go to Venezuela? But Landon can only go to Zambia (constraint 4)
-
-Landon → only Zambia
-
-But Zambia already has Ong → conflict.
-
-So cannot assign both Landon and Ong.
-
-Because:
-- Ong → can't go to Venezuela → so must go to Zambia if assigned
-- Landon → can only go to Zambia if assigned
-
-But only one person can go to Zambia.
-
-So **Landon and Ong cannot both be assigned**.
-
-Now, can we assign neither?
-
-Option 4: Assign only Jaramillo and one other?
-
-We need two more ambassadors.
-
-We have to pick two from: Jaramillo, Landon, Ong
-
-We just saw:
-- Cannot assign both Landon and Ong → conflict over Zambia
-- Cannot assign Ong to Venezuela
+So we need two from {J, L, O}, but L and O cannot both be assigned.
 
 So possibilities:
 
-**Option A**: Jaramillo and Landon  
-→ Yemen: Kayne  
-→ Venezuela: Jaramillo  
-→ Zambia: Landon  
-→ Ong not assigned  
-Check:
-- Kayne assigned, Novetzke not → OK
-- Jaramillo assigned → Kayne assigned → OK
-- Ong not assigned → so "Ong to Venezuela" is false → implication holds → OK
-- Landon assigned → to Zambia → OK
+1. Assign Jaramillo and Landon  
+   - J → ? (Venezuela or Zambia)  
+   - L → must be Zambia  
+   - So J → Venezuela  
+   - Ong not assigned  
+   - Valid?
 
-Valid.
+   Check constraints:
+   - Kayne assigned, Novetzke not → OK (XOR satisfied)
+   - J assigned → Kayne assigned → OK
+   - Ong not assigned → constraint 3 irrelevant
+   - L → Zambia → OK
 
-**Option B**: Jaramillo and Ong  
-→ Yemen: Kayne  
-→ Venezuela: Jaramillo  
-→ Zambia: Ong  
-→ Landon not assigned  
-Check:
-- Kayne assigned, Novetzke not → OK
-- Jaramillo → Kayne → OK
-- Ong → Zambia → not Venezuela → so antecedent false → OK
-- Landon not assigned → OK
+   → Valid.
 
-Valid.
+2. Assign Jaramillo and Ong  
+   - Ong → must be Zambia (can't go to Venezuela)
+   - Jaramillo → Venezuela
+   - Landon not assigned
+   - Valid?
 
-**Option C**: Landon and Ong → impossible, as both need Zambia → conflict
+   - Ong → Zambia → OK (not Venezuela)
+   - J → assigned, K → assigned → OK
+   - Landon not assigned → constraint 4 irrelevant
+   - Kayne assigned, Novetzke not → OK
 
-**Option D**: Only Jaramillo and someone? We need two.
+   → Valid.
 
-Wait — only three candidates: Jaramillo, Landon, Ong
+3. Assign Landon and Ong → both want Zambia → conflict → impossible.
 
-We can't assign only one — we need two more.
+So the only valid combinations are:
+- Kayne, Jaramillo, Landon
+- Kayne, Jaramillo, Ong
 
-So possible pairs:
-- Jaramillo + Landon → OK (Option A)
-- Jaramillo + Ong → OK (Option B)
-- Landon + Ong → impossible (both need Zambia)
-- Jaramillo only → no, need two people
+In both cases, **Jaramillo is assigned**.
 
-So only two valid assignments:
+Wait! Is that right?
 
-1. Venezuela: Jaramillo, Zambia: Landon, Yemen: Kayne → Ong not assigned
-2. Venezuela: Jaramillo, Zambia: Ong, Yemen: Kayne → Landon not assigned
+We need two from {J, L, O}, but L and O cannot both be assigned.
 
-Wait — in both cases, **Venezuela is assigned to Jaramillo**?
+So the only possible pairs are:
+- J and L
+- J and O
+- L only and someone else? But only J, L, O available (Novetzke out)
 
-Is that necessary?
+We need **two** people besides Kayne.
 
-Wait — can we assign Venezuela to someone else?
+Available candidates: J, L, O (N is out)
 
-Who else?
+We cannot pick L and O together.
 
-We have only Jaramillo, Landon, Ong as candidates (Novetzke out).
+So the only possible combinations are:
+- J and L
+- J and O
 
-Ong cannot go to Venezuela (as established).
+We **cannot** have L and O without J, because that’s only two people: L and O → but they both need Zambia → conflict.
 
-Landon cannot go to Venezuela — because Landon can only go to Zambia.
+Wait — we need **three ambassadors**: one per country.
 
-So:
-- Ong: cannot go to Venezuela
-- Landon: cannot go to Venezuela (only Zambia)
-- So only possible person for Venezuela is **Jaramillo**
+Kayne is one.
 
-Yes!
+We need **two more**.
 
-So Venezuela must be assigned to **Jaramillo**
+So possible sets:
+- {K, J, L}
+- {K, J, O}
+- {K, L, O} → invalid (both L and O need Zambia)
+- {K, L, N} → N is out
+- {K, O, N} → N is out
+- {K, J, N} → N is out
 
-Because:
-- Ong cannot go to Venezuela (due to constraint 3, since Kayne is in Yemen)
-- Landon cannot go to Venezuela (only Zambia)
-- Novetzke is not assigned
-- Kayne is in Yemen
+So only two possible valid sets:
+1. K, J, L
+2. K, J, O
 
-So only remaining possibility: **Jaramillo must be assigned to Venezuela**
+In **both**, **Jaramillo is assigned**.
 
-Therefore, **Jaramillo is assigned to Venezuela** in all valid cases.
+So **Jaramillo must be assigned**.
 
-So (A) must be true.
+But does he have to be in Venezuela?
 
-Now let’s check the other choices to confirm.
+Let’s see.
+
+In option 1: K → Yemen, L → Zambia, so J → Venezuela
+
+In option 2: K → Yemen, O → Zambia, so J → Venezuela
+
+In both cases, Venezuela is the only country left, so Jaramillo must go to Venezuela.
+
+So in **all valid assignments**, Jaramillo is assigned to **Venezuela**.
+
+So (A) says: **Jaramillo is assigned as ambassador to Venezuela.**
+
+This **must be true**.
+
+But let’s check the other choices to make sure.
 
 ---
 
-### Choice (A): Jaramillo is assigned as ambassador to Venezuela.  
-→ We just deduced this **must be true** — only possible person for Venezuela.
+### **Choice (B): Landon is assigned as ambassador to Zambia.**
 
-But let’s check others.
+Is this **must be true**?
 
----
+No. In the case where Ong is assigned (with Jaramillo and Kayne), Landon is **not** assigned.
 
-### Choice (B): Landon is assigned as ambassador to Zambia.
-
-Is this must be true?
-
-No.
-
-In Option B: Landon is **not assigned at all** → Ong is in Zambia.
-
-So Landon may not be assigned.
+So Landon may not be assigned at all.
 
 So (B) is not necessarily true.
 
+→ Not must be true.
+
 ---
 
-### Choice (C): Ong is assigned as ambassador to Zambia.
+### **Choice (C): Ong is assigned as ambassador to Zambia.**
 
-No — in Option A, Ong is not assigned at all.
+Similarly, in the case where Landon is assigned (with Jaramillo and Kayne), Ong is **not** assigned.
 
 So Ong may not be assigned.
 
-So (C) is not necessarily true.
+→ Not must be true.
 
 ---
 
-### Choice (D): Jaramillo is not assigned to an ambassadorship.
+### **Choice (D): Jaramillo is not assigned to an ambassadorship.**
 
-No — we just saw that Jaramillo **must** be assigned to Venezuela.
+We just concluded that **Jaramillo must be assigned** in all valid cases.
 
-So this is false.
+So this is **false**.
 
----
-
-### Choice (E): Ong is not assigned to an ambassadorship.
-
-Is this must be true?
-
-No — in Option B, Ong **is** assigned (to Zambia).
-
-So Ong may be assigned.
-
-So not necessarily true.
+→ Cannot be true.
 
 ---
 
-### Therefore, only (A) must be true.
+### **Choice (E): Ong is not assigned to an ambassadorship.**
 
-Wait — but let's double-check: is Jaramillo necessarily assigned?
+But in one valid case, Ong **is** assigned (to Zambia).
 
-Yes — because:
-- Venezuela needs someone
-- Candidates: only Jaramillo, Landon, Ong available (Kayne taken, Novetzke excluded)
-- Ong cannot go to Venezuela (constraint 3)
-- Landon cannot go to Venezuela (constraint 4: only Zambia)
-- So only Jaramillo can go to Venezuela
+So Ong **can** be assigned.
 
-Therefore, Jaramillo **must** be assigned to Venezuela.
+So it's not **must be true** that Ong is not assigned.
 
-So (A) is correct.
+→ False.
 
-But wait — what if Landon is assigned to Zambia and Ong not assigned?
+---
 
-Then Venezuela: Jaramillo → yes.
+### Therefore, the only statement that **must be true** is:
 
-Or if Ong is assigned to Zambia, Landon not → Venezuela: Jaramillo → yes.
+**(A) Jaramillo is assigned as ambassador to Venezuela.**
 
-No other option.
+Because:
+- Novetzke is out (since Kayne is in)
+- Only J, L, O available besides K
+- L and O cannot both be assigned (both need Zambia)
+- So we must pick Jaramillo and one of L or O
+- So Jaramillo is always assigned
+- The countries: Yemen → K, so Venezuela and Zambia left
+- The other person (L or O) must go to Zambia (L must, O can't go to Venezuela)
+- So Venezuela → Jaramillo
 
-So in **all valid cases**, Jaramillo is assigned to Venezuela.
+Thus, Jaramillo is always assigned to Venezuela.
 
-Hence, (A) must be true.
-
-But let’s confirm constraint 3 again.
-
-Constraint 3: If Ong is assigned to Venezuela, then Kayne is not in Yemen.
-
-But we are in a world where Kayne **is** in Yemen → so Ong cannot be in Venezuela → correct.
-
-So Ong ∉ Venezuela.
-
-Landon ∉ Venezuela (only Zambia).
-
-So Venezuela: only Jaramillo possible.
-
-Yes.
-
-So (A) is correct.
-
-But wait — is there a possibility that Jaramillo is not used?
-
-Only if we assign someone else to Venezuela.
-
-But no one else can.
-
-Unless Novetzke, but Novetzke is excluded because Kayne is assigned → constraint 1: only one of Kayne or Novetzke.
-
-So Novetzke is out.
-
-So no.
-
-Therefore, Jaramillo must be assigned to Venezuela.
-
-So answer is (A).
-
-But let’s see the choices again.
-
-Wait — is there a trick?
-
-What if Landon is not assigned, Ong is not assigned?
-
-Then only Jaramillo is available — but we need two people.
-
-We have to assign two more.
-
-If both Landon and Ong are not assigned, then only Jaramillo is left — but we need two ambassadors — impossible.
-
-So at least one of Landon or Ong must be assigned.
-
-But we cannot assign both — conflict over Zambia.
-
-So exactly one of Landon or Ong is assigned.
-
-Case 1: Landon assigned → to Zambia → Ong not assigned → Venezuela: Jaramillo
-
-Case 2: Ong assigned → to Zambia → Landon not assigned → Venezuela: Jaramillo
-
-In both cases, Venezuela: Jaramillo
-
-So yes — Jaramillo is always assigned to Venezuela.
-
-Therefore, (A) must be true.
-
-But let's check if (D) or (E) could be argued.
-
-(D): Jaramillo is not assigned → clearly false
-
-(E): Ong is not assigned → not necessarily true — Ong could be assigned (to Zambia)
-
-So only (A) must be true.
-
-Wait — but the question is: "which one of the following must be true?"
-
-And (A) says: "Jaramillo is assigned as ambassador to Venezuela."
-
-Yes — we have established this.
-
-But let me see if there's any flaw.
-
-Is it possible that Jaramillo is assigned to Zambia?
-
-Suppose:
-- Zambia: Jaramillo
-- Venezuela: ??? → who?
-
-Ong? → cannot, because Ong to Venezuela → Kayne not in Yemen → but Kayne is → invalid
-
-Landon? → Landon must be in Zambia → but Zambia has Jaramillo → conflict
-
-So no one for Venezuela.
-
-So impossible.
-
-So Jaramillo cannot be in Zambia.
-
-Similarly, Jaramillo cannot be in Yemen — taken.
-
-So Jaramillo must be in Venezuela.
-
-Yes.
-
-So (A) is correct.
-
-But wait — earlier I thought (B) might be tempting, but no — Landon may not be assigned.
-
-Similarly, (C) — Ong may not be assigned.
-
-So only (A) must be true.
-
-But let me see the answer choices again.
-
-(A) Jaramillo is assigned as ambassador to Venezuela. → Yes
-
-(B) Landon is assigned as ambassador to Zambia. → Not necessarily
-
-(C) Ong is assigned as ambassador to Zambia. → Not necessarily
-
-(D) Jaramillo is not assigned → False
-
-(E) Ong is not assigned → Not necessarily
-
-So only (A) is always true.
-
-Therefore, answer is (A)
-
-But wait — I recall that in some logic games, the answer might be something else.
-
-Let me see if constraint 2 affects anything.
-
-Constraint 2: If Jaramillo is assigned, then Kayne is assigned.
-
-But Kayne **is** assigned, so no issue.
-
-And we are forcing Jaramillo to be assigned — which is fine.
-
-So no contradiction.
-
-All constraints satisfied in both scenarios.
-
-So yes.
-
-Final answer: (A)
+✅ (A) must be true.
 
 {"answer": "A", "answer_index": 0}
 
@@ -1136,92 +678,79 @@ Confidence: <number between 0 and 100>%
 
 --- S2 RESPONSE ---
 Stage 1 — Comprehension & Formalization:  
-The premises are clearly stated:  
-- Exactly one of Kayne or Novetzke is assigned.  
-- Jaramillo → Kayne (so if Jaramillo is assigned, Kayne must be).  
-- Ong to Venezuela → Kayne not to Yemen.  
-- Landon → Zambia (if assigned, must be to Zambia).  
-We are given: Kayne is assigned to Yemen.  
-The question asks what **must be true** under this condition.  
+Premises:  
+- Exactly one of Kayne or Novetzke is assigned (XOR).  
+- J → K (If Jaramillo is assigned, then Kayne is assigned).  
+- If Ong is assigned to Venezuela, then Kayne is not assigned to Yemen.  
+- If Landon is assigned, then he is assigned to Zambia.  
+- One ambassador per country; three ambassadors total from five candidates.  
 
-The base LLM's final answer is (A): Jaramillo is assigned to Venezuela.  
-Its core deductive path:  
-- Since Kayne is assigned, Novetzke is not (from constraint 1).  
-- Since Kayne is in Yemen, Ong cannot be in Venezuela (contrapositive of constraint 3).  
-- Landon, if assigned, must be in Zambia.  
-- Ong, if assigned, cannot go to Venezuela and Yemen is taken, so only Zambia.  
-- Thus, Landon and Ong cannot both be assigned (Zambia conflict).  
-- Venezuela must be filled; only possible assignees from remaining pool (Jaramillo, Landon, Ong).  
-- Landon cannot go to Venezuela (only Zambia), Ong cannot go to Venezuela (due to constraint), so only Jaramillo can go to Venezuela.  
-- Therefore, Jaramillo must be assigned to Venezuela.  
-This is a valid chain. No hallucinations detected. All inferences are directly from constraints.
+Given: Kayne is assigned to Yemen.  
+Thus: Kayne is assigned → Novetzke is not assigned (from XOR).  
+Also: Kayne is in Yemen → Ong cannot be in Venezuela (else constraint 3 violated).  
+
+The base LLM correctly identifies these implications.  
+Final claim: (A) Jaramillo is assigned to Venezuela must be true.  
+
+Unstated assumptions? The LLM assumes that only {J, L, O} are available (correct, since N is out), and that we must pick two from them. It correctly identifies that L and O both require Zambia if assigned, hence cannot coexist. Then concludes only valid trios are {K, J, L} and {K, J, O}, both of which require Jaramillo → thus Jaramillo must be assigned, and to Venezuela.  
+
+No hallucinations detected. All deductions are from explicit constraints.
 
 Stage 2 — Preliminary Logical Modeling:  
-Independent derivation:  
-Given Kayne → Yemen.  
-→ Kayne is assigned → Novetzke is not (exactly one).  
-→ Ong to Venezuela → Kayne not to Yemen — but Kayne **is** to Yemen → so Ong cannot be to Venezuela.  
-→ Landon, if assigned, must be to Zambia.  
-Available candidates: Jaramillo, Landon, Ong (Kayne assigned, Novetzke out).  
-Need two more.  
-Venezuela and Zambia open.  
-Ong cannot go to Venezuela.  
-Landon cannot go to Venezuela (only Zambia).  
-So Venezuela can only be filled by Jaramillo.  
-Therefore, Jaramillo must be assigned to Venezuela.  
-No other option.  
-Thus, (A) must be true.  
-Other options:  
-(B) Landon to Zambia — not necessary (could be Ong instead).  
-(C) Ong to Zambia — not necessary (could be Landon or neither).  
-(D) Jaramillo not assigned — contradicted.  
-(E) Ong not assigned — not necessary.  
-So independently, I reach the same conclusion.
+Given K → Yemen:  
+- K is in → N is out (XOR).  
+- Ong ≠ Venezuela (else → K ≠ Yemen, contradiction).  
+- So Ong, if assigned, must be in Zambia.  
+- Landon, if assigned, must be in Zambia.  
+- So Ong and Landon cannot both be assigned (Zambia conflict).  
+- Remaining candidates: J, L, O. Need two besides K.  
+- Possible pairs: (J,L), (J,O), (L,O) — but (L,O) impossible due to Zambia.  
+- So only (J,L) and (J,O) possible.  
+- In both, J is assigned.  
+- Countries: Yemen taken. Zambia must go to L or O (whichever is selected). Venezuela → J.  
+→ So Jaramillo must be assigned to Venezuela.  
+
+Initial judgment: (A) must be true. Matches base LLM.
 
 Stage 3 — Critical Deductive Evaluation:  
-The base LLM considers all possible valid assignments:  
-- (Jaramillo, Landon): valid  
-- (Jaramillo, Ong): valid  
-- (Landon, Ong): invalid (Zambia conflict)  
-It correctly rules out Ong to Venezuela due to constraint 3.  
-It correctly applies constraint 4 to restrict Landon to Zambia.  
-It identifies that Venezuela cannot be filled by Landon or Ong, so only Jaramillo.  
-No fallacy detected.  
-It avoids confirmation bias — it tests all answer choices and rules them out based on counterexamples.  
-It does not assume unstated facts.  
-All reasoning is tightly bound to constraints.
+Base LLM does not exhibit confirmation bias. It considers multiple cases and eliminates invalid ones.  
+It correctly applies modus tollens to constraint 3:  
+- Ong → Venezuela → Kayne ≠ Yemen  
+- But Kayne = Yemen → so Ong → Venezuela is false → Ong ≠ Venezuela.  
+Correct.  
+
+It recognizes that Landon and Ong both "push" toward Zambia, making their co-assignment impossible.  
+It enumerates all possible valid sets and finds Jaramillo in both.  
+No fallacies detected. All reasoning is valid.
 
 Stage 4 — Decision Confirmation:  
-The base LLM's conclusion is **correct**: (A) must be true.  
-The reasoning is complete and sound.  
-No gaps.  
-The critical insight — that Venezuela can only be filled by Jaramillo under the constraints — is correctly identified and defended.
+Base LLM’s conclusion is logically entailed by the premises.  
+Every step is justified:  
+- Novetzke excluded (XOR with Kayne in).  
+- Ong cannot go to Venezuela (contrapositive of constraint 3).  
+- Landon and Ong cannot both be assigned (Zambia conflict).  
+- Only two valid candidate sets: both include Jaramillo.  
+- Venezuela is the only country left for Jaramillo in both cases.  
+Thus, (A) must be true.  
+
+No errors found.
 
 Stage 5 — Confidence & Soundness Assessment:  
-The reasoning is logically airtight.  
-I independently verified the conclusion.  
-No ambiguity in the constraints.  
-The base LLM did not overreach.  
-It considered edge cases (e.g., whether Ong or Landon could be omitted).  
-It correctly identified that exactly one of Landon or Ong must be assigned (due to need for two ambassadors), and that both cannot be assigned.  
-Its elimination of options is valid.  
-While the chain is moderately complex, each step is strictly entailed.  
-No hallucination, no informal fallacy.  
-I detect no flaw in the logic.  
-My own reasoning aligns fully.  
-Confidence is high.  
-However, per skeptical adjustment: is there any possibility I missed?  
-Could Jaramillo be unassigned? Only if Venezuela is filled by someone else — but Landon and Ong are both barred from Venezuela by constraints.  
-Novetzke is out.  
-So no.  
-Thus, Jaramillo must be assigned to Venezuela.  
-This is inescapable.  
-Final confidence: very high.  
-Score: 5 (flawlessly sound).
+Reasoning is dense, complete, and formally sound.  
+No overconfidence detected — the base LLM tests alternatives and rejects them based on constraints.  
+Own derivation matches exactly.  
+Only possible flaw: could there be a case where neither L nor O is assigned?  
+No — then we’d have only Kayne and Jaramillo → only two ambassadors, but three countries → need three people.  
+So must assign two from {J, L, O}, but cannot assign L and O together → must assign J and one of L or O.  
+Thus Jaramillo is necessary.  
+No edge case missed.  
 
-Confidence: 95%
+Confidence: 98%  
+(The 2% uncertainty is inherent to LLM self-evaluation — a minimal humility buffer in case of overlooked syntactic ambiguity, though none is apparent.)  
+
+Confidence: 98%
 ---
-S2 Parsed Confidence: 95.0%
+S2 Parsed Confidence: 98.0%
 S2 Escalate Decision: False (Threshold: 80.0%)
 S2 Label Assignment: TN
-S2 Tokens: 1032 | Latency: 61954.2ms
+S2 Tokens: 926 | Latency: 1525.1ms

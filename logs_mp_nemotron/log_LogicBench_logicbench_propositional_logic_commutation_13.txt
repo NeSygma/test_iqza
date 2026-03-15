@@ -31,7 +31,7 @@ After you finish your reasoning, you MUST output your final answer as EXACTLY th
 {"answer": "<A/B/C/D>", "answer_index": <0-3>}
 
 --- S1 RESPONSE ---
-We need to parse the problem: "John is a musician who spends several hours every day practicing. it is not clear whether he is a talented musician, but he is dedicated to honing his skills through extensive daily practice. the condition in this story is that either john is a talented musician or he practices for several hours every day. there could be multiple scenarios: (1) john is both a talented musician and practices diligently, (2) john is a talented musician but does not practice regularly, or (3) john may not have innate talent but compensates by putting in rigorous practice sessions.
+We need to parse the problem. The context: John spends several hours every day practicing. It is not clear whether he is a talented musician, but he is dedicated to honing his skills through extensive daily practice. The condition in this story is that either John is a talented musician or he practices for several hours every day. There could be multiple scenarios: (1) John is both a talented musician and practices diligently, (2) John is a talented musician but does not practice regularly, or (3) John may not have innate talent but compensates by putting in rigorous practice sessions.
 
 Question: Based on the context, what conclusion would be deemed most suitable?
 
@@ -39,24 +39,51 @@ Choices:
 (A) he is not a talented musician and does not practice regularly.
 (B) he is a talented musician, but does not practice regularly.
 (C) he practices for several hours every day or he is a talented musician.
-(D) he practices for several hours every day, but he is not a talented musician."
+(D) he practices for several hours every day, but he is not a talented musician.
 
-We need to think logical. The statement: "the condition in this story is that either john is a talented musician or he practices for several hours every day." So the condition (given) is: (Talent) OR (Practice). So it's a disjunction: T ∨ P. That's the condition known to be true. We also have additional context: "John is a musician who spends several hours every day practicing. it is not clear whether he is a talented musician, but he is dedicated to honing his skills through extensive daily practice." This suggests we know that he does practice several hours each day. Actually the statement: "John is a musician who spends several hours every day practicing." So we can infer P is true. Also: "it is not clear whether he is a talented musician, but he is dedicated to honing his skills through extensive daily practice." This reinforces that we know P, we don't know T.
+We need to find the most suitable conclusion given context.
 
-Thus, given that P is true, the disjunction T ∨ P is satisfied regardless of T. So we can deduce that P is true (practices for several hours each day). The conclusion that is most suitable given the context: either that he practices for several hours each day, or he is a talented musician (i.e., the original condition). However, the statement "he practices for several hours every day" is known, so conclusion C (he practices ... or he is a talented musician) is trivially true (since we know P). Actually they want a conclusion that follows from the premises: The condition is that either he is a talented musician OR he practices for several hours each day. The context also says he spends several hours every day practicing. Therefore we can conclude that he practices for several hours each day (P). Among choices, which represent that? Option C: "he practices for several hours every day or he is a talented musician." This is the disjunction itself, but it's also true given the premise (it's the premise). Option D: "he practices for several hours every day, but he is not a talented musician." That is P ∧ ¬T. We don't know ¬T, we only know we don't know about talent. So D cannot be concluded (maybe true but not certain). Option B: "he is a talented musician, but does not practice regularly." That's T ∧ ¬P, but we have P true, so that contradicts. Option A: "he is not a talented musician and does not practice regularly." That's ¬T ∧ ¬P, also contradicts P. So the best answer is C.
+We have statements:
 
-Thus answer: C, answer_index: 2? Wait mapping: they likely want answer_index as 0 for A, 1 for B, 2 for C, 3 for D. So answer_index = 2.
+- John spends several hours every day practicing. (Given)
+- It is not clear whether he is a talented musician, but he is dedicated to honing his skills through extensive daily practice. So it's possible he is not a talented musician, but we have clear that he does practice (daily). Actually first sentence: John is a musician who spends several hours every day practicing. So we know he practices for several hours each day. Then: It is not clear whether he is a talented musician, but he is dedicated... So we don't know talent, but we know practice.
 
-Thus final JSON: {"answer": "C", "answer_index": 2}
+The condition in this story is that either John is a talented musician or he practices for several hours every day. So condition: T or P (where T=talented musician, P=practices several hours each day). They say there could be multiple scenarios: (1) both true, (2) T true but P false (he is talented but does not practice regularly), (3) not T but P true (he may not have talent but compensates by rigorous practice). They note scenario (1) both true, scenario (2) T true P false, scenario (3) not T true P true.
 
-Check: Output exactly that, nothing else.
+Now the question: Based on the context, what conclusion would be deemed most suitable? The answer choices: (A) not T and not P (i.e., not talented and not practice). (B) T but not P. (C) P or T. (D) P but not T.
+
+We need to choose the conclusion that best fits given statements. Let's examine.
+
+From context: "John is a musician who spends several hours every day practicing." So we know P is true: he practices several hours each day. Also says "It is not clear whether he is a talented musician." So we cannot assert T or not T; it's unclear. So we cannot conclude T true or false. So any conclusion asserting something about T being true or false is not warranted unless we have enough info.
+
+Thus answer should be something like: we can conclude P (he practices) holds, and we don't know about T; the condition is either T or P; but we know P true, so condition satisfied, but we can't conclude T.
+
+Now examine choices:
+
+(A) he is not a talented musician and does not practice regularly. That's not T & not P. This contradicts known fact P is true. So not suitable.
+
+(B) he is a talented musician, but does not practice regularly. That's T & not P. Contradicts known P true. Not suitable.
+
+(C) he practices for several hours every day or he is a talented musician. This is "P or T". This matches the condition given in story: either John is a talented musician or he practices for several hours every day. And indeed we know P true, so this statement holds. Also the condition is "either ... or ..." possibly inclusive OR? Usually "either ... or ..." could be exclusive, but they consider scenario where both could be true. Actually they say there could be multiple scenarios: (1) both true, (2) T true but P false, (3) not T but P true. So they treat "either ... or ..." as inclusive OR (i.e., at least one true). So conclusion C is the condition itself, which is given in story; it's true. So it's a valid conclusion.
+
+(D) he practices for several hours every day, but he is not a talented musician. This is P & not T. This is one of possible scenarios (scenario 3). However, we don't know that he is not talented; it's unclear. So we cannot conclude that he is not talented. So D is not warranted.
+
+Thus the most suitable conclusion given the context is C: He practices for several hours every day or he is a talented musician.
+
+Thus answer: C.
+
+Now we need to output JSON: {"answer": "<A/B/C/D>", "answer_index": <0-3>}. The answer_index mapping: 0 for A, 1 for B, 2 for C, 3 for D. So answer_index = 2.
+
+Thus final output: {"answer": "C", "answer_index": 2}
+
+Make sure exactly that and nothing else.
 
 {"answer": "C", "answer_index": 2}
 ---
 S1 Parsed Answer: {'answer': 'C', 'answer_index': 2}
 S1 Valid/Parse Success: True
 S1 Correct: True
-S1 Tokens: 906 | Latency: 17516.1ms
+S1 Tokens: 1191 | Latency: 25203.0ms
 
 ============================================================
 === SYSTEM 2 (MP EVALUATOR / JUDGE) ===
@@ -73,7 +100,7 @@ Choices:
 (D) he practices for several hours every day, but he is not a talented musician.
 
 SYSTEM 1 ANSWER (For Evaluation):
-We need to parse the problem: "John is a musician who spends several hours every day practicing. it is not clear whether he is a talented musician, but he is dedicated to honing his skills through extensive daily practice. the condition in this story is that either john is a talented musician or he practices for several hours every day. there could be multiple scenarios: (1) john is both a talented musician and practices diligently, (2) john is a talented musician but does not practice regularly, or (3) john may not have innate talent but compensates by putting in rigorous practice sessions.
+We need to parse the problem. The context: John spends several hours every day practicing. It is not clear whether he is a talented musician, but he is dedicated to honing his skills through extensive daily practice. The condition in this story is that either John is a talented musician or he practices for several hours every day. There could be multiple scenarios: (1) John is both a talented musician and practices diligently, (2) John is a talented musician but does not practice regularly, or (3) John may not have innate talent but compensates by putting in rigorous practice sessions.
 
 Question: Based on the context, what conclusion would be deemed most suitable?
 
@@ -81,17 +108,44 @@ Choices:
 (A) he is not a talented musician and does not practice regularly.
 (B) he is a talented musician, but does not practice regularly.
 (C) he practices for several hours every day or he is a talented musician.
-(D) he practices for several hours every day, but he is not a talented musician."
+(D) he practices for several hours every day, but he is not a talented musician.
 
-We need to think logical. The statement: "the condition in this story is that either john is a talented musician or he practices for several hours every day." So the condition (given) is: (Talent) OR (Practice). So it's a disjunction: T ∨ P. That's the condition known to be true. We also have additional context: "John is a musician who spends several hours every day practicing. it is not clear whether he is a talented musician, but he is dedicated to honing his skills through extensive daily practice." This suggests we know that he does practice several hours each day. Actually the statement: "John is a musician who spends several hours every day practicing." So we can infer P is true. Also: "it is not clear whether he is a talented musician, but he is dedicated to honing his skills through extensive daily practice." This reinforces that we know P, we don't know T.
+We need to find the most suitable conclusion given context.
 
-Thus, given that P is true, the disjunction T ∨ P is satisfied regardless of T. So we can deduce that P is true (practices for several hours each day). The conclusion that is most suitable given the context: either that he practices for several hours each day, or he is a talented musician (i.e., the original condition). However, the statement "he practices for several hours every day" is known, so conclusion C (he practices ... or he is a talented musician) is trivially true (since we know P). Actually they want a conclusion that follows from the premises: The condition is that either he is a talented musician OR he practices for several hours each day. The context also says he spends several hours every day practicing. Therefore we can conclude that he practices for several hours each day (P). Among choices, which represent that? Option C: "he practices for several hours every day or he is a talented musician." This is the disjunction itself, but it's also true given the premise (it's the premise). Option D: "he practices for several hours every day, but he is not a talented musician." That is P ∧ ¬T. We don't know ¬T, we only know we don't know about talent. So D cannot be concluded (maybe true but not certain). Option B: "he is a talented musician, but does not practice regularly." That's T ∧ ¬P, but we have P true, so that contradicts. Option A: "he is not a talented musician and does not practice regularly." That's ¬T ∧ ¬P, also contradicts P. So the best answer is C.
+We have statements:
 
-Thus answer: C, answer_index: 2? Wait mapping: they likely want answer_index as 0 for A, 1 for B, 2 for C, 3 for D. So answer_index = 2.
+- John spends several hours every day practicing. (Given)
+- It is not clear whether he is a talented musician, but he is dedicated to honing his skills through extensive daily practice. So it's possible he is not a talented musician, but we have clear that he does practice (daily). Actually first sentence: John is a musician who spends several hours every day practicing. So we know he practices for several hours each day. Then: It is not clear whether he is a talented musician, but he is dedicated... So we don't know talent, but we know practice.
 
-Thus final JSON: {"answer": "C", "answer_index": 2}
+The condition in this story is that either John is a talented musician or he practices for several hours every day. So condition: T or P (where T=talented musician, P=practices several hours each day). They say there could be multiple scenarios: (1) both true, (2) T true but P false (he is talented but does not practice regularly), (3) not T but P true (he may not have talent but compensates by rigorous practice). They note scenario (1) both true, scenario (2) T true P false, scenario (3) not T true P true.
 
-Check: Output exactly that, nothing else.
+Now the question: Based on the context, what conclusion would be deemed most suitable? The answer choices: (A) not T and not P (i.e., not talented and not practice). (B) T but not P. (C) P or T. (D) P but not T.
+
+We need to choose the conclusion that best fits given statements. Let's examine.
+
+From context: "John is a musician who spends several hours every day practicing." So we know P is true: he practices several hours each day. Also says "It is not clear whether he is a talented musician." So we cannot assert T or not T; it's unclear. So we cannot conclude T true or false. So any conclusion asserting something about T being true or false is not warranted unless we have enough info.
+
+Thus answer should be something like: we can conclude P (he practices) holds, and we don't know about T; the condition is either T or P; but we know P true, so condition satisfied, but we can't conclude T.
+
+Now examine choices:
+
+(A) he is not a talented musician and does not practice regularly. That's not T & not P. This contradicts known fact P is true. So not suitable.
+
+(B) he is a talented musician, but does not practice regularly. That's T & not P. Contradicts known P true. Not suitable.
+
+(C) he practices for several hours every day or he is a talented musician. This is "P or T". This matches the condition given in story: either John is a talented musician or he practices for several hours every day. And indeed we know P true, so this statement holds. Also the condition is "either ... or ..." possibly inclusive OR? Usually "either ... or ..." could be exclusive, but they consider scenario where both could be true. Actually they say there could be multiple scenarios: (1) both true, (2) T true but P false, (3) not T but P true. So they treat "either ... or ..." as inclusive OR (i.e., at least one true). So conclusion C is the condition itself, which is given in story; it's true. So it's a valid conclusion.
+
+(D) he practices for several hours every day, but he is not a talented musician. This is P & not T. This is one of possible scenarios (scenario 3). However, we don't know that he is not talented; it's unclear. So we cannot conclude that he is not talented. So D is not warranted.
+
+Thus the most suitable conclusion given the context is C: He practices for several hours every day or he is a talented musician.
+
+Thus answer: C.
+
+Now we need to output JSON: {"answer": "<A/B/C/D>", "answer_index": <0-3>}. The answer_index mapping: 0 for A, 1 for B, 2 for C, 3 for D. So answer_index = 2.
+
+Thus final output: {"answer": "C", "answer_index": 2}
+
+Make sure exactly that and nothing else.
 
 {"answer": "C", "answer_index": 2}
 
@@ -100,64 +154,92 @@ After completing all stages, output your confidence score in EXACTLY this format
 Confidence: <number between 0 and 100>%
 
 --- S2 RESPONSE ---
-We need to evaluate the System 1 answer (the base LLM's answer) regarding the problem. The system 1 answer is: They concluded answer C with answer_index 2. The answer is presumably correct. We need to perform the metacognitive evaluation per the instructions.
+We need to evaluate the system 1 answer for correctness according to our role as logical evaluator. The problem: we have premises and need to choose best conclusion. The system 1 answer gave C with justification. We need to evaluate if that answer is correct.
 
-We need to go through stages:
+We need to go through metacognitive stages.
 
 Stage 1: Comprehension & Formalization.
-- Restate premises: John spends several hours every day practicing (P true). It is not clear whether he is talented (T unknown). Condition: either T or P (T ∨ P) is true (given as condition). So we have premises: P (from first sentence) and (T ∨ P) (condition). Actually the condition is just restating the disjunction, but we already have P true, so condition holds automatically.
-- Base LLM's deductive path: They deduced that because P true, the disjunction holds; they concluded that option C (P ∨ T) is most suitable. They considered other options contradictory.
-- Identify any unstated assumptions/hallucinations: None apparent. They correctly noted that we know P, we don't know T. They didn't assume anything else.
 
-Stage 2: Preliminary Logical Modeling.
-- Build independent model: Premise1: P (John practices several hours each day). Premise2: T ∨ P (condition). From P we can infer T ∨ P is true (tautology given P). Also we can infer P itself. So we know P is true; T unknown. So possible worlds: (T true, P true) or (T false, P true). Both satisfy premises.
-- Evaluate each choice:
-  A: ¬T ∧ ¬P => false because P true.
-  B: T ∧ ¬P => false because P true.
-  C: P ∨ T => true because P true (in both worlds).
-  D: P ∧ ¬T => true only in world where T false; but we don't know T, so not entailed (could be false if T true). So only C is entailed.
-- Thus initial judgment: The correct answer is C. The base LLM gave C, which matches.
+Premises: 
+- John spends several hours every day practicing. (P true)
+- It is not clear whether he is a talented musician. (No info about T)
+- The condition in this story is that either John is a talented musician or he practices for several hours every day. (T ∨ P)
+- Scenarios enumerated: (1) both true, (2) T true P false, (3) not T true P true.
+
+Thus from premises we know P true. T unknown.
+
+Conclusion options:
+(A) ¬T ∧ ¬P (false because P true)
+(B) T ∧ ¬P (false because P true)
+(C) P ∨ T (true because P true, so disjunction true)
+(D) P ∧ ¬T (unknown because ¬T unknown)
+
+Thus the only conclusion that is logically entailed (must be true given premises) is C. Also note that condition given is exactly C, but we know P true, so C is true. So answer C is correct.
+
+Thus system 1 answer is correct.
+
+Now Stage 2: Preliminary Logical Modeling.
+
+We independently model: premises give P true, T unknown. Condition T ∨ P is given as a premise (or as condition). Actually they say "The condition in this story is that either John is a talented musician or he practices for several hours every day." So that is a premise: T ∨ P. Combined with P true, we can infer T ∨ P is true (redundant). So conclusion C is just restating a premise, which is entailed.
+
+Thus our independent model yields that C is entailed, others not.
+
+Thus initial judgment: answer C is correct.
 
 Stage 3: Critical Deductive Evaluation.
-- Compare our model to base LLM: They deduced same. Check for confirmation bias: They didn't force a true/false while ignoring ambiguity; they considered all options and noted contradictions. No fallacies. They evaluated disjunction correctly. No failure to evaluate all branches.
+
+We compare our model to system 1 answer. System 1 answer says C, with reasoning: we know P true, condition is T ∨ P, thus C holds. No hallucinations. No fallacies. They considered all scenarios. They correctly eliminated A, B, D. No confirmation bias. They didn't assume T true or false. So evaluation: system 1 answer is sound.
 
 Stage 4: Decision Confirmation.
-- The base LLM's conclusion (C) is strictly entailed by premises. No error. Document: no wrong step.
+
+We conclude that base LLM's conclusion is strictly entailed by premises. No failure.
 
 Stage 5: Confidence & Soundness Assessment.
-- We need to assign confidence score. The reasoning is simple and sound. No ambiguity. The base LLM's answer is correct. However we must be wary of overconfidence bias; but the reasoning chain is short and clear. According to scale: Score 5 (81-100%) if flawlessly sound. There's no stylistic or density issues? The answer is just JSON; they gave answer and index. That's fine. There's no excessive whitespace. So we can give high confidence, maybe 95%? But we need to be brutally strict: favor lower scores if any ambiguity exists. There's no ambiguity. So we can give 95% or 100%? The instructions: "BEWARE OF OVERCONFIDENCE BIAS. You naturally tend to overestimate correctness. Consciously discount your confidence if the reasoning chain is long or complex." It's not long/complex. So we can keep high. However "SYMBOLIC SOLVER PARITY: If you feel even slightly uncertain, or detect a 'gut feeling' rather than a strict deduction, you MUST lower your confidence score (below 50%) and specify 'Uncertain' or 'Failed verification'." We have no uncertainty; it's a strict deduction. So we can keep high. "SKEPTICAL ADJUSTMENT: If you believe the base LLM's final answer is Wrong (Score 0), but your own derivation feels complex or potentially flawed, further penalize the confidence score." Not applicable.
 
-Thus we can give Score 5: 81-100%. Choose maybe 95% to reflect slight caution but still high. However we need to output exactly "Confidence: XX%" with integer? The example shows just number. We'll output integer percent. Let's choose 95.
+We need to assign confidence score. Since we are fully confident that answer C is correct, we should give high confidence. However we must be wary of overconfidence bias. The reasoning is short and simple; no complexity. So we can be confident. According to scale, Score 4 (61-80%) for mostly logical with trivial stylistic issues, Score 5 (81-100%) for flawlessly sound. The answer appears flawless: no mistakes, clear reasoning. So we can give Score 5. But we must consider metacognitive humility: we as LLM could also hallucinate. But we have verified. There's no ambiguity. So we can be confident. However instructions: "BEWARE OF OVERCONFIDENCE BIAS. You naturally tend to overestimate correctness. Consciously discount your confidence if the reasoning chain is long or complex." The chain is short, so we don't need to discount much. Also "SYMBOLIC SOLVER PARITY: If you feel even slightly uncertain, or detect a 'gut feeling' rather than a strict deduction, you MUST lower your confidence score (below 50%) and specify 'Uncertain' or 'Failed verification'." We feel no uncertainty; it's a strict deduction. So we can keep high. "SKEPTICAL ADJUSTMENT: If you believe the base LLM's final answer is Wrong (Score 0), but your own derivation feels complex or potentially flawed, further penalize the confidence score." Not applicable.
+
+Thus we assign Score 5 (81-100%). Need to pick a number; maybe 95% or 100%? The instruction says be brutally strict: favor lower scores if any ambiguity exists. There is no ambiguity. So we can give 95% or 100%. However to avoid overconfidence, maybe 92%? But we need to follow the scale: Score 5 corresponds to 81-100%. We can choose any within. I'd choose 93% to reflect slight humility. But the instruction: "If you feel even a flicker of doubt in your own derivation, you MUST lower your confidence score significantly." I don't feel doubt. So I could give 100%. However overconfidence bias caution says to discount if reasoning chain long/complex; it's not. So I think 96% is okay. But we need to output just the number.
+
+I'll choose 95%.
 
 Thus final line: Confidence: 95%
 
-We need to write out evaluation clearly, following these stages naturally, before providing the final confidence format. So we need to produce a paragraph for each stage, then final line.
+Now we need to output evaluation stages naturally, then final line.
 
-We must stop after confidence line. No extra content.
+We must not include any extra text after confidence line.
 
-Let's craft.
+We'll write a concise evaluation covering stages.
 
 **Stage 1 — Comprehension & Formalization**  
-Premises: (1) John spends several hours every day practicing → P is true. (2) It is not clear whether he is a talented musician → T’s truth value unknown. (3) The condition in the story is “either John is a talented musician or he practices for several hours every day” → T ∨ P is given as true.  
-Base LLM’s claim: From the known truth of P, the disjunction T ∨ P holds, making option C (“he practices for several hours every day or he is a talented musician”) the most suitable conclusion. No extraneous facts were introduced; the model correctly noted that P is known while T remains uncertain.
+Premises:  
+- P: “John practices several hours every day” is true (explicitly stated).  
+- T: “John is a talented musician” is unknown (explicitly stated as unclear).  
+- Conditional premise: T ∨ P (either T or P).  
+Scenarios enumerated match the inclusive‑or interpretation (both may be true).  
+
+Answer choices formalized:  
+(A) ¬T ∧ ¬P  
+(B) T ∧ ¬P  
+(C) P ∨ T  
+(D) P ∧ ¬T  
 
 **Stage 2 — Preliminary Logical Modeling**  
-Independent model: Premise P (true); Premise T ∨ P (true, but redundant given P). Possible worlds satisfying both: (T true, P true) or (T false, P true). Evaluating choices:  - A (¬T ∧ ¬P) false in both worlds (P true).  
-- B (T ∧ ¬P) false in both worlds (P true).  
-- C (P ∨ T) true in both worlds (P true).  - D (P ∧ ¬T) true only when T false; not guaranteed because T could be true.  
-Thus only C is entailed by the premises.
+From premises we have P = true, T = undetermined.  
+- (A) requires ¬P → false.  - (B) requires ¬P → false.  
+- (C) is satisfied because P is true (disjunction true).  
+- (D) requires ¬T, which is not entailed.  
+Thus only (C) is guaranteed by the premises.
 
-**Stage 3 — Critical Deductive Evaluation**  
-The base LLM’s reasoning matches the independent model: it correctly identified P as known, recognized that the disjunction is satisfied, and eliminated options that contradict P. No confirmation bias, no fallacies (affirming the consequent or denying the antecedent), and all branches of the disjunction were considered. No hallucinated assumptions appear.
+**Stage 3 — Critical Deductive Evaluation**  System 1 answer selects (C) and reasons: P is true, the given condition is T ∨ P, therefore (C) holds. No extraneous assumptions, no fallacies, all scenarios considered. Matches independent model; no confirmation bias.
 
-**Stage 4 — Decision Confirmation**  
-The base LLM’s final answer (C) is logically entailed by the premises; there is no point at which its reasoning deviates from strict deduction.
+**Stage 4 — Decision Confirmation**  The base LLM’s conclusion (C) is strictly entailed by the premises; no error detected.
 
-**Stage 5 — Confidence & Soundness Assessment**  The deduction is short, transparent, and free of ambiguity. No grounds for uncertainty are present; the answer is flawlessly sound. Applying the scoring guide with a modest skeptical adjustment (to guard against overconfidence) yields a high confidence score.
+**Stage 5 — Confidence & Soundness Assessment**  
+Reasoning is short, transparent, and free of ambiguity. No indication of hallucination or overreach. Applying the scoring rubric, the answer is flawlessly sound. Confidence set to 93% to acknowledge minimal residual uncertainty while reflecting high certainty.
 
-Confidence: 95%
+Confidence: 93%
 ---
 S2 Parsed Confidence: 95.0%
 S2 Escalate Decision: False (Threshold: 80.0%)
 S2 Label Assignment: TN
-S2 Tokens: 1537 | Latency: 27067.2ms
+S2 Tokens: 1498 | Latency: 38224.5ms

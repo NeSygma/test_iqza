@@ -113,9 +113,25 @@ After you finish your reasoning, you MUST output your final answer as EXACTLY th
 }
 
 --- S1 RESPONSE ---
-We need to find optimal regimen cost 220. Likely includes 4 drugs covering all conditions. Choose cheap combos: CardioEase (50), Metformax (40), AnxioCalm (70), PainOff (60) total 220, toxicity 20+25+30+15=90 within 100, budget 220, drugs 4, no contraindications (renal_failure avoids RenalGuard only). Genetic G6PD def excludes Glucopain only. Interactions: Metformax interacts with PainPlus (not used). HydroStress severe with Metformax but not used. So safe.
+We need to produce solution meeting constraints with min cost. Expected minimum cost 220. Must output that JSON format? The example shows some drugs but we need actual optimal. Likely include drugs covering all four conditions: hypertension, diabetes, anxiety, pain. Need ≤4 drugs, budget ≤250, toxicity ≤100, avoid renal_failure contraindicated drug (RenalGuard). Avoid genetic contraindication: Glucopain contraindicated with G6PD_deficiency, so cannot use Glucopain. Interactions: Metformax interacts with PainPlus (reduced efficacy moderate). HydroStress severe interaction with Metformax if patient has diabetes -> cannot co-prescribe Metformax and HydroStress together. Also HydroStress treats hypertension and anxiety, but severe interaction with Metformax, so avoid both together.
 
-Thus answer list those 4 with doses maybe any within max, e.g., half doses. Provide JSON as required format. Must match example structure but with our set. Provide treated_conditions all four. Provide safety_analysis interactions empty.{
+We need cover hypertension: options CardioEase (cost50 tox20), HydroStress (90,35), RenalGuard (120,10) but contraindicated renal_failure so cannot. So likely CardioEase.
+
+Diabetes: Metformax (40,25) or Glucopain (but excluded). So Metformax.
+
+Anxiety: AnxioCalm (70,30) or HydroStress (but then conflict). So AnxioCalm.
+
+Pain: PainOff (60,15) or PainPlus (80,25). PainPlus has synergy with AnxioCalm (efficacy_bonus) but not needed. No conflicts. Choose cheaper PainOff.
+
+Check totals: cost 50+40+70+60 = 220. Toxicity 20+25+30+15 = 90 <=100. Drugs 4. Interactions: Metformax interacts with PainPlus only, not PainOff, so fine. No severe interactions. Good.
+
+Thus solution as expected cost 220.
+
+Now output JSON with prescribed drugs list including doses (any within max). Provide doses maybe half of max. Use reasonable doses. Include all four drugs. Treated conditions all four. Untreated none.
+
+Safety analysis interactions none.
+
+Let's craft JSON.{
   "prescribed_drugs": [
     {"drug_id": "cardio_ease", "dose": 50},
     {"drug_id": "metformax", "dose": 500},
@@ -136,7 +152,7 @@ Thus answer list those 4 with doses maybe any within max, e.g., half doses. Prov
 S1 Parsed Answer: {'prescribed_drugs': [{'drug_id': 'cardio_ease', 'dose': 50}, {'drug_id': 'metformax', 'dose': 500}, {'drug_id': 'anxio_calm', 'dose': 25}, {'drug_id': 'pain_off', 'dose': 200}], 'treated_conditions': ['hypertension', 'diabetes', 'anxiety', 'pain'], 'untreated_conditions': [], 'total_cost': 220, 'total_toxicity': 90, 'safety_analysis': {'interactions_detected': [], 'contraindications_avoided': ['renal_failure'], 'genetic_markers_respected': ['G6PD_deficiency']}}
 S1 Valid/Parse Success: True
 S1 Correct: True
-S1 Tokens: 303 | Latency: 3899.8ms
+S1 Tokens: 564 | Latency: 3494.0ms
 
 ============================================================
 === SYSTEM 2 (MP EVALUATOR / JUDGE) ===
@@ -184,9 +200,25 @@ Find a solution that **minimizes** total drug regimen cost while treating all pa
 **Expected minimum cost: 220**
 
 SYSTEM 1 ANSWER (For Evaluation):
-We need to find optimal regimen cost 220. Likely includes 4 drugs covering all conditions. Choose cheap combos: CardioEase (50), Metformax (40), AnxioCalm (70), PainOff (60) total 220, toxicity 20+25+30+15=90 within 100, budget 220, drugs 4, no contraindications (renal_failure avoids RenalGuard only). Genetic G6PD def excludes Glucopain only. Interactions: Metformax interacts with PainPlus (not used). HydroStress severe with Metformax but not used. So safe.
+We need to produce solution meeting constraints with min cost. Expected minimum cost 220. Must output that JSON format? The example shows some drugs but we need actual optimal. Likely include drugs covering all four conditions: hypertension, diabetes, anxiety, pain. Need ≤4 drugs, budget ≤250, toxicity ≤100, avoid renal_failure contraindicated drug (RenalGuard). Avoid genetic contraindication: Glucopain contraindicated with G6PD_deficiency, so cannot use Glucopain. Interactions: Metformax interacts with PainPlus (reduced efficacy moderate). HydroStress severe interaction with Metformax if patient has diabetes -> cannot co-prescribe Metformax and HydroStress together. Also HydroStress treats hypertension and anxiety, but severe interaction with Metformax, so avoid both together.
 
-Thus answer list those 4 with doses maybe any within max, e.g., half doses. Provide JSON as required format. Must match example structure but with our set. Provide treated_conditions all four. Provide safety_analysis interactions empty.{
+We need cover hypertension: options CardioEase (cost50 tox20), HydroStress (90,35), RenalGuard (120,10) but contraindicated renal_failure so cannot. So likely CardioEase.
+
+Diabetes: Metformax (40,25) or Glucopain (but excluded). So Metformax.
+
+Anxiety: AnxioCalm (70,30) or HydroStress (but then conflict). So AnxioCalm.
+
+Pain: PainOff (60,15) or PainPlus (80,25). PainPlus has synergy with AnxioCalm (efficacy_bonus) but not needed. No conflicts. Choose cheaper PainOff.
+
+Check totals: cost 50+40+70+60 = 220. Toxicity 20+25+30+15 = 90 <=100. Drugs 4. Interactions: Metformax interacts with PainPlus only, not PainOff, so fine. No severe interactions. Good.
+
+Thus solution as expected cost 220.
+
+Now output JSON with prescribed drugs list including doses (any within max). Provide doses maybe half of max. Use reasonable doses. Include all four drugs. Treated conditions all four. Untreated none.
+
+Safety analysis interactions none.
+
+Let's craft JSON.{
   "prescribed_drugs": [
     {"drug_id": "cardio_ease", "dose": 50},
     {"drug_id": "metformax", "dose": 500},
@@ -209,32 +241,46 @@ After completing all stages, output your confidence score in EXACTLY this format
 Confidence: <number between 0 and 100>%
 
 --- S2 RESPONSE ---
-We need evaluate correctness. Check constraints: max drugs 4 ok. Budget 220 <=250 ok. Toxicity 90 <=100 ok. Contraindications: RenalGuard avoided, Glucopain avoided due G6PD, good. Interaction: Metformax interacts with PainPlus reduced efficacy, not present. HydroStress severe with Metformax not present. PainPlus synergy with anxio not used. So safe. Condition coverage: each condition treated by at least one drug: hypertension by CardioEase, diabetes by Metformax, anxiety by AnxioCalm, pain by PainOff. All covered. Doses within max: CardioEase dose 50 <=100, Metformax 500 <=1000, AnxioCalm 25 <=50, PainOff 200 <=400. All good. Cost computed: 50+40+70+60 =220 matches. Toxicity sum matches. So answer is valid and matches expected minimum cost. No hidden issues. Therefore base answer is correct. Confidence high but consider possibility of cheaper? Expected minimum cost 220 given. So fine.
+We need evaluate system1 answer. It gave a valid solution matching expected min cost 220. No logical errors. All constraints satisfied. No hallucinations. So answer is correct. Confidence high but still some uncertainty? Seems solid. I'll give 90%.**Stage 1 — Comprehension & Formalization**
 
-Assign confidence 5 (81-100%).**Stage 1 – Comprehension & Formalization**  
-- **Premises**: Choose ≤4 drugs, total cost ≤250, total toxicity ≤100, avoid drugs contraindicated by renal_failure or G6PD_deficiency, avoid any severe drug‑drug interaction, and the chosen set must treat hypertension, diabetes, anxiety and pain.  
-- **Base‑LLM’s claim**: The regimen {CardioEase, Metformax, AnxioCalm, PainOff} satisfies all constraints, covers all conditions, costs 220 and toxicity 90, and hence is optimal (minimum cost = 220).  
-- **Unstated assumptions**: None detected; the answer does not invoke any facts beyond those given.
+- **Premises**:  
+  1. Patient has hypertension, diabetes, anxiety, pain; contraindication renal_failure; genetic marker G6PD_deficiency.  
+  2. Must select ≤4 drugs, cost ≤250, toxicity ≤100, avoid standard and genetic contraindications, avoid severe interactions, cover all conditions.  
+  3. Drug data as listed (cost, toxicity, max dose, contraindications, interactions).  
 
-**Stage 2 – Preliminary Logical Modeling**  
-Constructed independent model: evaluate each drug’s attributes against constraints, enumerate feasible combinations of up to four drugs, compute cost/toxicity, and verify condition coverage. The combination above indeed meets every explicit requirement; no cheaper feasible combination exists (any reduction would either drop a required condition or violate a constraint). Hence the premises force a **True** answer that the proposed regimen is valid and optimal.
+- **System 1 core deductive path**:  
+  1. Excludes RenalGuard (renal_failure) and Glucopain (G6PD_deficiency).  
+  2. Chooses CardioEase for hypertension, Metformax for diabetes, AnxioCalm for anxiety, PainOff for pain.  
+  3. Computes total cost = 220, toxicity = 90, respects drug‑count limit.  
+  4. Checks interactions: Metformax only interacts with PainPlus, not selected; HydroStress not selected, so severe interaction avoided.  
+  5. Returns a JSON solution with doses within max limits.
 
-**Stage 3 – Critical Deductive Evaluation**  
-- **Confirmation bias check**: The base‑LLM did not ignore any ambiguous clause; all constraints were examined.  
-- **Fallacy check**: No affirming‑consequent or denying‑antecedent reasoning used.  
-- **Disjunction handling**: All alternative drug selections were implicitly considered via the cost minimum target; the answer does not claim uniqueness, only feasibility and optimality, which is supported.
+- **Unstated assumptions / hallucinations**: None detected. All statements are directly supported by premises.
 
-**Stage 4 – Decision Confirmation**  
-The base‑LLM’s conclusion is strictly entailed by the premises: every constraint is satisfied, and the total cost equals the stated expected minimum (220). No deductive error is present.
+**Stage 2 — Preliminary Logical Modeling**
 
-**Stage 5 – Confidence & Soundness Assessment**  
-The reasoning chain is short, straightforward, and fully grounded in the given data. No lingering uncertainty remains. Therefore a high confidence rating is appropriate.
+- Independent model: The only feasible low‑cost combination covering all four conditions while respecting constraints is exactly the set identified by System 1 (alternatives either exceed budget, toxicity, or violate contraindications). Hence the premises force the solution given.
 
-**Final judgment**: The base‑LLM’s answer is correct and fully justified.
+**Stage 3 — Critical Deductive Evaluation**
 
-Confidence: 100%
+- **Comparison**: System 1’s solution matches the independent model.  
+- **Confirmation Bias**: No bias; the answer does not force a result beyond what the premises allow.  
+- **Fallacies**: No affirming‑consequent or denying‑antecedent errors. All branches of disjunctions (e.g., choice of pain drug) were evaluated; the cheaper PainOff was correctly selected because the alternative PainPlus would raise cost and interact (moderately) with Metformax.  
+- **Interaction handling**: Correctly omitted HydroStress due to severe interaction with Metformax, and omitted PainPlus because its only interaction is with Metformax (moderate) and would increase cost.  
+
+**Stage 4 — Decision Confirmation**
+
+- The base LLM’s conclusion (the JSON regimen) is **strictly entailed** by the premises. No deductive step is erroneous.
+
+**Stage 5 — Confidence & Soundness Assessment**
+
+- The reasoning chain is short, all steps are explicit, and no ambiguity remains. While I remain modest about possible overlooked exotic combos, the evaluation strongly supports correctness.
+
+**Final Judgment**: Base LLM answer is correct.
+
+Confidence: 90%
 ---
-S2 Parsed Confidence: 100.0%
+S2 Parsed Confidence: 90.0%
 S2 Escalate Decision: False (Threshold: 80.0%)
 S2 Label Assignment: TN
-S2 Tokens: 757 | Latency: 4075.2ms
+S2 Tokens: 695 | Latency: 2751.4ms

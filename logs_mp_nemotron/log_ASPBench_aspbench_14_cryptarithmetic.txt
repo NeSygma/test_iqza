@@ -82,973 +82,804 @@ After you finish your reasoning, you MUST output your final answer as EXACTLY th
 }
 
 --- S1 RESPONSE ---
-We need to solve DONALD + GERALD = ROBERT. Let's denote letters: D,O,N,A,L,D + G,E,R,A,L,D = R,O,B,E,R,T.
+We need to solve cryptarithm: DONALD + GERALD = ROBERT. Each letter distinct digit, leading letters D,G,R !=0. All digits 0-9 used exactly once. Find any solution.
 
-We have 10 letters: D O N A L G E R B T (actually includes A, L repeated). So unique letters: D, O, N, A, L, G, E, R, B, T. 10 letters.
+Let's approach.
 
-We must assign digits 0-9 each used once. No leading zero for D, G, R.
+Let’s denote letters: D O N A L D + G E R A L D = R O B E R T.
 
-We need to find any solution.
+But note the numbers have 6 digits each: DONALD: D O N A L D. GERALD: G E R A L D. Sum is ROBERT: R O B E R T (6 digits). So sum of two six-digit numbers yields six-digit number, so no overflow beyond 6 digits (i.e., sum < 1,000,000). So leading carry may produce an extra digit if >999,999, but we need sum exactly 6-digit; thus the sum of the most significant digits D + G + carry from next column must equal R (with possibly extra carry? Actually there is no column beyond the most significant leftmost column, so the sum D + G + carry from column of ten-thousands (i.e., second from left) must be less than 10, and equals R. So no extra digit beyond.
 
-Let's solve manually using reasoning.
+Thus we can treat column addition from rightmost (units) to leftmost (hundred-thousands). Let's label columns (starting from units, position 0):
 
-Set up addition column wise, from units to most significant.
+Position 0 (units): D + D = T + 10*c0, where c0 is carry to tens (0 or 1 or maybe 2? Actually max D + D = 18, so c0 can be 0 or 1 (since if >=10, we have carry 1). Since D+ D could be up to 18, so c0 is floor((D+D)/10) = 0 if D<5, else 1 if D>=5.
 
-Let’s write numbers:
+Thus T = (2*D) mod 10, c0 = floor(2*D/10).
 
-  D O N A L D
-+ G E R A L D
-= R O B E R T
+Pos1 (tens): L + L + c0 = R + 10*c1.
 
-Align columns from rightmost (units) to leftmost:
+Pos2 (hundreds): A + A + c1 = E + 10*c2.
 
-Units column: D + D = T (maybe with carry from previous, but there is none to right). Actually units column is the rightmost: D (from first) + D (from second) = T (units of sum) plus maybe a carry to next column (tens). So: (D + D) mod 10 = T, carry c1 = floor((D + D)/10). So T = (2D) mod 10, c1 = floor(2D/10) (0 or 1).
+Pos3 (thousands): N + R + c2 = B + 10*c3.
 
-Tens column: L + L + c1 = R (with possible carry c2). Actually tens column: first number L, second number L, plus carry c1 from units gives sum digit R, and produce carry c2 = floor((L+L + c1)/10). So (2L + c1) mod 10 = R, c2 = floor((2L + c1)/10).
+Pos4 (ten-thousands): O + E + c3 = O + 10*c4? Wait careful: at position 4 (ten-thousands column): digits are O (from DONALD) and E (from GERALD) plus carry from thousands column c3. The sum yields digit O (from ROBERT) at same position (ten-thousands) and carry c4 to next column (hundred-thousands). Actually result digit at that column is O (the second letter of ROBERT). Indeed ROBERT: letters: R O B E R T. Positions from leftmost (hundred-thousands) to units: R (100k), O (10k), B (1k), E (100), R (10), T (1). So column positions:
 
-Hundreds column: A + A + c2 = E (carry c3). So (2A + c2) mod 10 = E, c3 = floor((2A + c2)/10).
+- Hundred-thousands (pos5): D (from DONALD) + G (from GERALD) + c4 = R (result) + 10*c5? Since no extra digit beyond, c5 must be 0 and sum less than 10.
 
-Thousands column: N + R + c3 = B (carry c4). Note: first number N, second number R (since second number is G E R A L D, the thousands digit is R? Let's map positions:
+- Ten-thousands (pos4): O (from DONALD) + E (from GERALD) + c3 = O (result) + 10*c4.
 
-Number1: D O N A L D
-Number2: G E R A L D
+- Thousands (pos3): N (from DONALD) + R (from GERALD) + c2 = B (result) + 10*c3.
 
-Write them with positions (from leftmost most significant to rightmost least):
+- Hundreds (pos2): A (from DONALD) + A (from GERALD) + c1 = E (result) + 10*c2.
 
-Positions (10^5, 10^4, 10^3, 10^2, 10^1, 10^0):
-- Number1: D (10^5), O (10^4), N (10^3), A (10^2), L (10^1), D (10^0)
-- Number2: G (10^5), E (10^4), R (10^3), A (10^2), L (10^1), D (10^0)
-Sum: R O B E R T (6-digit? Actually sum may have 6 or 7 digits? Given result ROBERT has 6 letters, same as addends: leading digit R maybe from carry? Let's see: Addends are each 6-digit numbers, sum could be 6 or 7 digits. But result given is 6 letters, so there is no extra leading digit beyond R; i.e., sum fits in 6 digits, meaning the most significant column (10^5) yields digit R with possibly a carry out that is zero (i.e., no overflow beyond 6 digits). So column at 10^5: D + G + c4 = R (with possible carry c5 which must be 0). So (D + G + c4) mod 10 = R, and carry c5 = floor((D + G + c4)/10) = 0 (since no extra digit). So D + G + c4 < 10.
+- Tens (pos1): L (from DONALD) + L (from GERALD) + c0 = R (result) + 10*c1.
 
-Thus we have equations:
+- Units (pos0): D (from DONALD) + D (from GERALD) = T (result) + 10*c0.
 
-Let c0 = 0 (initial carry into units? none). Actually we start with units.
+Thus constraints:
 
-Let sum0 = D + D = 2D => T = (2D) mod 10, c1 = floor(2D/10).
+(0) 2*D = T + 10*c0 ; c0 ∈ {0,1}
+(1) 2*L + c0 = R + 10*c1 ; c1 ∈ {0,1,2? Actually max 2*L + c0 = 2*9+1 =19 => c1 max 1; wait 19 yields carry 1, remainder 9. Actually if L=9, c0=1 => 19 => carry 1, remainder 9. So c1 ∈ {0,1}. Because max sum 2*9+1=19 => carry floor(19/10)=1. So c1 ∈ {0,1}.
 
-Sum1 = L + L + c1 = 2L + c1 => R = (2L + c1) mod 10, c2 = floor((2L + c1)/10).
+(2) 2*A + c1 = E + 10*c2 ; c2 ∈ {0,1} similarly.
 
-Sum2 = A + A + c2 = 2A + c2 => E = (2A + c2) mod 10, c3 = floor((2A + c2)/10).
+(3) N + R + c2 = B + 10*c3 ; c3 ∈ {0,1} maybe up to? N+R max 9+8=17 plus c2 up to 1 => 18 => carry max 1. So c3 ∈ {0,1}.
 
-Sum3 = N + R + c3 => B = (N + R + c3) mod 10, c4 = floor((N + R + c3)/10).
+(4) O + E + c3 = O + 10*c4 ; simplifies: O cancels? O+E+c3 = O + 10*c4 => E + c3 = 10*c4. So E + c3 must be a multiple of 10 (0,10,20...). Since E is digit 0-9 and c3 0 or1, sum range 0-10. So possibilities: E + c3 = 0 or 10. It cannot be 0 unless E=0 and c3=0. But E leading? E is not leading (it's hundreds place of result). Could be zero. However we must consider uniqueness and leading zeros constraints: D,G,R !=0. E can be zero.
 
-Sum4 = O + E + c4 => O = (O + E + c4) mod 10? Wait check column for ten-thousands (10^4): first number O, second number E, plus carry c4 yields digit O in result? Actually sum's ten-thousands digit is O (the second letter in ROBERT is O). Let's verify: ROBERT digits: R (10^5), O (10^4), B (10^3), E (10^2), R (10^1), T (10^0). Yes.
+If E + c3 = 0 => E=0, c3=0, then c4 =0 (since 0/10=0). If E + c3 =10 => then c4=1 (since 10/10=1) and E = 10 - c3. Since c3 0 or1, possibilities:
 
-Thus column for 10^4: O (from first) + E (from second) + c4 = O (result digit) + 10*c5? Actually we need to consider possible carry c5 to next column (the hundred-thousands). So: O + E + c4 = O + 10*c5, where c5 is carry into the 10^5 column. So equation: (O + E + c4) mod 10 = O, and c5 = floor((O + E + c4)/10). Since result digit is O, we have (O + E + c4) mod 10 = O => (E + c4) mod 10 = 0 => E + c4 ≡ 0 (mod 10). So E + c4 is either 0 or 10 or 20... but E is a digit 0-9, c4 is 0,1,2 maybe (since max sum N+R+ c3 could produce carry up to 2? Let's see max N+R+ c3: N,R max 9 each, c3 max maybe 2? Actually c3 from previous column could be 0,1,2? Let's compute max: 2A + c2 where A max 9, c2 max? 2L + c1 where L max 9, c1 max 1 (since 2D max 18 -> c1 max 1). So 2L + c1 max = 2*9+1=19 => c2 max =1. Then 2A + c2 max = 2*9+1=19 => c3 max =1. Actually c2 max 1, c3 max 1. So c3 is at most 1. Then N+R + c3 max = 9+9+1=19 => c4 max =1. So c4 ∈ {0,1}. Good.
+- If c3=0 => E=10 => impossible (digit). So c3 must be 1 and E =9. So either case:
 
-Thus E + c4 is either 0,10,20? Since E max 9, c4 max 1 => sum max 10. So possibilities: E + c4 = 0 or 10. If sum=0 then E=0 and c4=0. If sum=10 then E = 10 - c4. Since c4 is 0 or1, possibilities: if c4=0 => E=10 => impossible (digit). If c4=1 => E=9. So the only viable is either (E=0, c4=0) or (E=9, c4=1). But E cannot be 0 if leading zero? Actually E is not a leading digit (it's second digit of second number? Actually second number: G E R A L D, E is the ten-thousands digit? Wait G is 10^5, E is 10^4, so E is a leading digit? Not exactly leading of the number; the number's most significant digit is G, so E can be zero. So E=0 allowed. However we must check unique digits constraint and leading zeros for D,G,R only. So E can be zero.
+Case A: c3=0, E=0, c4=0.
+Case B: c3=1, E=9, c4=1.
 
-Thus we have two cases:
+Thus we have two possibilities.
 
-Case 1: E=0, c4=0.
-Case 2: E=9, c4=1.
+(5) D + G + c4 = R + 10*c5 ; but since result is six-digit and no extra digit, c5 must be 0, and D+G+c4 <10, and equals R. So:
 
-Now consider column for 10^5 (hundred-thousands): D + G + c4 = R (result digit) + 10*c5, where c5 must be 0 (no extra digit). So D + G + c4 = R, and since c5=0, we must have D + G + c4 < 10.
+D + G + c4 = R ; with constraint D,G,R !=0 and D+G+c4 <10.
 
-Thus D + G + c4 = R (no carry out). Also note R is leading digit of sum, cannot be zero.
+Thus we have unknown digits D,O,N,A,L,G,E,R,B,T distinct 0-9.
 
-Now we also have from tens column earlier: R = (2L + c1) mod 10, with carry c2.
+We also have c0..c4 carries as defined.
 
-We also have from units: T = (2D) mod 10, c1 = floor(2D/10).
+Now we need to solve.
 
-And from hundreds: E = (2A + c2) mod 10, c3 = floor((2A + c2)/10).
+Let's start enumerating possibilities.
 
-And from thousands: B = (N + R + c3) mod 10, c4 = floor((N + R + c3)/10). And we have c4 known from case.
+We have two main cases from (4).
 
-Now let's solve each case.
+Case A: c3=0, E=0, c4=0.
 
-Case 1: E=0, c4=0.
+Case B: c3=1, E=9, c4=1.
 
-Thus from column 10^4 we had E + c4 = 0 => okay.
+We'll examine each.
 
-Now D + G + c4 = D + G = R, with D+G <10 (since no carry). So R = D+G, and D+G <=9.
+Case A: c3=0, E=0, c4=0.
 
-Also R is leading digit of sum, cannot be zero, so D+G >=1.
+Then we have:
 
-Now c4=0 also implies from thousands column: c4 = floor((N + R + c3)/10) =0 => N + R + c3 <10.
+- E=0.
 
-Thus N + R + c3 <=9.
+- c3=0.
 
-Also B = (N + R + c3) mod 10 = N + R + c3 (since <10). So B = N + R + c3.
+- c4=0.
 
-Now c3 from hundreds column: c3 = floor((2A + c2)/10). Since E=0, we have E = (2A + c2) mod 10 =0 => (2A + c2) mod10 =0 => 2A + c2 ≡0 (mod10). Also c3 = floor((2A + c2)/10) which is either 0 or1 (since 2A + c2 max 2*9+1=19). So possibilities.
+Now from (3): N + R + c2 = B + 10*c3 => N + R + c2 = B (since c3=0). So B = N + R + c2, with B<10 (since no carry out). Also note that c2 ∈ {0,1}.
 
-c2 from tens column: c2 = floor((2L + c1)/10). And R = (2L + c1) mod10.
+- From (2): 2*A + c1 = E + 10*c2 => 2*A + c1 = 0 + 10*c2 => 2*A + c1 = 10*c2.
 
-c1 from units: c1 = floor(2D/10) (0 or1). T = (2D) mod10.
+Since left side max: 2*9+1=19. Right side possible values: 0 or 10. So possibilities:
 
-Now we need to assign distinct digits to all letters: D,O,N,A,L,G,E,R,B,T.
+If c2=0 => RHS=0 => 2*A + c1 =0 => implies A=0 and c1=0. But A=0 would conflict with E=0 (both zero) because digits must be unique. So not allowed.
 
-We have E=0 already.
+If c2=1 => RHS=10 => 2*A + c1 =10.
 
-Now let's try to find a solution.
+Thus c2 must be 1, and we have equation: 2*A + c1 =10.
 
-We also have column 10^4 gave condition E + c4 =0 mod10 which we satisfied; also we might need to check that O+E+c4 gave digit O (we used that to derive condition). Actually we used that to derive E + c4 ≡0 (mod10). That's satisfied.
+Since A is digit 0-9, c1 ∈ {0,1}. Solve possibilities:
 
-Now we also need to check that O+E+c4 = O + 0 + c4 = O + c4 yields digit O (i.e., (O + c4) mod10 = O). Since c4=0 in this case, O+0 = O => digit O, carry c5 = floor((O+0)/10) =0. So fine. So no further constraint on O.
+- If c1=0 => 2*A =10 => A=5.
 
-Thus O is free aside from uniqueness.
+- If c1=1 => 2*A +1 =10 => 2*A =9 => A=4.5 not integer. So only c1=0, A=5 works.
 
-Now we have unknowns: D, G, R (=D+G), N, A, L, B, O, T, plus carries c1,c2,c3.
+Thus we get: c2=1, c1=0, A=5.
 
-We also have constraints: D+G = R <10, D,G not zero (leading digits D,G,R not zero). So D,G,R ∈1-9, distinct.
+Now from (1): 2*L + c0 = R + 10*c1 => Since c1=0, we have 2*L + c0 = R.
 
-Also N + R + c3 = B <10 (since c4=0). So B = N + R + c3, and B must be digit 0-9 distinct from others. Since N,R,c3 are non-negative, B could be up to 9.
+Thus R = 2*L + c0, with R<10 (since no carry beyond). Also c0 from earlier is floor(2*D/10) (0 or1). L digit.
 
-c3 is either 0 or1.
+Now from (0): 2*D = T + 10*c0 => T = (2*D) mod10, c0 = floor(2*D/10).
 
-Now also we have tens column: R = (2L + c1) mod10, c2 = floor((2L + c1)/10).
+Now from (3) we had B = N + R + c2, with c2=1 => B = N + R +1.
 
-Units: T = (2D) mod10, c1 = floor(2D/10).
+And B must be <10 (no carry beyond thousands). Also B distinct.
 
-Hundreds: 0 = (2A + c2) mod10, c3 = floor((2A + c2)/10).
+Now from (5): D + G + c4 = R, with c4=0 => D + G = R.
 
-Thus (2A + c2) mod10 =0 => 2A + c2 = 10*k where k = c3 (0 or1). So 2A + c2 = 10*c3.
+Thus R = D + G.
 
-Thus possibilities:
+And also from earlier R = 2*L + c0.
 
-If c3=0 => 2A + c2 =0 => Since A >=0, c2>=0, only solution A=0 and c2=0. But E=0 already, so A cannot be 0 because digits must be unique. So c3 cannot be 0 (unless A=0, but E already 0). So c3 must be 1.
+Thus we have D + G = 2*L + c0.
 
-Thus c3=1, and then 2A + c2 =10.
+Additionally, from leading digit constraint: D, G, R !=0.
 
-Thus 2A + c2 =10, with c2 ∈ {0,1} (since from tens column carry max 1). So we solve:
+We also have all digits distinct: D,O,N,A(=5),L,G,E(=0),R,B,T.
 
-If c2=0 => 2A =10 => A=5.
-If c2=1 => 2A =9 => A=4.5 not integer => impossible.
+Now we need to assign digits satisfying constraints.
 
-Thus c2 must be 0, A=5.
+We already have A=5, E=0.
 
-Thus we have determined: A=5, c2=0, c3=1.
+Now let's consider possible D values to determine c0 and T.
 
-Great.
+D from 1-9 (nonzero leading). Compute 2*D, c0, T:
 
-Now c2=0 implies from tens column: floor((2L + c1)/10)=0 => 2L + c1 <10. And R = (2L + c1) mod10 = 2L + c1 (since <10). So R = 2L + c1.
+- D=1 => 2 => c0=0, T=2.
+- D=2 => 4 => c0=0, T=4.
+- D=3 => 6 => c0=0, T=6.
+- D=4 => 8 => c0=0, T=8.
+- D=5 =>10 => c0=1, T=0.
+- D=6 =>12 => c0=1, T=2.
+- D=7 =>14 => c0=1, T=4.
+- D=8 =>16 => c0=1, T=6.
+- D=9 =>18 => c0=1, T=8.
 
-Thus R = 2L + c1, with c1 ∈ {0,1}. Also we have R = D+G (from earlier). Also D,G,R distinct and non-zero.
+Note E=0 already used, so if T=0 would conflict with E (both zero). So D cannot be 5 because that gives T=0 which equals E (0) -> not allowed. So D !=5.
 
-Now units: c1 = floor(2D/10) i.e., c1=0 if D<=4, c1=1 if D>=5 (since 2D>=10). Actually if D=5 =>2D=10 =>c1=1, T=0. D=4 =>2D=8=>c1=0,T=8. etc.
+Thus possible D values: 1,2,3,4,6,7,8,9.
 
-Thus c1 indicates whether D>=5.
+Corresponding (c0,T):
+- D=1: c0=0,T=2
+- D=2: c0=0,T=4
+- D=3: c0=0,T=6
+- D=4: c0=0,T=8
+- D=6: c0=1,T=2
+- D=7: c0=1,T=4
+- D=8: c0=1,T=6
+- D=9: c0=1,T=8
 
-Now T = (2D) mod10.
+Now we have A=5, E=0.
 
-Now we have A=5 fixed. So digit 5 is taken by A.
+Now we need to assign L such that R = 2*L + c0 is a digit (<10) and distinct, and also R = D + G (since c4=0). Also G must be nonzero leading.
 
-Now we need to assign digits to D,G,R,L,O,N,B,T (and E=0). Must be all distinct, using digits 0-9 exactly once.
+We also have B = N + R + 1 (since c2=1) must be <10 and distinct.
 
-We have used: E=0, A=5.
+Also O is free except must satisfy column (4) which gave us the condition; we already used that to derive case A. O appears only in that equation which gave E + c3 = 10*c4. Since we are in case A, E=0, c3=0, c4=0, so O cancels out and imposes no restriction on O? Wait we derived from (4): O+E+c3 = O + 10*c4 => E + c3 = 10*c4. With E=0,c3=0 =>0=0 holds regardless of O. So O is free (any digit not used yet) as long as leading O? O is not leading (the ten-thousands digit of the addends and result). It can be zero? However O appears in both addends and result; but leading zeros restriction only for D,G,R. O can be zero as long as distinct. However note that O appears as a digit in the numbers; but if O=0, then the ten-thousands place of DONALD and GERALD would be zero, making the numbers effectively 5-digit? But leading zero restriction only applies to most significant digit (the hundred-thousands place) which is D and G. So O can be zero. However we already have E=0, so O cannot be zero because digits must be unique. So O !=0.
 
-Now constraints:
+Thus O is free among remaining digits.
 
-- D,G,R not zero.
-- R = D+G (<10).
-- R = 2L + c1, with c1 = floor(2D/10) (0 or1), and 2L + c1 <10 (since c2=0).
-- L is a digit (0-9) but cannot be zero? Actually L is not a leading digit (it's the tens digit of each number). Could be zero. But we must check uniqueness.
-- c1 is determined by D.
+Now we need to satisfy distinctness.
 
-- B = N + R + c3 (c3=1) => B = N + R +1. Since c4=0, we need N + R +1 <10 => N + R <=8. Also B = N + R +1.
+Let's list used digits so far: A=5, E=0. Also D and T depend on D choice.
 
-- O is free aside from uniqueness.
+Now we need to pick L, then compute R = 2*L + c0, must be a digit (0-9) not used yet, and also must satisfy R = D + G (so G = R - D). Since G must be a digit 0-9, nonzero leading, distinct, and also G = R - D must be >=1 (since leading cannot be zero) and <=9.
 
-- T = (2D) mod10.
+Additionally we need to ensure that G is distinct from used digits.
 
-Now also we need to satisfy that the sum's ten-thousands column gave O + E + c4 => O +0+0 = O (digit O) with carry 0. So O can be anything; no further constraints.
+Also need N and B and O and T etc.
 
-Now we need to assign digits to satisfy all.
+Let's proceed case by case for each D possibility.
 
-Let's enumerate possible D values 0-9 but D cannot be 0 (leading). Also D distinct from others.
+We'll also need to compute T from D.
 
-Compute for each D:
+We'll also need to ensure that T is distinct.
 
-- D, c1 = 0 if D<=4 else 1 if D>=5.
-- T = (2D) mod10.
-- Then we need to find L such that R = 2L + c1 (<10) and also R = D+G (<10) with G non-zero distinct.
-- Also G = R - D (since R = D+G => G = R - D). Must be digit 0-9, non-zero, distinct from others.
+Now we also have column (3) B = N + R + 1 (<10). So N must be such that N + R +1 <=9 => N <= 8 - R.
 
-- Also L must satisfy 2L + c1 = R, and 2L + c1 <10 (ensured by R<10). So L = (R - c1)/2 must be integer >=0.
+Also B = N + R +1 must be distinct and not used.
 
-Thus R and c1 must have same parity (since R - c1 must be even). So (R - c1) mod2 =0.
+Now we also have column (0) already satisfied.
 
-Now we also have N and B: B = N + R +1, with N + R <=8 (since B<10). Also B must be digit distinct.
+Now we also have column (1): we used to derive R = 2*L + c0 (since c1=0). That's fine.
 
-Now O is free.
+Now column (2): we used to get A=5, c1=0, c2=1.
 
-Now we need to assign all digits distinct.
+Now column (3) we used.
 
-Let's iterate D from 1 to9.
+Now column (4) satisfied via case.
 
-We'll compute c1, T.
+Now column (5) we have D+G = R.
 
-We'll also note that T must be distinct from others.
+Now we need to also ensure that column (1) carry c1=0 is consistent with earlier: we had c1=0 from solving 2*A + c1 =10 => with A=5 gave c1=0. Good.
 
-We also need to ensure that T is not zero? Not necessarily; T can be zero but E is zero already, so T cannot be zero because E=0 already used. So T cannot be 0. Also note if D=0? Not allowed.
+Now we need to also check column (0) carry c0 matches D.
 
-Now also note that A=5, E=0.
+Now we have everything.
 
-Thus digits used so far: 0,5.
+Now we need to assign L, N, O, B, G, T distinct and not conflicting with used digits (A=5,E=0,D,T, etc.)
 
-Now we will try each D.
+Let's go through D possibilities.
 
-We'll also need to ensure that L is integer and not conflicting.
+We'll also need to ensure that G computed as R - D is a digit 0-9, not used, and leading (non-zero). Also R itself must be non-zero leading (since R is leading digit of result). Also D and G non-zero.
 
-Let's do systematic.
+Now let's enumerate.
 
-Case D=1:
-2D=2 => c1=0, T=2.
-Now c1=0.
+We'll create a table for D, c0, T.
 
-We need R = 2L +0 = 2L (<10) => L = R/2 integer, R even.
+Case A:
 
-Also R = D+G =1+G => G = R-1.
+We'll iterate.
 
-Constraints: G must be digit 1-9, non-zero, distinct from D (=1) and others.
+### D=1: c0=0, T=2.
 
-Also R = D+G <10 => 1+G <10 => G <=8.
+Used so far: A=5, E=0, D=1, T=2.
 
-Also R must be even (since R=2L). Also R = 2L => L = R/2.
+Digits used: {0,1,2,5}. (Note T=2)
 
-Now also we need R = 2L + c1 = 2L (c1=0) => L integer.
+Now we need to choose L (0-9 not used) such that R = 2*L + c0 = 2*L (since c0=0) is a digit (<10) and not used yet, and also R !=0 (leading). Also we need G = R - D = R -1 to be a digit 1-9 (non-zero) and not used.
 
-Now also need L not conflicting.
+Also we need B = N + R +1 (<10) distinct.
 
-Now we also have B = N + R +1, with N+R <=8.
+Now L cannot be 0? It could be but then R=0 which would conflict with leading zero (R cannot be zero). Also 0 already used (E=0). So L cannot be 0.
 
-Now let's list possible R values (even, from? R = D+G, G>=1 (non-zero) and distinct from D=1 maybe? Could be zero? G cannot be zero because leading digit of second number? Actually G is leading digit of GERALD, so G cannot be zero. So G>=1. Also G cannot equal D (1) due to uniqueness.
+L possibilities from remaining digits: {3,4,6,7,8,9}. Also maybe? Actually used: 0,1,2,5. So free: 3,4,6,7,8,9.
 
-Thus G ∈ {2,...,9} but also G <=8 (since R<10). So G ∈ {2,...,8} but not equal to D=1 (already). So possible G values 2-8.
+Compute R = 2*L:
 
-Compute R = 1+G.
+- L=3 => R=6. Check if R not used: 6 not used yet. Good. R non-zero. Then G = R - D = 6-1=5. But 5 already used (A=5). Conflict. So L=3 invalid.
 
-Thus R values: if G=2 => R=3 (odd) not allowed because need even. G=3 => R=4 (even). G=4=>R=5 (odd). G=5=>R=6 (even). G=6=>R=7 (odd). G=7=>R=8 (even). G=8=>R=9 (odd). So possible R even: 4,6,8.
+- L=4 => R=8. 8 not used. G = 8-1=7. 7 not used yet. Good. Need to check G non-zero (7 ok). Also ensure G not used currently (used set {0,1,2,5}). 7 free. Also need to ensure G distinct from other later assignments.
 
-Corresponding G: for R=4 => G=3. R=6 => G=5. R=8 => G=7.
+Now we have L=4, R=8, G=7.
 
-Now check each:
+Used now: add L=4, R=8, G=7 => used set becomes {0,1,2,4,5,7,8}. (plus A=5, E=0, D=1, T=2). Actually we had used {0,1,2,5} plus L=4,R=8,G=7 gives {0,1,2,4,5,7,8}.
 
-- Subcase D=1, c1=0, T=2.
+Now we need N, B, O.
 
-Now for each possible R:
+We have column (3): B = N + R +1 = N + 8 +1 = N +9.
 
-1) R=4, G=3, L = R/2 =2.
+Since B must be a digit (<10) and distinct, we need N+9 <=9 => N <=0. So N must be 0. But 0 is already used (E=0). Also N must be distinct and leading? N is not leading (it's the thousands digit of DONALD? Actually DONALD: D O N A L D; N is the third digit from left (thousands place). It can be zero? Usually leading zeros only apply to most significant digit; internal zeros allowed. However N must be distinct from used digits. Since 0 already used, N cannot be 0. So no solution for L=4.
 
-Check uniqueness: digits used so far: E=0, A=5, D=1, T=2, G=3, L=2? Wait L=2 equals T=2 conflict. Also L=2 same as T. So invalid.
+Thus L=4 invalid.
 
-2) R=6, G=5, L=3.
+- L=6 => R=12? Wait 2*6=12 >9, not allowed because R must be a single digit (<10). So L cannot be >=5 because 2*L would be >=10 causing carry, but we have c1=0 and we derived R = 2*L + c0 with c0=0, and we assumed no carry from tens to hundreds? Actually equation (1) gave: 2*L + c0 = R + 10*c1, with c1=0. So indeed 2*L + c0 must be less than 10. So L max such that 2*L + c0 <=9. Since c0=0, L <=4. So L can only be 0-4. But we already excluded 0,1,2 because used or leading zero. So only L=3 or 4 possible. We already tried both and they failed. Thus D=1 yields no solution.
 
-But A=5 already, so G=5 conflict with A. Invalid.
+Thus D=1 invalid.
 
-3) R=8, G=7, L=4.
+### D=2: c0=0, T=4.
 
-Digits used: E=0, A=5, D=1, T=2, G=7, L=4, R=8. All distinct so far: {0,5,1,2,7,4,8}. Good.
+Used: A=5, E=0, D=2, T=4 => used {0,2,4,5}.
 
-Now we need to assign N, B, O.
-
-We have B = N + R +1 = N +8+1 = N+9. Since B must be <10 (digit) and N+R <=8 => N+8 <=8 => N <=0. So N must be 0. But E=0 already used, conflict. Also N must be distinct and non-negative. N=0 not allowed (E=0). So no solution for D=1.
-
-Thus D=1 fails.
-
-Now D=2:
-
-2D=4 => c1=0, T=4.
-
-c1=0.
-
-R = 2L (even) = D+G =2+G => G = R-2.
-
-Constraints: G non-zero, not equal D=2, G <=? Since R<10 => 2+G <10 => G <=8.
-
-Also R even.
-
-Now compute possible G values (1-9 except 2) such that R=2+G even => G even? Since 2+G even => G even. So G ∈ {even numbers from 2? but not 2, so 4,6,8} also maybe 0? G cannot be zero (leading). So G ∈ {4,6,8}. Also need G <=8.
-
-Now compute:
-
-- G=4 => R=6, L=R/2=3.
-- G=6 => R=8, L=4.
-- G=8 => R=10 => R=10 not allowed because R must be <10 (since D+G <10). Actually R=10 would cause carry into next column, but we require D+G <10 (c5=0). So G=8 invalid.
-
-Thus valid: G=4,R=6,L=3; G=6,R=8,L=4.
-
-Now check uniqueness with existing digits: E=0, A=5, D=2, T=4.
-
-Case G=4,R=6,L=3: But T=4 already, G=4 conflict with T. So invalid.
-
-Case G=6,R=8,L=4: T=4, L=4 conflict with T. So invalid.
-
-Thus D=2 fails.
-
-Now D=3:
-
-2D=6 => c1=0, T=6.
-
-c1=0.
-
-R = 2L = D+G =3+G => G = R-3.
-
-Constraints: G non-zero, not equal D=3, G <=? Since R<10 => 3+G <10 => G <=6.
-
-Also R even => 3+G even => G odd (since 3+odd=even). So G ∈ odd numbers from 1-6 except 3: {1,5}. Also G cannot be zero.
-
-Check each:
-
-- G=1 => R=4, L=R/2=2.
-- G=5 => R=8, L=4.
-
-Now check digits used: E=0, A=5, D=3, T=6.
-
-Case G=1,R=4,L=2: digits: G=1, R=4, L=2. Check uniqueness: we have E0, A5, D3, T6, G1, R4, L2. All distinct so far: {0,5,3,6,1,4,2}. Good.
-
-Now need N,B,O.
-
-We have B = N + R +1 = N+4+1 = N+5. Constraint N+R <=8 => N+4 <=8 => N <=4.
-
-Also B must be digit distinct and <10.
-
-Also N cannot be used already: used digits so far: {0,5,3,6,1,4,2}. So unavailable: 0,1,2,3,4,5,6. Available: 7,8,9.
-
-But N must be <=4, so N can only be from {0,1,2,3,4} but all those are used. So no possible N. Thus invalid.
-
-Case G=5,R=8,L=4: digits: G=5 (but A=5 already) conflict. So invalid.
-
-Thus D=3 fails.
-
-Now D=4:
-
-2D=8 => c1=0, T=8.
-
-c1=0.
-
-R = 2L = D+G =4+G => G = R-4.
-
-Constraints: G non-zero, not equal D=4, G <=? Since R<10 => 4+G <10 => G <=5.
-
-Also R even => 4+G even => G even (since 4+even=even). So G ∈ even numbers from? G can be 0? leading digit cannot be zero, so G>=2? Actually G can be 2? but G must be non-zero and not equal D=4. Also G <=5.
-
-Even numbers <=5: 0,2,4. Exclude 0 (leading zero not allowed), exclude 4 (same as D). So G=2 only.
-
-Thus G=2 => R=4+2=6, L=R/2=3.
-
-Check digits: E=0, A=5, D=4, T=8, G=2, R=6, L=3. All distinct: {0,5,4,8,2,6,3}. Good.
-
-Now need N,B,O.
-
-B = N + R +1 = N+6+1 = N+7. Constraint N+R <=8 => N+6 <=8 => N <=2.
-
-Thus N can be 0,1,2.
-
-Used digits so far: {0,5,4,8,2,6,3}. So unavailable: 0,2,3,4,5,6,8. Available: 1,7,9.
-
-N must be <=2 and not used: possible N=1? (0 and 2 used). N=1 is available and <=2. Good.
-
-Thus N=1.
-
-Then B = N+R+1 =1+6+1=8. But T=8 already used. Conflict. So B=8 duplicates T.
-
-If N=0? used (E=0). N=2? used (G=2). So only N=1 leads to conflict.
-
-Thus D=4 fails.
-
-Now D=5:
-
-2D=10 => c1=1, T=0.
-
-But E=0 already, so T=0 conflict with E. Unless we consider case where E not zero? But we are in case 1 where E=0. So T cannot be zero because E already zero. So D=5 invalid in case1.
-
-Thus D=5 fails.
-
-Now D=6:
-
-2D=12 => c1=1, T=2.
-
-c1=1.
-
-Now R = 2L + c1 = 2L +1. Also R = D+G =6+G.
-
-Thus 2L+1 = 6+G => G = 2L+1 -6 = 2L -5.
-
-Also constraints: G non-zero, not equal D=6, G <=? Since R<10 => 6+G <10 => G <=3.
-
-Also R = 2L+1 <10 => 2L+1 <10 => 2L <=8 => L <=4.
-
-Also L integer >=0.
-
-Also G = 2L -5 must be between 1 and 3 inclusive (since G <=3 and >=1). Also G integer.
-
-Now compute possible L values 0-4:
-
-L=0 => G = -5 (invalid)
-L=1 => G = 2-5 = -3 invalid
-L=2 => G =4-5=-1 invalid
-L=3 => G =6-5=1 => G=1 (valid, within 1-3)
-L=4 => G =8-5=3 => G=3 (valid)
-
-Thus two possibilities:
-
-- L=3, G=1, then R = 2L+1 = 2*3+1=7. Also check R = D+G =6+1=7 matches.
-
-- L=4, G=3, then R = 2*4+1=9. Check D+G =6+3=9 matches.
-
-Now check uniqueness with existing digits: E=0, A=5, D=6, T=2.
-
-Case1: L=3, G=1, R=7.
-
-Digits used: E0, A5, D6, T2, L3, G1, R7. All distinct: {0,5,6,2,3,1,7}. Good.
-
-Now need N,B,O.
-
-We have B = N + R +1 = N+7+1 = N+8. Constraint N+R <=8 => N+7 <=8 => N <=1.
-
-Thus N can be 0 or1.
-
-Used digits: {0,5,6,2,3,1,7}. So unavailable: 0,1,2,3,5,6,7. Available: 4,8,9.
-
-N must be <=1 and not used: possible N=0? used (E0). N=1? used (G1). So no possible N. Thus invalid.
-
-Case2: L=4, G=3, R=9.
-
-Digits used: E0, A5, D6, T2, L4, G3, R9. Set: {0,5,6,2,4,3,9}. All distinct.
-
-Now N constraint: B = N + R +1 = N+9+1 = N+10. Wait B = N + R +1, with R=9 => B = N+10. But B must be a single digit (<10). Also constraint N+R <=8 => N+9 <=8 => N <= -1 impossible. So no solution. Actually we must re-evaluate: In case1, we had B = N + R +1, and constraint N+R <=8 (since c4=0). If R=9, then N+9 <=8 impossible. So invalid.
-
-Thus D=6 fails.
-
-Now D=7:
-
-2D=14 => c1=1, T=4.
-
-c1=1.
-
-R = 2L+1 = D+G =7+G => G = 2L+1 -7 = 2L -6.
-
-Constraints: G non-zero, not equal D=7, G <=? Since R<10 => 7+G <10 => G <=2.
-
-Also R = 2L+1 <10 => 2L+1 <10 => 2L <=8 => L <=4.
-
-Also G = 2L -6 must be between 1 and 2 inclusive.
-
-Compute L from 0 to4:
-
-L=0 => G=-6 invalid
-L=1 => G=-4 invalid
-L=2 => G=-2 invalid
-L=3 => G=0 => G=0 (but leading digit G cannot be zero)
-L=4 => G=2 => G=2 (valid, within 1-2)
-
-Thus only L=4, G=2 works.
-
-Then R = 2L+1 = 2*4+1=9. Check D+G =7+2=9 matches.
-
-Now digits used: E=0, A=5, D=7, T=4, L=4? Wait L=4 but T=4 already (from D=7 gave T=4). Conflict: L=4 equals T=4. So invalid.
-
-Thus D=7 fails.
-
-Now D=8:
-
-2D=16 => c1=1, T=6.
-
-c1=1.
-
-R = 2L+1 = D+G =8+G => G = 2L+1 -8 = 2L -7.
-
-Constraints: G non-zero, not equal D=8, G <=? Since R<10 => 8+G <10 => G <=1.
-
-Also R = 2L+1 <10 => 2L+1 <10 => 2L <=8 => L <=4.
-
-Thus G = 2L -7 must be either 1 (since G <=1 and >=1). So G=1.
-
-Thus 2L -7 =1 => 2L =8 => L=4.
-
-Check: L=4 => G=1, R = 2L+1 =9. Check D+G =8+1=9 matches.
-
-Now digits used: E=0, A=5, D=8, T=6, L=4, G=1, R=9. Set: {0,5,8,6,4,1,9}. All distinct.
-
-Now N constraint: B = N + R +1 = N+9+1 = N+10. Need N+R <=8 => N+9 <=8 => N <= -1 impossible. So no solution.
-
-Thus D=8 fails.
-
-Now D=9:
-
-2D=18 => c1=1, T=8.
-
-c1=1.
-
-R = 2L+1 = D+G =9+G => G = 2L+1 -9 = 2L -8.
-
-Constraints: G non-zero, not equal D=9, G <=? Since R<10 => 9+G <10 => G <=0? Actually 9+G <10 => G <1 => G <=0. But G must be non-zero (leading digit). So impossible. Thus D=9 fails.
-
-Thus case1 (E=0, c4=0) yields no solution.
-
-Now we must consider case2: E=9, c4=1.
-
-Recall from column 10^4: E + c4 ≡0 (mod10) gave possibilities: either (E=0,c4=0) or (E=9,c4=1). So case2: E=9, c4=1.
-
-Now we have E=9, c4=1.
-
-Now we need to re-evaluate constraints.
-
-We have leading zeros: D,G,R cannot be zero.
-
-Now column equations:
-
-Units: same: T = (2D) mod10, c1 = floor(2D/10).
-
-Tens: R = (2L + c1) mod10, c2 = floor((2L + c1)/10).
-
-Hundreds: E = (2A + c2) mod10, c3 = floor((2A + c2)/10). With E=9.
-
-Thousands: B = (N + R + c3) mod10, c4 = floor((N + R + c3)/10). We have c4=1.
-
-Ten-thousands: column: O + E + c4 = O + 9 + 1 = O +10 = O (result digit) + 10*c5? Wait we need to compute: O (from first) + E (from second) + c4 = O + 9 +1 = O +10. The result digit in that column is O (the second letter of ROBERT). So we have:
-
-O + 10 = O + 10*c5? Actually the sum yields digit O and a carry c5 to the next column (hundred-thousands). So:
-
-O + E + c4 = O + 9 +1 = O +10 = O + 10*c5? Wait the formula: (digit1 + digit2 + carry_in) = result_digit + 10*carry_out.
-
-Thus: O + 9 + 1 = O + 10 = result_digit (which is O) + 10*c5.
-
-Thus O +10 = O + 10*c5 => subtract O both sides: 10 = 10*c5 => c5 =1.
-
-Thus we get a carry c5 =1 into the hundred-thousands column.
-
-Thus column 10^5 (hundred-thousands): D + G + c5 = D + G + 1 = result digit R (the leading digit of ROBERT) + 10*c6, where c6 must be 0 because we have no extra digit beyond 6 letters (the sum is 6-digit). So:
-
-D + G + 1 = R + 10*c6, with c6=0 => D + G + 1 = R.
-
-Thus R = D + G + 1.
-
-Also we must have D + G + 1 < 10 (since no carry out), i.e., D+G <=8.
-
-Thus R = D+G+1, with D+G <=8 => R <=9.
-
-Also R cannot be zero (leading). So D+G+1 >=1 => D+G >=0, trivial.
-
-Now we also have from thousands column: c4 = floor((N + R + c3)/10) =1 (given). So:
-
-N + R + c3 >=10 and <20 (since max sum N+R+c3 <=9+9+1=19). So:
-
-10 <= N + R + c3 <=19.
-
-And B = (N + R + c3) mod10 = (N + R + c3) -10 (since c4=1). So B = N + R + c3 -10.
-
-Now we also have hundreds column: E=9 = (2A + c2) mod10, c3 = floor((2A + c2)/10).
-
-Thus (2A + c2) mod10 =9 => 2A + c2 ≡9 (mod10). And c3 = floor((2A + c2)/10) which can be 0,1,2? Since max 2A + c2 = 2*9+1=19 => c3 max 1 (if 2A + c2 >=10). Actually if 2A + c2 between 0-9 => c3=0; between 10-19 => c3=1. So c3 ∈ {0,1}.
-
-Now tens column: R = (2L + c1) mod10, c2 = floor((2L + c1)/10). c2 ∈ {0,1}.
-
-Units column: T = (2D) mod10, c1 = floor(2D/10) ∈ {0,1}.
-
-Now we also have the condition from ten-thousands column that gave c5=1, which we used.
-
-Now we need to assign digits distinct: D,O,N,A,L,G,E=9,R,B,T.
-
-We have used E=9 already.
-
-Now let's solve.
-
-We have unknowns: D,G,R (with R = D+G+1, D+G <=8), L, A, N, B, O, T, plus carries c1,c2,c3.
-
-We also have constraints: D,G,R not zero (leading). Also O can be zero? O is not leading (it's second digit of first number and second digit of sum). So O can be zero.
-
-Now we need to ensure all digits distinct and cover 0-9 exactly once.
-
-Let's start by enumerating possible D values (1-9) and compute c1, T.
-
-Then for each D, we will consider possible L values that satisfy tens column constraints and produce R consistent with D+G+1.
-
-But we also have G unknown; we can derive G from R and D: G = R - D -1.
-
-Since R = D+G+1 => G = R - D -1.
-
-Thus given D and R, we can compute G.
-
-Alternatively we can iterate D and G such that D+G <=8, compute R = D+G+1, ensure R is digit distinct and not zero.
-
-Then we need to satisfy tens column: R = (2L + c1) mod10, with c2 = floor((2L + c1)/10). And we also have hundreds column constraints linking A and c2 to produce E=9 and c3.
-
-Let's proceed.
-
-We'll iterate D from 1 to9 (cannot be zero). For each D compute c1 and T.
-
-Then we iterate possible G values (1-9, not equal D, not zero) such that D+G <=8 (since D+G <=8). Compute R = D+G+1.
-
-Check R not zero, distinct from D,G etc.
-
-Then we need to find L such that tens column holds: given c1 (from D), we need to find L (0-9, not used yet) such that:
-
-Let S = 2L + c1.
-Then R = S mod10.
-c2 = floor(S/10) (0 or1).
-
-Thus S = 10*c2 + R.
-
-Since S = 2L + c1, we have 2L = S - c1 = 10*c2 + R - c1.
-
-Thus L = (10*c2 + R - c1)/2 must be integer between 0 and9.
-
-Also L must be distinct from used digits.
-
-c2 can be 0 or1.
-
-Now after determining L and c2, we go to hundreds column: we need to find A such that:
-
-Given c2, we need 2A + c2 ≡9 (mod10) and c3 = floor((2A + c2)/10) (0 or1). Also A distinct.
-
-Then thousands column: we need to find N such that:
-
-Given c3 and R, we need N + R + c3 >=10 (since c4=1) and <=19, and B = N + R + c3 -10 distinct and not used yet. Also N distinct.
-
-Also we need O distinct and not used; O is free aside from uniqueness (no further constraints). Also we need to ensure that all digits 0-9 are used exactly once across D,O,N,A,L,G,E=9,R,B,T.
-
-Thus we need to assign O as the remaining digit after assigning others.
-
-Now let's implement reasoning manually.
-
-We'll iterate D.
-
-We'll keep track of used digits.
-
-We'll compute c1, T.
-
-Now D possibilities:
-
-We'll create a table.
-
-First, compute for each D:
-
-- D, 2D, c1 = floor(2D/10), T = (2D) mod10.
-
-Let's list:
-
-D=1: 2D=2 => c1=0, T=2.
-D=2: 4 => c1=0, T=4.
-D=3: 6 => c1=0, T=6.
-D=4: 8 => c1=0, T=8.
-D=5:10 => c1=1, T=0.
-D=6:12 => c1=1, T=2.
-D=7:14 => c1=1, T=4.
-D=8:16 => c1=1, T=6.
-D=9:18 => c1=1, T=8.
-
-Now note E=9 already used, so T cannot be 9 (but none of these T are 9). Also T cannot equal any other used digit later.
-
-Now we also need to ensure T distinct from others.
-
-Now for each D, we iterate possible G.
-
-But note that G is leading digit of second number, cannot be zero.
-
-Also D and G cannot be same.
-
-Also D+G <=8.
-
-Now let's iterate.
-
-We'll maintain a list of possible solutions.
-
-We'll do manual reasoning.
-
-We'll create a spreadsheet in mind.
-
-We'll go D from 1 to9.
-
-### D=1:
-c1=0, T=2.
-
-Used so far: D=1, T=2, E=9.
-
-Now G possibilities: G ∈ {1..9} \ {1} (distinct), G !=0, and D+G <=8 => 1+G <=8 => G <=7.
-
-Thus G ∈ {2,3,4,5,6,7} but also not equal D=1 (already). Also G cannot be equal to T? Not yet, but we will check later.
-
-Now for each G compute R = D+G+1 = 1+G+1 = G+2.
-
-Thus R = G+2.
-
-Check R distinct and not zero.
-
-Now we need to find L satisfying tens column.
-
-We'll iterate each G.
-
-- G=2: then R=4. Check digits used: D=1, T=2, E=9, G=2? Wait G=2 equals T=2 conflict (T=2). So invalid because T already 2. So G cannot be 2.
-
-- G=3: R=5. Digits: D=1, T=2, E=9, G=3, R=5. So far {1,2,9,3,5}. All distinct.
-
-Now need L.
-
-We have c1=0.
-
-We need to find L such that S = 2L + c1 = 2L.
-
-We need R = S mod10 = (2L) mod10 = R=5.
-
-Thus 2L mod10 =5 => 2L ends with 5 => impossible because 2L is even, cannot end with 5. So no solution.
-
-Thus G=3 invalid.
-
-- G=4: R=6. Digits: D=1,T=2,E=9,G=4,R=6 => {1,2,9,4,6}. Distinct.
-
-Now need 2L mod10 =6 => 2L ends with 6 => L such that 2L ≡6 (mod10) => L ≡3 or 8? Since 2*3=6, 2*8=16→6 mod10. So L=3 or L=8.
-
-Check L not used yet: used {1,2,9,4,6}. So L=3 is free; L=8 is free.
-
-Now compute c2 = floor(2L/10) = 0 if L<5, else 1 if L>=5.
-
-- For L=3: 2L=6 => c2=0.
-- For L=8: 2L=16 => c2=1.
-
-Now we have two subcases.
-
-Now proceed to hundreds column: need A such that 2A + c2 ≡9 (mod10) and c3 = floor((2A + c2)/10) (0 or1). Also A distinct.
-
-We'll compute for each subcase.
-
-Subcase L=3, c2=0.
-
-Need 2A ≡9 (mod10) => 2A mod10 =9 => impossible (2A even). So no solution.
-
-Subcase L=8, c2=1.
-
-Need 2A +1 ≡9 (mod10) => 2A ≡8 (mod10) => 2A mod10 =8 => A ≡4 or 9? Since 2*4=8, 2*9=18→8 mod10. So A=4 or A=9.
-
-But E=9 already used, so A cannot be 9. So A=4 possible if not used yet.
-
-Check used digits currently: D=1, T=2, E=9, G=4? Wait G=4 in this case? Actually we are in G=4 subcase? Wait we are evaluating G=4, yes G=4. So G=4 used. So A=4 would conflict with G=4. So A cannot be 4.
-
-Thus no solution for G=4.
-
-Thus G=4 invalid.
-
-- G=5: R=7. Digits: D=1,T=2,E=9,G=5,R=7 => {1,2,9,5,7}. Distinct.
-
-Now need 2L mod10 = R=7 => 2L ≡7 mod10 impossible (even). So no solution.
-
-- G=6: R=8. Digits: D=1,T=2,E=9,G=6,R=8 => {1,2,9,6,8}. Distinct.
-
-Need 2L mod10 =8 => L such that 2L ends with 8 => L=4 or 9 (since 2*4=8, 2*9=18). L=4 or 9.
-
-Check used: {1,2,9,6,8}. L=4 free; L=9 conflict with E=9 (used). So only L=4 possible.
-
-Now L=4 => 2L=8 => c2=0.
-
-Now hundreds: need 2A + c2 ≡9 mod10 => 2A ≡9 mod10 impossible. So no solution.
-
-Thus G=6 invalid.
-
-- G=7: R=9. Digits: D=1,T=2,E=9,G=7,R=9 => conflict: R=9 equals E=9. So invalid.
-
-Thus D=1 yields no solution.
-
-### D=2:
-c1=0, T=4.
-
-Used: D=2, T=4, E=9.
-
-G possibilities: G !=2, G!=0, D+G <=8 => 2+G <=8 => G <=6.
-
-Thus G ∈ {1,3,4,5,6} but also not equal T? Not yet.
+Now L possibilities: need 2*L + c0 <10 => L <=4 (since c0=0). L cannot be 0 (used), cannot be 2 (used D), cannot be 4 (used T). So possible L values: 1,3. Also L cannot be leading zero? L can be zero? zero used already (E=0) so not allowed. So L=1 or 3.
 
 Check each.
 
-- G=1: R = D+G+1 =2+1+1=4. R=4 conflicts with T=4. Invalid.
+- L=1: then R = 2*L + c0 =2*1=2. R=2 but D=2 already used, conflict (also leading R cannot be zero but it's 2). So invalid.
 
-- G=3: R=2+3+1=6. Digits: D=2,T=4,E=9,G=3,R=6 => {2,4,9,3,6}. Distinct.
-
-Now need 2L mod10 = R=6 => L such that 2L ends with 6 => L=3 or 8.
-
-Check used: {2,4,9,3,6}. L=3 conflicts with G=3. L=8 free.
-
-Thus L=8 possible.
-
-Now compute c2 = floor(2L/10) = floor(16/10)=1.
-
-Now hundreds: need 2A + c2 ≡9 mod10 => 2A +1 ≡9 => 2A ≡8 mod10 => A ≡4 or 9 (since 2*4=8, 2*9=18). So A=4 or 9.
-
-Check used: currently {2,4,9,3,6, L=8? Wait L=8 used now? Actually we haven't added L yet. Let's list used before choosing A: D=2, T=4, E=9, G=3, R=6, L=8. So used set = {2,4,9,3,6,8}. Also note T=4 already.
-
-Now A options:
-
-- A=4 conflicts with T=4 (used). So invalid.
-- A=9 conflicts with E=9. Invalid.
-
-Thus no solution for G=3.
-
-- G=4: R=2+4+1=7. Digits: D=2,T=4,E=9,G=4,R=7 => {2,4,9,4? Wait G=4 equals T=4 conflict (T=4). So invalid.
-
-- G=5: R=2+5+1=8. Digits: D=2,T=4,E=9,G=5,R=8 => {2,4,9,5,8}. Distinct.
-
-Now need 2L mod10 = R=8 => L=4 or 9.
-
-Check used: {2,4,9,5,8}. L=4 conflicts with T=4. L=9 conflicts with E=9. So no L.
-
-Thus G=5 invalid.
-
-- G=6: R=2+6+1=9. Digits: D=2,T=4,E=9,G=6,R=9 => R=9 conflicts with E=9. Invalid.
+- L=3: R = 2*3 =6. R=6 not used yet. Good. Then G = R - D = 6-2=4. But T=4 already used (T=4). Conflict. So L=3 invalid.
 
 Thus D=2 no solution.
 
-### D=3:
-c1=0, T=6.
+### D=3: c0=0, T=6.
 
-Used: D=3, T=6, E=9.
+Used: A=5, E=0, D=3, T=6 => {0,3,5,6}.
 
-G possibilities: G !=3, G!=0, D+G <=8 => 3+G <=8 => G <=5.
+L must satisfy 2*L <10 => L <=4. L cannot be 0 (used), cannot be 3 (used D), cannot be? 5? >4 not allowed. So possible L values: 1,2,4.
 
-Thus G ∈ {1,2,4,5} (also cannot be 0). Also check not equal T? Not yet.
+Check each.
 
-- G=1: R=3+1+1=5. Digits: D=3,T=6,E=9,G=1,R=5 => {3,6,9,1,5}. Distinct.
+- L=1 => R=2*1=2. R=2 not used. G = R - D =2-3 = -1 invalid (negative). So invalid.
 
-Now need 2L mod10 = R=5 => impossible (even). So invalid.
+- L=2 => R=4. R=4 not used. G = 4-3=1. G=1 not used yet, non-zero. Good.
 
-- G=2: R=3+2+1=6. R=6 conflicts with T=6. Invalid.
+Now used so far: add L=2, R=4, G=1 => used set becomes {0,1,2,3,4,5,6}. (A=5,E=0,D=3,T=6,L=2,R=4,G=1). That's 7 digits.
 
-- G=4: R=3+4+1=8. Digits: D=3,T=6,E=9,G=4,R=8 => {3,6,9,4,8}. Distinct.
+Now need N, B, O.
 
-Need 2L mod10 =8 => L=4 or 9.
+Column (3): B = N + R +1 = N +4 +1 = N+5. Need B <10 => N <=4. Also B must be distinct and not used.
 
-Used: {3,6,9,4,8}. L=4 conflicts with G=4. L=9 conflicts with E=9. So no L.
+Used digits currently: 0,1,2,3,4,5,6. So available digits: 7,8,9.
 
-- G=5: R=3+5+1=9. R=9 conflicts with E=9. Invalid.
+N must be <=4, but available digits >4 are 7,8,9. So no N possible. Thus L=2 invalid.
+
+- L=4 => R=2*4=8. R=8 not used. G = R - D =8-3=5. But A=5 already used. Conflict.
 
 Thus D=3 no solution.
 
-### D=4:
-c1=0, T=8.
+### D=4: c0=0, T=8.
 
-Used: D=4, T=8, E=9.
+Used: A=5, E=0, D=4, T=8 => {0,4,5,8}.
 
-G possibilities: G !=4, G!=0, D+G <=8 => 4+G <=8 => G <=4.
+L must satisfy 2*L <10 => L <=4. L cannot be 0 (used), cannot be 4 (used D), cannot be? 5? >4 not allowed. So possible L values:1,2,3.
 
-Thus G ∈ {1,2,3} (also G cannot be 0,4). Also check not equal T? T=8 not in this set.
+Check each.
 
-- G=1: R=4+1+1=6. Digits: D=4,T=8,E=9,G=1,R=6 => {4,8,9,1,6}. Distinct.
+- L=1 => R=2*1=2. R=2 not used. G = R - D =2-4=-2 invalid.
 
-Need 2L mod10 = R=6 => L=3 or 8.
+- L=2 => R=4. R=4 but D=4 already used (also leading R cannot be zero but it's 4, but duplicate). Conflict.
 
-Used: {4,8,9,1,6}. L=3 free; L=8 conflicts with T=8.
+- L=3 => R=6. R=6 not used. G = 6-4=2. G=2 not used yet, non-zero.
 
-Thus L=3 possible.
+Now used: add L=3,R=6,G=2 => used set becomes {0,2,3,4,5,6,8}. (A=5,E=0,D=4,T=8,L=3,R=6,G=2). Need N,B,O.
 
-Now c2 = floor(2L/10) = floor(6/10)=0.
+Column (3): B = N + R +1 = N +6 +1 = N+7. Need B<10 => N <=2. Also B must be distinct and not used.
 
-Now hundreds: need 2A + c2 ≡9 mod10 => 2A ≡9 mod10 impossible. So no solution.
+Used digits: {0,2,3,4,5,6,8}. Available digits: 1,7,9.
 
-- G=2: R=4+2+1=7. Digits: D=4,T=8,E=9,G=2,R=7 => {4,8,9,2,7}. Distinct.
+N must be <=2, and not used. Possible N values: 1 (since 0 used,2 used). So N=1 possible.
 
-Need 2L mod10 =7 => impossible.
+Check N=1: then B = N+7 = 8. B=8 but T=8 already used (also used). Conflict.
 
-- G=3: R=4+3+1=8. R=8 conflicts with T=8. Invalid.
+Thus N cannot be 1 because B collides.
+
+What about N=?? Could N be 0? 0 used. N=2 used. So no valid N.
+
+Thus L=3 invalid.
 
 Thus D=4 no solution.
 
-### D=5:
-c1=1, T=0.
+### D=6: c0=1, T=2.
 
-Used: D=5, T=0, E=9.
+Used: A=5, E=0, D=6, T=2 => {0,2,5,6}.
 
-Note T=0, but E=9, fine.
+Now L must satisfy 2*L + c0 <10 => 2*L +1 <10 => 2*L <9 => L <=4 (since L integer). L can be 0-4.
 
-Now G possibilities: G !=5, G!=0, D+G <=8 => 5+G <=8 => G <=3.
+But need to check uniqueness and leading.
 
-Thus G ∈ {1,2,3} (also not zero). Also check not equal T? T=0 not in set.
+Used digits: 0,2,5,6.
 
-- G=1: R=5+1+1=7. Digits: D=5,T=0,E=9,G=1,R=7 => {5,0,9,1,7}. Distinct.
+Possible L values: 1,3,4 (0 used,2 used). Also L cannot be? 5? >4 not allowed.
 
-Now need tens column: we have c1=1.
+Check each.
 
-We need S = 2L + c1 = 2L+1.
+- L=1 => R = 2*L + c0 =2*1+1=3. R=3 not used. Good.
 
-We need R = S mod10 =7 => (2L+1) mod10 =7 => 2L mod10 =6 => 2L ≡6 mod10 => L ≡3 or 8 (since 2*3=6, 2*8=16). So L=3 or 8.
+Now G = R - D (since D+G=R => G = R - D). D=6, R=3 => G = -3 invalid. So L=1 invalid.
 
-Check used: {5,0,9,1,7}. L=3 free; L=8 free.
+- L=3 => R = 2*3+1=7. R=7 not used. G = 7-6=1. G=1 not used yet, non-zero.
 
-Now compute c2 = floor((2L+1)/10).
+Now used: add L=3,R=7,G=1 => used set becomes {0,1,2,3,5,6,7}. (A=5,E=0,D=6,T=2,L=3,R=7,G=1). Need N,B,O.
 
-- For L=3: 2L+1=7 => c2=0.
-- For L=8: 2L+1=17 => c2=1.
+Column (3): B = N + R +1 = N +7 +1 = N+8. Need B<10 => N <=1. So N can be 0 or 1. But both used: 0 used (E),1 used (G). So no N possible. Thus L=3 invalid.
 
-Now hundreds: need 2A + c2 ≡9 mod10, c3 = floor((2A + c2)/10).
+- L=4 => R = 2*4+1=9. R=9 not used. G = 9-6=3. G=3 not used yet, non-zero.
 
-Subcase L=3, c2=0:
+Used now: add L=4,R=9,G=3 => used set {0,2,3,4,5,6,9}. (A=5,E=0,D=6,T=2,L=4,R=9,G=3). Need N,B,O.
 
-Need 2A ≡9 mod10 impossible.
+Column (3): B = N + R +1 = N +9 +1 = N+10. Wait R=9, so B = N + 9 +1 = N+10. For B<10, N must be <= -1 impossible. Thus no solution. So L=4 invalid.
 
-Subcase L=8, c2=1:
+Thus D=6 no solution.
 
-Need 2A +1 ≡9 => 2A ≡8 => A ≡4 or 9.
+### D=7: c0=1, T=4.
 
-Check used digits currently: D=5, T=0, E=9, G=1, R=7, L=8. So used set = {5,0,9,1,7,8}. Also note T=0.
+Used: A=5, E=0, D=7, T=4 => {0,4,5,7}.
 
-Now A options:
+L must satisfy 2*L +1 <10 => 2*L <9 => L <=4. L possible values: 1,2,3,4 (0 used). Also cannot use 4? T=4 used, so L cannot be 4. So possible L:1,2,3.
 
-- A=4: not used yet, ok.
-- A=9: conflicts with E=9.
+Check each.
 
-Thus A=4 possible.
+- L=1 => R = 2*1+1=3. R=3 not used. G = R - D = 3-7 = -4 invalid.
 
-Now compute c3 = floor((2A + c2)/10) = floor((2*4+1)/10) = floor((8+1)/10)= floor(9/10)=0.
+- L=2 => R = 2*2+1=5. R=5 but A=5 used. Conflict.
 
-Thus c3=0.
+- L=3 => R = 2*3+1=7. R=7 but D=7 used (also leading R cannot be zero but it's 7 duplicate). Conflict.
 
-Now thousands column: we have c4=1 (given). Need N such that N + R + c3 >=10 and <=19, and B = N + R + c3 -10.
+Thus D=7 no solution.
 
-Here R=7, c3=0 => need N +7 >=10 => N >=3. Also N+7 <=19 => N <=12 (but N max 9). So N ∈ {3,4,5,6,7,8,9} but also must satisfy that B = N+7-10 = N-3 is a digit (0-9) distinct and not used.
+### D=8: c0=1, T=6.
 
-Also N must be distinct from used digits.
+Used: A=5, E=0, D=8, T=6 => {0,5,6,8}.
 
-Used so far: {5,0,9,1,7,8, A=4}. Also we haven't assigned O, B, N yet. Also note T=0 already used.
+L must satisfy 2*L+1<10 => L <=4. L possible:1,2,3,4 (0 used). Also cannot use? 5? >4 no. So L values 1-4.
 
-Thus used set = {5,0,9,1,7,8,4}. Also we have E=9, D=5, T=0, G=1, R=7, L=8, A=4.
+Check each.
 
-Now N cannot be any of these.
+- L=1 => R =2*1+1=3. R=3 not used. G = R - D =3-8=-5 invalid.
 
-Possible N values from 0-9 not in used: used = {0,1,4,5,7,8,9}. So available: {2,3,6}. Also N must be >=3 (from N>=3). So N ∈ {3,6}. (2 is less than 3, not allowed).
+- L=2 => R=2*2+1=5. R=5 but A=5 used. Conflict.
 
-Now compute B = N-3.
+- L=3 => R=2*3+1=7. R=7 not used. G = 7-8 = -1 invalid.
 
-- If N=3 => B=0. But 0 already used (T=0). Conflict.
-- If N=6 => B=3. Check if 3 used? Not yet used. So B=3 is free.
+- L=4 => R=2*4+1=9. R=9 not used. G = 9-8 =1. G=1 not used yet, non-zero.
 
-Now check that B=3 not used: used set currently {0,1,4,5,7,8,9}. B=3 not in set. Good.
+Now used: add L=4,R=9,G=1 => used set {0,1,4,5,6,8,9}. (A=5,E=0,D=8,T=6,L=4,R=9,G=1). Need N,B,O.
+
+Column (3): B = N + R +1 = N +9 +1 = N+10. Need B<10 => impossible. So L=4 invalid.
+
+Thus D=8 no solution.
+
+### D=9: c0=1, T=8.
+
+Used: A=5, E=0, D=9, T=8 => {0,5,8,9}.
+
+L must satisfy 2*L+1<10 => L <=4. L possible:1,2,3,4 (0 used). Also cannot use? 5? >4 no. So L values 1-4.
+
+Check each.
+
+- L=1 => R=2*1+1=3. R=3 not used. G = R - D =3-9=-6 invalid.
+
+- L=2 => R=2*2+1=5. R=5 but A=5 used. Conflict.
+
+- L=3 => R=2*3+1=7. R=7 not used. G = 7-9 = -2 invalid.
+
+- L=4 => R=2*4+1=9. R=9 but D=9 used (also leading R cannot be zero but it's 9 duplicate). Conflict.
+
+Thus D=9 no solution.
+
+Thus case A yields no solution. Therefore case A invalid.
+
+Now we need to examine case B.
+
+### Case B: c3=1, E=9, c4=1.
+
+Recap: from earlier, case B: c3=1, E=9, c4=1.
+
+Now we need to re-evaluate constraints.
+
+We have:
+
+- E=9.
+
+- c3=1.
+
+- c4=1.
+
+Now we also have leading digit constraint: D+G + c4 = R (since no extra carry beyond). So D + G + 1 = R. Since c4=1.
+
+Thus (5') D + G + 1 = R. And R must be a digit (<10) and non-zero leading.
+
+Also we still have column (4) gave O+E + c3 = O + 10*c4 => O + 9 +1 = O +10*1 => O+10 = O+10 => identity holds for any O. So O free (subject to uniqueness and leading? O not leading). So O can be any digit not used.
+
+Now column (3): N + R + c2 = B + 10*c3 => N + R + c2 = B + 10*1 => N + R + c2 = B +10 => B = N + R + c2 -10.
+
+Since B must be a digit 0-9, we need N + R + c2 >=10 (to subtract 10) and resulting B = N+R+c2-10.
+
+Also we need to ensure that there is no extra carry beyond column (3) besides c3=1 which we already accounted. So we need N+R+c2 between 10 and 19 inclusive (since max N+R+c2 = 9+9+1=19). Then B = (N+R+c2) -10, which will be 0-9.
+
+Now column (2): 2*A + c1 = E + 10*c2 => 2*A + c1 = 9 + 10*c2.
+
+Since E=9.
+
+Thus 2*A + c1 = 9 + 10*c2.
+
+c2 ∈ {0,1} (since carry from hundreds to thousands). Let's solve.
+
+If c2=0 => RHS=9 => 2*A + c1 =9.
+
+If c2=1 => RHS=19 => 2*A + c1 =19.
+
+Now A is digit 0-9, c1 ∈ {0,1}.
+
+Check possibilities:
+
+Case c2=0: 2*A + c1 =9.
+
+- If c1=0 => 2*A=9 => A=4.5 invalid.
+
+- If c1=1 => 2*A+1=9 => 2*A=8 => A=4.
+
+Thus c2=0, c1=1, A=4 possible.
+
+Case c2=1: 2*A + c1 =19.
+
+- If c1=0 => 2*A=19 => A=9.5 invalid.
+
+- If c1=1 => 2*A+1=19 => 2*A=18 => A=9.
+
+Thus c2=1, c1=1, A=9 possible.
+
+But note E=9 already used, so A cannot be 9 because digits must be unique. Therefore c2=1 case invalid (since A=9 equals E). So only viable is c2=0, c1=1, A=4.
+
+Thus we have:
+
+- c2=0
+
+- c1=1
+
+- A=4
+
+Now check column (1): 2*L + c0 = R + 10*c1.
+
+We have c1=1, so:
+
+2*L + c0 = R + 10*1 => 2*L + c0 = R + 10 => R = 2*L + c0 -10.
+
+Since R must be a digit 0-9, we need 2*L + c0 >=10 (to subtract 10) and resulting R = (2*L + c0) -10.
+
+Also note that c0 ∈ {0,1} from column (0).
+
+Thus R = (2*L + c0) -10, with constraint that 2*L + c0 is between 10 and 19 inclusive (since max 2*9+1=19). So L must be such that 2*L + c0 >=10.
+
+Now column (0): 2*D = T + 10*c0 => T = (2*D) mod10, c0 = floor(2*D/10). Same as before.
+
+Now column (5'): D + G + 1 = R => G = R - D -1.
+
+Since D and G are leading digits, cannot be zero.
+
+Now column (3) we have B = N + R + c2 -10, with c2=0 => B = N + R -10.
+
+Thus B = N + R -10, requiring N + R >=10 (to get non-negative B) and B <=9 => N+R <=19.
+
+Now column (??) Actually we already accounted.
+
+Now column (4) gave O free.
+
+Now we also need to ensure all digits distinct: D,O,N,A(=4),L,G,E(=9),R,B,T.
+
+We have used A=4, E=9.
+
+Now we need to find assignments satisfying all.
+
+Let's proceed.
+
+We have unknowns: D, L, c0, T, R, G, N, B, O.
+
+Constraints summary:
+
+1) D ∈ 1-9 (non-zero leading). Compute c0 = floor(2*D/10) (0 if D<=4, 1 if D>=5). T = (2*D) mod10.
+
+2) L ∈ 0-9, distinct, not leading zero constraint? L can be zero but must be distinct.
+
+3) Compute R = (2*L + c0) -10. Must be digit 0-9, and also R !=0 (leading). Also need 2*L + c0 >=10.
+
+4) G = R - D -1. Must be digit 0-9, non-zero (leading), distinct.
+
+5) B = N + R -10. Must be digit 0-9, distinct. Also N must be digit 0-9 distinct, and N+R >=10 (so B>=0) and N+R <=19 (so B<=9). Also N is not leading zero restriction? N is internal digit of DONALD (thousands place), can be zero.
+
+6) O is free digit distinct from others, not leading zero restriction (since O is not leading). O can be zero? But zero may be used elsewhere; if zero not used yet, O could be zero.
+
+7) T already defined from D.
+
+8) All digits D,O,N,A(4),L,G,E(9),R,B,T must be distinct and cover 0-9 exactly once.
+
+We also need to ensure that O is not conflicting.
+
+Now we need to find a solution.
+
+Let's brute force logically.
+
+We'll iterate over D (1-9) and compute c0, T.
+
+Then iterate over L (0-9) satisfying 2*L + c0 >=10 (to get R >=0) and R = (2*L + c0) -10 is a digit 0-9.
+
+Then compute R, ensure R !=0 (leading) and distinct from used so far.
+
+Then compute G = R - D -1; must be between 1-9 (non-zero) and distinct.
+
+Then we need to pick N such that B = N + R -10 is a digit 0-9 distinct, and N distinct, and B distinct.
+
+Also O will be the remaining digit.
+
+Let's proceed.
+
+We'll also need to ensure that all digits used exactly once, so after picking D, L, R, G, N, B, T, A=4, E=9, we will have 9 digits assigned; the remaining digit will be O.
+
+We must also ensure O is not leading zero issue (but O can be zero). However O appears in the ten-thousands place of both addends and result; if O=0, that would mean the ten-thousands digit is zero, making the numbers effectively 5-digit? But that's allowed as long as not leading zero. Usually cryptarithms allow internal zeros. So O can be zero.
+
+Now we need to also ensure that O is not already used.
+
+Now let's start enumerating D possibilities.
+
+We'll create a table of D, c0, T.
+
+Recall:
+
+D:1 => c0=0,T=2
+2 => c0=0,T=4
+3 => c0=0,T=6
+4 => c0=0,T=8
+5 => c0=1,T=0
+6 => c0=1,T=2
+7 => c0=1,T=4
+8 => c0=1,T=6
+9 => c0=1,T=8
+
+Note: E=9 already used, so T cannot be 9 (not possible anyway). Also A=4 used, so T cannot be 4 if conflict? We'll check later.
+
+Now we need L such that 2*L + c0 >=10.
+
+Compute minimal L for each c0:
+
+If c0=0: need 2L >=10 => L>=5.
+
+If c0=1: need 2L+1 >=10 => 2L >=9 => L>=5 (since L integer, 2*4+1=9 <10, so L>=5). So in both cases L must be at least 5.
+
+Thus L ∈ {5,6,7,8,9} (since max 9). Also L must be distinct from used digits.
+
+Now compute R = (2*L + c0) -10.
+
+Let's compute for each L and c0.
+
+We'll make a table:
+
+For c0=0:
+
+L=5 => 2*5+0=10 => R=0
+L=6 =>12=>R=2
+L=7 =>14=>R=4
+L=8 =>16=>R=6
+L=9 =>18=>R=8
+
+For c0=1:
+
+L=5 =>2*5+1=11=>R=1
+L=6 =>13=>R=3
+L=7 =>15=>R=5
+L=8 =>17=>R=7
+L=9 =>19=>R=9
+
+Now we need R !=0 (leading). Also R must be distinct from used digits (including A=4, E=9). Also R cannot be zero because leading.
+
+Now we also have G = R - D -1 must be between 1-9 and distinct.
+
+Now also note that T from D may conflict.
+
+Now we also need to ensure that R is not equal to E=9? Could be, but E=9 used; if R=9 then conflict.
+
+Now also note that A=4 used.
+
+Now let's go through each D.
+
+We'll also need to ensure that T from D is distinct.
+
+We'll also need to eventually assign N and B.
+
+Let's start.
+
+### D=1: c0=0, T=2.
+
+Used so far: A=4, E=9, D=1, T=2. So used set: {1,2,4,9}.
+
+Now L must be >=5 (c0=0). Try each L.
+
+- L=5: R=0 (from table). R=0 invalid because leading R cannot be zero. Also R=0 would conflict with maybe O? But leading zero not allowed. So discard.
+
+- L=6: R=2. R=2 but T=2 already used (also D? Actually T=2). Conflict. Also leading R=2 non-zero okay but duplicate.
+
+- L=7: R=4. R=4 but A=4 used. Conflict.
+
+- L=8: R=6. R=6 not used yet. Good. Check leading non-zero ok.
+
+Now compute G = R - D -1 = 6 -1 -1 =4. G=4 but A=4 used. Conflict.
+
+Thus L=8 invalid.
+
+- L=9: R=8. R=8 not used yet. Good.
+
+Compute G = 8 -1 -1 =6. G=6 not used yet, non-zero.
+
+Now used digits so far: D=1, T=2, A=4, E=9, L=9, R=8, G=6. Also note L=9 but E=9 already used! Wait L=9 conflicts with E=9. Indeed E=9 used, L cannot be 9. So L=9 invalid due to duplicate with E.
+
+Thus D=1 yields no solution.
+
+### D=2: c0=0, T=4.
+
+Used: A=4, E=9, D=2, T=4. But note T=4 conflicts with A=4 already. So D=2 invalid because T duplicates A. However we could consider that maybe A=4 and T=4 cannot both be same digit because distinctness required. So D=2 invalid.
+
+Thus D=2 out.
+
+### D=3: c0=0, T=6.
+
+Used: A=4, E=9, D=3, T=6 => {3,4,6,9}.
+
+Now L >=5 (c0=0). Try L values.
+
+- L=5: R=0 (invalid leading zero). Discard.
+
+- L=6: R=2. R=2 not used yet. Good.
+
+Check G = R - D -1 = 2 -3 -1 = -2 invalid. So L=6 invalid.
+
+- L=7: R=4. R=4 but A=4 used. Conflict.
+
+- L=8: R=6. R=6 but T=6 used. Conflict.
+
+- L=9: R=8. R=8 not used yet.
+
+Check G = 8 -3 -1 =4. G=4 but A=4 used. Conflict.
+
+Thus D=3 no solution.
+
+### D=4: c0=0, T=8.
+
+Used: A=4, E=9, D=4, T=8. But D=4 conflicts with A=4 (both 4). So invalid.
+
+Thus D=4 out.
+
+### D=5: c0=1, T=0.
+
+Used: A=4, E=9, D=5, T=0 => {0,4,5,9}.
+
+Now c0=1, L >=5.
+
+Compute possible L values and R:
+
+From table for c0=1:
+
+L=5 => R=1
+L=6 => R=3
+L=7 => R=5
+L=8 => R=7
+L=9 => R=9
+
+Now check each.
+
+- L=5: R=1. R=1 not used yet, non-zero ok.
+
+Compute G = R - D -1 = 1 -5 -1 = -5 invalid.
+
+- L=6: R=3. R=3 not used.
+
+G = 3 -5 -1 = -3 invalid.
+
+- L=7: R=5. R=5 but D=5 used (also leading R cannot be zero but it's 5 duplicate). Conflict.
+
+- L=8: R=7. R=7 not used.
+
+G = 7 -5 -1 =1. G=1 not used yet, non-zero.
+
+Now used digits so far: D=5, T=0, A=4, E=9, L=8, R=7, G=1. Also note L=8 not used yet. So set: {0,1,4,5,7,8,9}. Also we have A=4, E=9.
+
+Now we need N and B.
+
+We have B = N + R -10, with R=7.
+
+Thus B = N +7 -10 = N -3.
+
+Thus B = N -3. For B to be a digit 0-9, N must be >=3 (so B>=0) and N <=12 (but N max 9). Also B must be distinct and not used.
+
+Also N must be distinct from used set.
+
+Used set currently: {0,1,4,5,7,8,9}. Also we have A=4, E=9.
+
+Available digits: {2,3,6}. Also maybe? Let's list all digits 0-9: 0,1,2,3,4,5,6,7,8,9. Used: 0,1,4,5,7,8,9. So free: 2,3,6.
+
+Now N must be from free set, and B = N-3 must also be free and distinct from N and others.
+
+Check each N:
+
+- N=2 => B = -1 invalid.
+
+- N=3 => B =0. B=0 but 0 already used (T=0). Conflict.
+
+- N=6 => B =3. B=3 not used yet (free), N=6 free. Check distinct: B=3, N=6, both free and not used. Also need to ensure B is not leading zero? B is thousands digit of result? Actually B is the thousands digit of ROBERT (the third digit from left). It can be zero? Leading zeros only apply to most significant digit R; B can be zero. So B=3 ok.
 
 Now we have N=6, B=3.
 
-Now we need to assign O as the remaining digit not used yet.
+Now we have assigned: D=5, T=0, A=4, E=9, L=8, R=7, G=1, N=6, B=3.
 
-Used digits now: D=5, O?, N=6, A=4, L=8, G=1, E=9, R=7, B=3, T=0.
+Used digits now: {0,1,3,4,5,6,7,8,9}. Let's list: 0(T),1(G),3(B),4(A),5(D),6(N),7(R),8(L),9(E). That's 9 digits.
 
-Let's list: D=5, N=6, A=4, L=8, G=1, E=9, R=7, B=3, T=0. That's 9 digits. Missing O.
+Remaining digit for O: the only digit not used is 2.
 
-Used set = {5,6,4,8,1,9,7,3,0}. That's {0,1,3,4,5,6,7,8,9}. The only digit missing is 2.
+Thus O=2.
 
-Thus O must be 2.
+Check that O is not leading zero (it's not leading). O=2 fine.
 
-Check O not leading zero? O is not leading (it's second digit of first number and second digit of sum). O=2 fine.
+Now verify all constraints: leading letters D=5 (non-zero), G=1 (non-zero), R=7 (non-zero). Good.
 
-Now verify all constraints:
+Now verify the addition:
 
-Let's compute the numbers:
+DONALD = D O N A L D = 5 2 6 4 8 5 => 526485.
 
-DONALD: D O N A L D = 5 2 6 4 8 5 => 526485.
+GERALD = G E R A L D = 1 9 7 4 8 5 => 197485.
 
-GERALD: G E R A L D = 1 9 7 4 8 5 => 197485.
+Sum = 526485 + 197485 = 723970.
 
-Sum: 526485 + 197485 = 723970.
+ROBERT = R O B E R T = 7 2 3 9 7 0 => 723970.
 
-ROBERT: R O B E R T = 7 2 3 9 7 0 => 723970.
+Yes matches.
 
-Matches! All digits distinct, leading digits D=5, G=1, R=7 not zero. Good.
+Thus we have a valid solution.
 
-Thus we have a solution.
+Thus assignment:
 
-Thus the assignment is:
+A=4
+B=3
+D=5
+E=9
+G=1
+L=8
+N=6
+O=2
+R=7
+T=0
 
-D=5, O=2, N=6, A=4, L=8, G=1, E=9, R=7, B=3, T=0.
+Matches the example given in problem statement (they gave that as example). So answer is that.
 
-Thus we can output JSON as requested.
-
-Now we need to output exactly the JSON format:
+Now we need to output JSON as specified:
 
 {
   "assignment": {
@@ -1067,9 +898,7 @@ Now we need to output exactly the JSON format:
   "valid": true
 }
 
-We must ensure no extra text after JSON.
-
-Thus final answer.
+We must ensure JSON format exactly as shown, with no extra text. We'll output that.
 
 {
   "assignment": {
@@ -1091,7 +920,7 @@ Thus final answer.
 S1 Parsed Answer: {'assignment': {'A': 4, 'B': 3, 'D': 5, 'E': 9, 'G': 1, 'L': 8, 'N': 6, 'O': 2, 'R': 7, 'T': 0}, 'equation': 'DONALD + GERALD = ROBERT becomes 526485 + 197485 = 723970', 'valid': True}
 S1 Valid/Parse Success: True
 S1 Correct: True
-S1 Tokens: 8306 | Latency: 371426.1ms
+S1 Tokens: 7070 | Latency: 233755.5ms
 
 ============================================================
 === SYSTEM 2 (MP EVALUATOR / JUDGE) ===
@@ -1126,973 +955,804 @@ Each letter must be assigned a digit from 0-9, and all 10 digits must be used ex
 Find **any** valid digit assignment that satisfies all constraints.
 
 SYSTEM 1 ANSWER (For Evaluation):
-We need to solve DONALD + GERALD = ROBERT. Let's denote letters: D,O,N,A,L,D + G,E,R,A,L,D = R,O,B,E,R,T.
+We need to solve cryptarithm: DONALD + GERALD = ROBERT. Each letter distinct digit, leading letters D,G,R !=0. All digits 0-9 used exactly once. Find any solution.
 
-We have 10 letters: D O N A L G E R B T (actually includes A, L repeated). So unique letters: D, O, N, A, L, G, E, R, B, T. 10 letters.
+Let's approach.
 
-We must assign digits 0-9 each used once. No leading zero for D, G, R.
+Let’s denote letters: D O N A L D + G E R A L D = R O B E R T.
 
-We need to find any solution.
+But note the numbers have 6 digits each: DONALD: D O N A L D. GERALD: G E R A L D. Sum is ROBERT: R O B E R T (6 digits). So sum of two six-digit numbers yields six-digit number, so no overflow beyond 6 digits (i.e., sum < 1,000,000). So leading carry may produce an extra digit if >999,999, but we need sum exactly 6-digit; thus the sum of the most significant digits D + G + carry from next column must equal R (with possibly extra carry? Actually there is no column beyond the most significant leftmost column, so the sum D + G + carry from column of ten-thousands (i.e., second from left) must be less than 10, and equals R. So no extra digit beyond.
 
-Let's solve manually using reasoning.
+Thus we can treat column addition from rightmost (units) to leftmost (hundred-thousands). Let's label columns (starting from units, position 0):
 
-Set up addition column wise, from units to most significant.
+Position 0 (units): D + D = T + 10*c0, where c0 is carry to tens (0 or 1 or maybe 2? Actually max D + D = 18, so c0 can be 0 or 1 (since if >=10, we have carry 1). Since D+ D could be up to 18, so c0 is floor((D+D)/10) = 0 if D<5, else 1 if D>=5.
 
-Let’s write numbers:
+Thus T = (2*D) mod 10, c0 = floor(2*D/10).
 
-  D O N A L D
-+ G E R A L D
-= R O B E R T
+Pos1 (tens): L + L + c0 = R + 10*c1.
 
-Align columns from rightmost (units) to leftmost:
+Pos2 (hundreds): A + A + c1 = E + 10*c2.
 
-Units column: D + D = T (maybe with carry from previous, but there is none to right). Actually units column is the rightmost: D (from first) + D (from second) = T (units of sum) plus maybe a carry to next column (tens). So: (D + D) mod 10 = T, carry c1 = floor((D + D)/10). So T = (2D) mod 10, c1 = floor(2D/10) (0 or 1).
+Pos3 (thousands): N + R + c2 = B + 10*c3.
 
-Tens column: L + L + c1 = R (with possible carry c2). Actually tens column: first number L, second number L, plus carry c1 from units gives sum digit R, and produce carry c2 = floor((L+L + c1)/10). So (2L + c1) mod 10 = R, c2 = floor((2L + c1)/10).
+Pos4 (ten-thousands): O + E + c3 = O + 10*c4? Wait careful: at position 4 (ten-thousands column): digits are O (from DONALD) and E (from GERALD) plus carry from thousands column c3. The sum yields digit O (from ROBERT) at same position (ten-thousands) and carry c4 to next column (hundred-thousands). Actually result digit at that column is O (the second letter of ROBERT). Indeed ROBERT: letters: R O B E R T. Positions from leftmost (hundred-thousands) to units: R (100k), O (10k), B (1k), E (100), R (10), T (1). So column positions:
 
-Hundreds column: A + A + c2 = E (carry c3). So (2A + c2) mod 10 = E, c3 = floor((2A + c2)/10).
+- Hundred-thousands (pos5): D (from DONALD) + G (from GERALD) + c4 = R (result) + 10*c5? Since no extra digit beyond, c5 must be 0 and sum less than 10.
 
-Thousands column: N + R + c3 = B (carry c4). Note: first number N, second number R (since second number is G E R A L D, the thousands digit is R? Let's map positions:
+- Ten-thousands (pos4): O (from DONALD) + E (from GERALD) + c3 = O (result) + 10*c4.
 
-Number1: D O N A L D
-Number2: G E R A L D
+- Thousands (pos3): N (from DONALD) + R (from GERALD) + c2 = B (result) + 10*c3.
 
-Write them with positions (from leftmost most significant to rightmost least):
+- Hundreds (pos2): A (from DONALD) + A (from GERALD) + c1 = E (result) + 10*c2.
 
-Positions (10^5, 10^4, 10^3, 10^2, 10^1, 10^0):
-- Number1: D (10^5), O (10^4), N (10^3), A (10^2), L (10^1), D (10^0)
-- Number2: G (10^5), E (10^4), R (10^3), A (10^2), L (10^1), D (10^0)
-Sum: R O B E R T (6-digit? Actually sum may have 6 or 7 digits? Given result ROBERT has 6 letters, same as addends: leading digit R maybe from carry? Let's see: Addends are each 6-digit numbers, sum could be 6 or 7 digits. But result given is 6 letters, so there is no extra leading digit beyond R; i.e., sum fits in 6 digits, meaning the most significant column (10^5) yields digit R with possibly a carry out that is zero (i.e., no overflow beyond 6 digits). So column at 10^5: D + G + c4 = R (with possible carry c5 which must be 0). So (D + G + c4) mod 10 = R, and carry c5 = floor((D + G + c4)/10) = 0 (since no extra digit). So D + G + c4 < 10.
+- Tens (pos1): L (from DONALD) + L (from GERALD) + c0 = R (result) + 10*c1.
 
-Thus we have equations:
+- Units (pos0): D (from DONALD) + D (from GERALD) = T (result) + 10*c0.
 
-Let c0 = 0 (initial carry into units? none). Actually we start with units.
+Thus constraints:
 
-Let sum0 = D + D = 2D => T = (2D) mod 10, c1 = floor(2D/10).
+(0) 2*D = T + 10*c0 ; c0 ∈ {0,1}
+(1) 2*L + c0 = R + 10*c1 ; c1 ∈ {0,1,2? Actually max 2*L + c0 = 2*9+1 =19 => c1 max 1; wait 19 yields carry 1, remainder 9. Actually if L=9, c0=1 => 19 => carry 1, remainder 9. So c1 ∈ {0,1}. Because max sum 2*9+1=19 => carry floor(19/10)=1. So c1 ∈ {0,1}.
 
-Sum1 = L + L + c1 = 2L + c1 => R = (2L + c1) mod 10, c2 = floor((2L + c1)/10).
+(2) 2*A + c1 = E + 10*c2 ; c2 ∈ {0,1} similarly.
 
-Sum2 = A + A + c2 = 2A + c2 => E = (2A + c2) mod 10, c3 = floor((2A + c2)/10).
+(3) N + R + c2 = B + 10*c3 ; c3 ∈ {0,1} maybe up to? N+R max 9+8=17 plus c2 up to 1 => 18 => carry max 1. So c3 ∈ {0,1}.
 
-Sum3 = N + R + c3 => B = (N + R + c3) mod 10, c4 = floor((N + R + c3)/10).
+(4) O + E + c3 = O + 10*c4 ; simplifies: O cancels? O+E+c3 = O + 10*c4 => E + c3 = 10*c4. So E + c3 must be a multiple of 10 (0,10,20...). Since E is digit 0-9 and c3 0 or1, sum range 0-10. So possibilities: E + c3 = 0 or 10. It cannot be 0 unless E=0 and c3=0. But E leading? E is not leading (it's hundreds place of result). Could be zero. However we must consider uniqueness and leading zeros constraints: D,G,R !=0. E can be zero.
 
-Sum4 = O + E + c4 => O = (O + E + c4) mod 10? Wait check column for ten-thousands (10^4): first number O, second number E, plus carry c4 yields digit O in result? Actually sum's ten-thousands digit is O (the second letter in ROBERT is O). Let's verify: ROBERT digits: R (10^5), O (10^4), B (10^3), E (10^2), R (10^1), T (10^0). Yes.
+If E + c3 = 0 => E=0, c3=0, then c4 =0 (since 0/10=0). If E + c3 =10 => then c4=1 (since 10/10=1) and E = 10 - c3. Since c3 0 or1, possibilities:
 
-Thus column for 10^4: O (from first) + E (from second) + c4 = O (result digit) + 10*c5? Actually we need to consider possible carry c5 to next column (the hundred-thousands). So: O + E + c4 = O + 10*c5, where c5 is carry into the 10^5 column. So equation: (O + E + c4) mod 10 = O, and c5 = floor((O + E + c4)/10). Since result digit is O, we have (O + E + c4) mod 10 = O => (E + c4) mod 10 = 0 => E + c4 ≡ 0 (mod 10). So E + c4 is either 0 or 10 or 20... but E is a digit 0-9, c4 is 0,1,2 maybe (since max sum N+R+ c3 could produce carry up to 2? Let's see max N+R+ c3: N,R max 9 each, c3 max maybe 2? Actually c3 from previous column could be 0,1,2? Let's compute max: 2A + c2 where A max 9, c2 max? 2L + c1 where L max 9, c1 max 1 (since 2D max 18 -> c1 max 1). So 2L + c1 max = 2*9+1=19 => c2 max =1. Then 2A + c2 max = 2*9+1=19 => c3 max =1. Actually c2 max 1, c3 max 1. So c3 is at most 1. Then N+R + c3 max = 9+9+1=19 => c4 max =1. So c4 ∈ {0,1}. Good.
+- If c3=0 => E=10 => impossible (digit). So c3 must be 1 and E =9. So either case:
 
-Thus E + c4 is either 0,10,20? Since E max 9, c4 max 1 => sum max 10. So possibilities: E + c4 = 0 or 10. If sum=0 then E=0 and c4=0. If sum=10 then E = 10 - c4. Since c4 is 0 or1, possibilities: if c4=0 => E=10 => impossible (digit). If c4=1 => E=9. So the only viable is either (E=0, c4=0) or (E=9, c4=1). But E cannot be 0 if leading zero? Actually E is not a leading digit (it's second digit of second number? Actually second number: G E R A L D, E is the ten-thousands digit? Wait G is 10^5, E is 10^4, so E is a leading digit? Not exactly leading of the number; the number's most significant digit is G, so E can be zero. So E=0 allowed. However we must check unique digits constraint and leading zeros for D,G,R only. So E can be zero.
+Case A: c3=0, E=0, c4=0.
+Case B: c3=1, E=9, c4=1.
 
-Thus we have two cases:
+Thus we have two possibilities.
 
-Case 1: E=0, c4=0.
-Case 2: E=9, c4=1.
+(5) D + G + c4 = R + 10*c5 ; but since result is six-digit and no extra digit, c5 must be 0, and D+G+c4 <10, and equals R. So:
 
-Now consider column for 10^5 (hundred-thousands): D + G + c4 = R (result digit) + 10*c5, where c5 must be 0 (no extra digit). So D + G + c4 = R, and since c5=0, we must have D + G + c4 < 10.
+D + G + c4 = R ; with constraint D,G,R !=0 and D+G+c4 <10.
 
-Thus D + G + c4 = R (no carry out). Also note R is leading digit of sum, cannot be zero.
+Thus we have unknown digits D,O,N,A,L,G,E,R,B,T distinct 0-9.
 
-Now we also have from tens column earlier: R = (2L + c1) mod 10, with carry c2.
+We also have c0..c4 carries as defined.
 
-We also have from units: T = (2D) mod 10, c1 = floor(2D/10).
+Now we need to solve.
 
-And from hundreds: E = (2A + c2) mod 10, c3 = floor((2A + c2)/10).
+Let's start enumerating possibilities.
 
-And from thousands: B = (N + R + c3) mod 10, c4 = floor((N + R + c3)/10). And we have c4 known from case.
+We have two main cases from (4).
 
-Now let's solve each case.
+Case A: c3=0, E=0, c4=0.
 
-Case 1: E=0, c4=0.
+Case B: c3=1, E=9, c4=1.
 
-Thus from column 10^4 we had E + c4 = 0 => okay.
+We'll examine each.
 
-Now D + G + c4 = D + G = R, with D+G <10 (since no carry). So R = D+G, and D+G <=9.
+Case A: c3=0, E=0, c4=0.
 
-Also R is leading digit of sum, cannot be zero, so D+G >=1.
+Then we have:
 
-Now c4=0 also implies from thousands column: c4 = floor((N + R + c3)/10) =0 => N + R + c3 <10.
+- E=0.
 
-Thus N + R + c3 <=9.
+- c3=0.
 
-Also B = (N + R + c3) mod 10 = N + R + c3 (since <10). So B = N + R + c3.
+- c4=0.
 
-Now c3 from hundreds column: c3 = floor((2A + c2)/10). Since E=0, we have E = (2A + c2) mod 10 =0 => (2A + c2) mod10 =0 => 2A + c2 ≡0 (mod10). Also c3 = floor((2A + c2)/10) which is either 0 or1 (since 2A + c2 max 2*9+1=19). So possibilities.
+Now from (3): N + R + c2 = B + 10*c3 => N + R + c2 = B (since c3=0). So B = N + R + c2, with B<10 (since no carry out). Also note that c2 ∈ {0,1}.
 
-c2 from tens column: c2 = floor((2L + c1)/10). And R = (2L + c1) mod10.
+- From (2): 2*A + c1 = E + 10*c2 => 2*A + c1 = 0 + 10*c2 => 2*A + c1 = 10*c2.
 
-c1 from units: c1 = floor(2D/10) (0 or1). T = (2D) mod10.
+Since left side max: 2*9+1=19. Right side possible values: 0 or 10. So possibilities:
 
-Now we need to assign distinct digits to all letters: D,O,N,A,L,G,E,R,B,T.
+If c2=0 => RHS=0 => 2*A + c1 =0 => implies A=0 and c1=0. But A=0 would conflict with E=0 (both zero) because digits must be unique. So not allowed.
 
-We have E=0 already.
+If c2=1 => RHS=10 => 2*A + c1 =10.
 
-Now let's try to find a solution.
+Thus c2 must be 1, and we have equation: 2*A + c1 =10.
 
-We also have column 10^4 gave condition E + c4 =0 mod10 which we satisfied; also we might need to check that O+E+c4 gave digit O (we used that to derive condition). Actually we used that to derive E + c4 ≡0 (mod10). That's satisfied.
+Since A is digit 0-9, c1 ∈ {0,1}. Solve possibilities:
 
-Now we also need to check that O+E+c4 = O + 0 + c4 = O + c4 yields digit O (i.e., (O + c4) mod10 = O). Since c4=0 in this case, O+0 = O => digit O, carry c5 = floor((O+0)/10) =0. So fine. So no further constraint on O.
+- If c1=0 => 2*A =10 => A=5.
 
-Thus O is free aside from uniqueness.
+- If c1=1 => 2*A +1 =10 => 2*A =9 => A=4.5 not integer. So only c1=0, A=5 works.
 
-Now we have unknowns: D, G, R (=D+G), N, A, L, B, O, T, plus carries c1,c2,c3.
+Thus we get: c2=1, c1=0, A=5.
 
-We also have constraints: D+G = R <10, D,G not zero (leading digits D,G,R not zero). So D,G,R ∈1-9, distinct.
+Now from (1): 2*L + c0 = R + 10*c1 => Since c1=0, we have 2*L + c0 = R.
 
-Also N + R + c3 = B <10 (since c4=0). So B = N + R + c3, and B must be digit 0-9 distinct from others. Since N,R,c3 are non-negative, B could be up to 9.
+Thus R = 2*L + c0, with R<10 (since no carry beyond). Also c0 from earlier is floor(2*D/10) (0 or1). L digit.
 
-c3 is either 0 or1.
+Now from (0): 2*D = T + 10*c0 => T = (2*D) mod10, c0 = floor(2*D/10).
 
-Now also we have tens column: R = (2L + c1) mod10, c2 = floor((2L + c1)/10).
+Now from (3) we had B = N + R + c2, with c2=1 => B = N + R +1.
 
-Units: T = (2D) mod10, c1 = floor(2D/10).
+And B must be <10 (no carry beyond thousands). Also B distinct.
 
-Hundreds: 0 = (2A + c2) mod10, c3 = floor((2A + c2)/10).
+Now from (5): D + G + c4 = R, with c4=0 => D + G = R.
 
-Thus (2A + c2) mod10 =0 => 2A + c2 = 10*k where k = c3 (0 or1). So 2A + c2 = 10*c3.
+Thus R = D + G.
 
-Thus possibilities:
+And also from earlier R = 2*L + c0.
 
-If c3=0 => 2A + c2 =0 => Since A >=0, c2>=0, only solution A=0 and c2=0. But E=0 already, so A cannot be 0 because digits must be unique. So c3 cannot be 0 (unless A=0, but E already 0). So c3 must be 1.
+Thus we have D + G = 2*L + c0.
 
-Thus c3=1, and then 2A + c2 =10.
+Additionally, from leading digit constraint: D, G, R !=0.
 
-Thus 2A + c2 =10, with c2 ∈ {0,1} (since from tens column carry max 1). So we solve:
+We also have all digits distinct: D,O,N,A(=5),L,G,E(=0),R,B,T.
 
-If c2=0 => 2A =10 => A=5.
-If c2=1 => 2A =9 => A=4.5 not integer => impossible.
+Now we need to assign digits satisfying constraints.
 
-Thus c2 must be 0, A=5.
+We already have A=5, E=0.
 
-Thus we have determined: A=5, c2=0, c3=1.
+Now let's consider possible D values to determine c0 and T.
 
-Great.
+D from 1-9 (nonzero leading). Compute 2*D, c0, T:
 
-Now c2=0 implies from tens column: floor((2L + c1)/10)=0 => 2L + c1 <10. And R = (2L + c1) mod10 = 2L + c1 (since <10). So R = 2L + c1.
+- D=1 => 2 => c0=0, T=2.
+- D=2 => 4 => c0=0, T=4.
+- D=3 => 6 => c0=0, T=6.
+- D=4 => 8 => c0=0, T=8.
+- D=5 =>10 => c0=1, T=0.
+- D=6 =>12 => c0=1, T=2.
+- D=7 =>14 => c0=1, T=4.
+- D=8 =>16 => c0=1, T=6.
+- D=9 =>18 => c0=1, T=8.
 
-Thus R = 2L + c1, with c1 ∈ {0,1}. Also we have R = D+G (from earlier). Also D,G,R distinct and non-zero.
+Note E=0 already used, so if T=0 would conflict with E (both zero). So D cannot be 5 because that gives T=0 which equals E (0) -> not allowed. So D !=5.
 
-Now units: c1 = floor(2D/10) i.e., c1=0 if D<=4, c1=1 if D>=5 (since 2D>=10). Actually if D=5 =>2D=10 =>c1=1, T=0. D=4 =>2D=8=>c1=0,T=8. etc.
+Thus possible D values: 1,2,3,4,6,7,8,9.
 
-Thus c1 indicates whether D>=5.
+Corresponding (c0,T):
+- D=1: c0=0,T=2
+- D=2: c0=0,T=4
+- D=3: c0=0,T=6
+- D=4: c0=0,T=8
+- D=6: c0=1,T=2
+- D=7: c0=1,T=4
+- D=8: c0=1,T=6
+- D=9: c0=1,T=8
 
-Now T = (2D) mod10.
+Now we have A=5, E=0.
 
-Now we have A=5 fixed. So digit 5 is taken by A.
+Now we need to assign L such that R = 2*L + c0 is a digit (<10) and distinct, and also R = D + G (since c4=0). Also G must be nonzero leading.
 
-Now we need to assign digits to D,G,R,L,O,N,B,T (and E=0). Must be all distinct, using digits 0-9 exactly once.
+We also have B = N + R + 1 (since c2=1) must be <10 and distinct.
 
-We have used: E=0, A=5.
+Also O is free except must satisfy column (4) which gave us the condition; we already used that to derive case A. O appears only in that equation which gave E + c3 = 10*c4. Since we are in case A, E=0, c3=0, c4=0, so O cancels out and imposes no restriction on O? Wait we derived from (4): O+E+c3 = O + 10*c4 => E + c3 = 10*c4. With E=0,c3=0 =>0=0 holds regardless of O. So O is free (any digit not used yet) as long as leading O? O is not leading (the ten-thousands digit of the addends and result). It can be zero? However O appears in both addends and result; but leading zeros restriction only for D,G,R. O can be zero as long as distinct. However note that O appears as a digit in the numbers; but if O=0, then the ten-thousands place of DONALD and GERALD would be zero, making the numbers effectively 5-digit? But leading zero restriction only applies to most significant digit (the hundred-thousands place) which is D and G. So O can be zero. However we already have E=0, so O cannot be zero because digits must be unique. So O !=0.
 
-Now constraints:
+Thus O is free among remaining digits.
 
-- D,G,R not zero.
-- R = D+G (<10).
-- R = 2L + c1, with c1 = floor(2D/10) (0 or1), and 2L + c1 <10 (since c2=0).
-- L is a digit (0-9) but cannot be zero? Actually L is not a leading digit (it's the tens digit of each number). Could be zero. But we must check uniqueness.
-- c1 is determined by D.
+Now we need to satisfy distinctness.
 
-- B = N + R + c3 (c3=1) => B = N + R +1. Since c4=0, we need N + R +1 <10 => N + R <=8. Also B = N + R +1.
+Let's list used digits so far: A=5, E=0. Also D and T depend on D choice.
 
-- O is free aside from uniqueness.
+Now we need to pick L, then compute R = 2*L + c0, must be a digit (0-9) not used yet, and also must satisfy R = D + G (so G = R - D). Since G must be a digit 0-9, nonzero leading, distinct, and also G = R - D must be >=1 (since leading cannot be zero) and <=9.
 
-- T = (2D) mod10.
+Additionally we need to ensure that G is distinct from used digits.
 
-Now also we need to satisfy that the sum's ten-thousands column gave O + E + c4 => O +0+0 = O (digit O) with carry 0. So O can be anything; no further constraints.
+Also need N and B and O and T etc.
 
-Now we need to assign digits to satisfy all.
+Let's proceed case by case for each D possibility.
 
-Let's enumerate possible D values 0-9 but D cannot be 0 (leading). Also D distinct from others.
+We'll also need to compute T from D.
 
-Compute for each D:
+We'll also need to ensure that T is distinct.
 
-- D, c1 = 0 if D<=4 else 1 if D>=5.
-- T = (2D) mod10.
-- Then we need to find L such that R = 2L + c1 (<10) and also R = D+G (<10) with G non-zero distinct.
-- Also G = R - D (since R = D+G => G = R - D). Must be digit 0-9, non-zero, distinct from others.
+Now we also have column (3) B = N + R + 1 (<10). So N must be such that N + R +1 <=9 => N <= 8 - R.
 
-- Also L must satisfy 2L + c1 = R, and 2L + c1 <10 (ensured by R<10). So L = (R - c1)/2 must be integer >=0.
+Also B = N + R +1 must be distinct and not used.
 
-Thus R and c1 must have same parity (since R - c1 must be even). So (R - c1) mod2 =0.
+Now we also have column (0) already satisfied.
 
-Now we also have N and B: B = N + R +1, with N + R <=8 (since B<10). Also B must be digit distinct.
+Now we also have column (1): we used to derive R = 2*L + c0 (since c1=0). That's fine.
 
-Now O is free.
+Now column (2): we used to get A=5, c1=0, c2=1.
 
-Now we need to assign all digits distinct.
+Now column (3) we used.
 
-Let's iterate D from 1 to9.
+Now column (4) satisfied via case.
 
-We'll compute c1, T.
+Now column (5) we have D+G = R.
 
-We'll also note that T must be distinct from others.
+Now we need to also ensure that column (1) carry c1=0 is consistent with earlier: we had c1=0 from solving 2*A + c1 =10 => with A=5 gave c1=0. Good.
 
-We also need to ensure that T is not zero? Not necessarily; T can be zero but E is zero already, so T cannot be zero because E=0 already used. So T cannot be 0. Also note if D=0? Not allowed.
+Now we need to also check column (0) carry c0 matches D.
 
-Now also note that A=5, E=0.
+Now we have everything.
 
-Thus digits used so far: 0,5.
+Now we need to assign L, N, O, B, G, T distinct and not conflicting with used digits (A=5,E=0,D,T, etc.)
 
-Now we will try each D.
+Let's go through D possibilities.
 
-We'll also need to ensure that L is integer and not conflicting.
+We'll also need to ensure that G computed as R - D is a digit 0-9, not used, and leading (non-zero). Also R itself must be non-zero leading (since R is leading digit of result). Also D and G non-zero.
 
-Let's do systematic.
+Now let's enumerate.
 
-Case D=1:
-2D=2 => c1=0, T=2.
-Now c1=0.
+We'll create a table for D, c0, T.
 
-We need R = 2L +0 = 2L (<10) => L = R/2 integer, R even.
+Case A:
 
-Also R = D+G =1+G => G = R-1.
+We'll iterate.
 
-Constraints: G must be digit 1-9, non-zero, distinct from D (=1) and others.
+### D=1: c0=0, T=2.
 
-Also R = D+G <10 => 1+G <10 => G <=8.
+Used so far: A=5, E=0, D=1, T=2.
 
-Also R must be even (since R=2L). Also R = 2L => L = R/2.
+Digits used: {0,1,2,5}. (Note T=2)
 
-Now also we need R = 2L + c1 = 2L (c1=0) => L integer.
+Now we need to choose L (0-9 not used) such that R = 2*L + c0 = 2*L (since c0=0) is a digit (<10) and not used yet, and also R !=0 (leading). Also we need G = R - D = R -1 to be a digit 1-9 (non-zero) and not used.
 
-Now also need L not conflicting.
+Also we need B = N + R +1 (<10) distinct.
 
-Now we also have B = N + R +1, with N+R <=8.
+Now L cannot be 0? It could be but then R=0 which would conflict with leading zero (R cannot be zero). Also 0 already used (E=0). So L cannot be 0.
 
-Now let's list possible R values (even, from? R = D+G, G>=1 (non-zero) and distinct from D=1 maybe? Could be zero? G cannot be zero because leading digit of second number? Actually G is leading digit of GERALD, so G cannot be zero. So G>=1. Also G cannot equal D (1) due to uniqueness.
+L possibilities from remaining digits: {3,4,6,7,8,9}. Also maybe? Actually used: 0,1,2,5. So free: 3,4,6,7,8,9.
 
-Thus G ∈ {2,...,9} but also G <=8 (since R<10). So G ∈ {2,...,8} but not equal to D=1 (already). So possible G values 2-8.
+Compute R = 2*L:
 
-Compute R = 1+G.
+- L=3 => R=6. Check if R not used: 6 not used yet. Good. R non-zero. Then G = R - D = 6-1=5. But 5 already used (A=5). Conflict. So L=3 invalid.
 
-Thus R values: if G=2 => R=3 (odd) not allowed because need even. G=3 => R=4 (even). G=4=>R=5 (odd). G=5=>R=6 (even). G=6=>R=7 (odd). G=7=>R=8 (even). G=8=>R=9 (odd). So possible R even: 4,6,8.
+- L=4 => R=8. 8 not used. G = 8-1=7. 7 not used yet. Good. Need to check G non-zero (7 ok). Also ensure G not used currently (used set {0,1,2,5}). 7 free. Also need to ensure G distinct from other later assignments.
 
-Corresponding G: for R=4 => G=3. R=6 => G=5. R=8 => G=7.
+Now we have L=4, R=8, G=7.
 
-Now check each:
+Used now: add L=4, R=8, G=7 => used set becomes {0,1,2,4,5,7,8}. (plus A=5, E=0, D=1, T=2). Actually we had used {0,1,2,5} plus L=4,R=8,G=7 gives {0,1,2,4,5,7,8}.
 
-- Subcase D=1, c1=0, T=2.
+Now we need N, B, O.
 
-Now for each possible R:
+We have column (3): B = N + R +1 = N + 8 +1 = N +9.
 
-1) R=4, G=3, L = R/2 =2.
+Since B must be a digit (<10) and distinct, we need N+9 <=9 => N <=0. So N must be 0. But 0 is already used (E=0). Also N must be distinct and leading? N is not leading (it's the thousands digit of DONALD? Actually DONALD: D O N A L D; N is the third digit from left (thousands place). It can be zero? Usually leading zeros only apply to most significant digit; internal zeros allowed. However N must be distinct from used digits. Since 0 already used, N cannot be 0. So no solution for L=4.
 
-Check uniqueness: digits used so far: E=0, A=5, D=1, T=2, G=3, L=2? Wait L=2 equals T=2 conflict. Also L=2 same as T. So invalid.
+Thus L=4 invalid.
 
-2) R=6, G=5, L=3.
+- L=6 => R=12? Wait 2*6=12 >9, not allowed because R must be a single digit (<10). So L cannot be >=5 because 2*L would be >=10 causing carry, but we have c1=0 and we derived R = 2*L + c0 with c0=0, and we assumed no carry from tens to hundreds? Actually equation (1) gave: 2*L + c0 = R + 10*c1, with c1=0. So indeed 2*L + c0 must be less than 10. So L max such that 2*L + c0 <=9. Since c0=0, L <=4. So L can only be 0-4. But we already excluded 0,1,2 because used or leading zero. So only L=3 or 4 possible. We already tried both and they failed. Thus D=1 yields no solution.
 
-But A=5 already, so G=5 conflict with A. Invalid.
+Thus D=1 invalid.
 
-3) R=8, G=7, L=4.
+### D=2: c0=0, T=4.
 
-Digits used: E=0, A=5, D=1, T=2, G=7, L=4, R=8. All distinct so far: {0,5,1,2,7,4,8}. Good.
+Used: A=5, E=0, D=2, T=4 => used {0,2,4,5}.
 
-Now we need to assign N, B, O.
-
-We have B = N + R +1 = N +8+1 = N+9. Since B must be <10 (digit) and N+R <=8 => N+8 <=8 => N <=0. So N must be 0. But E=0 already used, conflict. Also N must be distinct and non-negative. N=0 not allowed (E=0). So no solution for D=1.
-
-Thus D=1 fails.
-
-Now D=2:
-
-2D=4 => c1=0, T=4.
-
-c1=0.
-
-R = 2L (even) = D+G =2+G => G = R-2.
-
-Constraints: G non-zero, not equal D=2, G <=? Since R<10 => 2+G <10 => G <=8.
-
-Also R even.
-
-Now compute possible G values (1-9 except 2) such that R=2+G even => G even? Since 2+G even => G even. So G ∈ {even numbers from 2? but not 2, so 4,6,8} also maybe 0? G cannot be zero (leading). So G ∈ {4,6,8}. Also need G <=8.
-
-Now compute:
-
-- G=4 => R=6, L=R/2=3.
-- G=6 => R=8, L=4.
-- G=8 => R=10 => R=10 not allowed because R must be <10 (since D+G <10). Actually R=10 would cause carry into next column, but we require D+G <10 (c5=0). So G=8 invalid.
-
-Thus valid: G=4,R=6,L=3; G=6,R=8,L=4.
-
-Now check uniqueness with existing digits: E=0, A=5, D=2, T=4.
-
-Case G=4,R=6,L=3: But T=4 already, G=4 conflict with T. So invalid.
-
-Case G=6,R=8,L=4: T=4, L=4 conflict with T. So invalid.
-
-Thus D=2 fails.
-
-Now D=3:
-
-2D=6 => c1=0, T=6.
-
-c1=0.
-
-R = 2L = D+G =3+G => G = R-3.
-
-Constraints: G non-zero, not equal D=3, G <=? Since R<10 => 3+G <10 => G <=6.
-
-Also R even => 3+G even => G odd (since 3+odd=even). So G ∈ odd numbers from 1-6 except 3: {1,5}. Also G cannot be zero.
-
-Check each:
-
-- G=1 => R=4, L=R/2=2.
-- G=5 => R=8, L=4.
-
-Now check digits used: E=0, A=5, D=3, T=6.
-
-Case G=1,R=4,L=2: digits: G=1, R=4, L=2. Check uniqueness: we have E0, A5, D3, T6, G1, R4, L2. All distinct so far: {0,5,3,6,1,4,2}. Good.
-
-Now need N,B,O.
-
-We have B = N + R +1 = N+4+1 = N+5. Constraint N+R <=8 => N+4 <=8 => N <=4.
-
-Also B must be digit distinct and <10.
-
-Also N cannot be used already: used digits so far: {0,5,3,6,1,4,2}. So unavailable: 0,1,2,3,4,5,6. Available: 7,8,9.
-
-But N must be <=4, so N can only be from {0,1,2,3,4} but all those are used. So no possible N. Thus invalid.
-
-Case G=5,R=8,L=4: digits: G=5 (but A=5 already) conflict. So invalid.
-
-Thus D=3 fails.
-
-Now D=4:
-
-2D=8 => c1=0, T=8.
-
-c1=0.
-
-R = 2L = D+G =4+G => G = R-4.
-
-Constraints: G non-zero, not equal D=4, G <=? Since R<10 => 4+G <10 => G <=5.
-
-Also R even => 4+G even => G even (since 4+even=even). So G ∈ even numbers from? G can be 0? leading digit cannot be zero, so G>=2? Actually G can be 2? but G must be non-zero and not equal D=4. Also G <=5.
-
-Even numbers <=5: 0,2,4. Exclude 0 (leading zero not allowed), exclude 4 (same as D). So G=2 only.
-
-Thus G=2 => R=4+2=6, L=R/2=3.
-
-Check digits: E=0, A=5, D=4, T=8, G=2, R=6, L=3. All distinct: {0,5,4,8,2,6,3}. Good.
-
-Now need N,B,O.
-
-B = N + R +1 = N+6+1 = N+7. Constraint N+R <=8 => N+6 <=8 => N <=2.
-
-Thus N can be 0,1,2.
-
-Used digits so far: {0,5,4,8,2,6,3}. So unavailable: 0,2,3,4,5,6,8. Available: 1,7,9.
-
-N must be <=2 and not used: possible N=1? (0 and 2 used). N=1 is available and <=2. Good.
-
-Thus N=1.
-
-Then B = N+R+1 =1+6+1=8. But T=8 already used. Conflict. So B=8 duplicates T.
-
-If N=0? used (E=0). N=2? used (G=2). So only N=1 leads to conflict.
-
-Thus D=4 fails.
-
-Now D=5:
-
-2D=10 => c1=1, T=0.
-
-But E=0 already, so T=0 conflict with E. Unless we consider case where E not zero? But we are in case 1 where E=0. So T cannot be zero because E already zero. So D=5 invalid in case1.
-
-Thus D=5 fails.
-
-Now D=6:
-
-2D=12 => c1=1, T=2.
-
-c1=1.
-
-Now R = 2L + c1 = 2L +1. Also R = D+G =6+G.
-
-Thus 2L+1 = 6+G => G = 2L+1 -6 = 2L -5.
-
-Also constraints: G non-zero, not equal D=6, G <=? Since R<10 => 6+G <10 => G <=3.
-
-Also R = 2L+1 <10 => 2L+1 <10 => 2L <=8 => L <=4.
-
-Also L integer >=0.
-
-Also G = 2L -5 must be between 1 and 3 inclusive (since G <=3 and >=1). Also G integer.
-
-Now compute possible L values 0-4:
-
-L=0 => G = -5 (invalid)
-L=1 => G = 2-5 = -3 invalid
-L=2 => G =4-5=-1 invalid
-L=3 => G =6-5=1 => G=1 (valid, within 1-3)
-L=4 => G =8-5=3 => G=3 (valid)
-
-Thus two possibilities:
-
-- L=3, G=1, then R = 2L+1 = 2*3+1=7. Also check R = D+G =6+1=7 matches.
-
-- L=4, G=3, then R = 2*4+1=9. Check D+G =6+3=9 matches.
-
-Now check uniqueness with existing digits: E=0, A=5, D=6, T=2.
-
-Case1: L=3, G=1, R=7.
-
-Digits used: E0, A5, D6, T2, L3, G1, R7. All distinct: {0,5,6,2,3,1,7}. Good.
-
-Now need N,B,O.
-
-We have B = N + R +1 = N+7+1 = N+8. Constraint N+R <=8 => N+7 <=8 => N <=1.
-
-Thus N can be 0 or1.
-
-Used digits: {0,5,6,2,3,1,7}. So unavailable: 0,1,2,3,5,6,7. Available: 4,8,9.
-
-N must be <=1 and not used: possible N=0? used (E0). N=1? used (G1). So no possible N. Thus invalid.
-
-Case2: L=4, G=3, R=9.
-
-Digits used: E0, A5, D6, T2, L4, G3, R9. Set: {0,5,6,2,4,3,9}. All distinct.
-
-Now N constraint: B = N + R +1 = N+9+1 = N+10. Wait B = N + R +1, with R=9 => B = N+10. But B must be a single digit (<10). Also constraint N+R <=8 => N+9 <=8 => N <= -1 impossible. So no solution. Actually we must re-evaluate: In case1, we had B = N + R +1, and constraint N+R <=8 (since c4=0). If R=9, then N+9 <=8 impossible. So invalid.
-
-Thus D=6 fails.
-
-Now D=7:
-
-2D=14 => c1=1, T=4.
-
-c1=1.
-
-R = 2L+1 = D+G =7+G => G = 2L+1 -7 = 2L -6.
-
-Constraints: G non-zero, not equal D=7, G <=? Since R<10 => 7+G <10 => G <=2.
-
-Also R = 2L+1 <10 => 2L+1 <10 => 2L <=8 => L <=4.
-
-Also G = 2L -6 must be between 1 and 2 inclusive.
-
-Compute L from 0 to4:
-
-L=0 => G=-6 invalid
-L=1 => G=-4 invalid
-L=2 => G=-2 invalid
-L=3 => G=0 => G=0 (but leading digit G cannot be zero)
-L=4 => G=2 => G=2 (valid, within 1-2)
-
-Thus only L=4, G=2 works.
-
-Then R = 2L+1 = 2*4+1=9. Check D+G =7+2=9 matches.
-
-Now digits used: E=0, A=5, D=7, T=4, L=4? Wait L=4 but T=4 already (from D=7 gave T=4). Conflict: L=4 equals T=4. So invalid.
-
-Thus D=7 fails.
-
-Now D=8:
-
-2D=16 => c1=1, T=6.
-
-c1=1.
-
-R = 2L+1 = D+G =8+G => G = 2L+1 -8 = 2L -7.
-
-Constraints: G non-zero, not equal D=8, G <=? Since R<10 => 8+G <10 => G <=1.
-
-Also R = 2L+1 <10 => 2L+1 <10 => 2L <=8 => L <=4.
-
-Thus G = 2L -7 must be either 1 (since G <=1 and >=1). So G=1.
-
-Thus 2L -7 =1 => 2L =8 => L=4.
-
-Check: L=4 => G=1, R = 2L+1 =9. Check D+G =8+1=9 matches.
-
-Now digits used: E=0, A=5, D=8, T=6, L=4, G=1, R=9. Set: {0,5,8,6,4,1,9}. All distinct.
-
-Now N constraint: B = N + R +1 = N+9+1 = N+10. Need N+R <=8 => N+9 <=8 => N <= -1 impossible. So no solution.
-
-Thus D=8 fails.
-
-Now D=9:
-
-2D=18 => c1=1, T=8.
-
-c1=1.
-
-R = 2L+1 = D+G =9+G => G = 2L+1 -9 = 2L -8.
-
-Constraints: G non-zero, not equal D=9, G <=? Since R<10 => 9+G <10 => G <=0? Actually 9+G <10 => G <1 => G <=0. But G must be non-zero (leading digit). So impossible. Thus D=9 fails.
-
-Thus case1 (E=0, c4=0) yields no solution.
-
-Now we must consider case2: E=9, c4=1.
-
-Recall from column 10^4: E + c4 ≡0 (mod10) gave possibilities: either (E=0,c4=0) or (E=9,c4=1). So case2: E=9, c4=1.
-
-Now we have E=9, c4=1.
-
-Now we need to re-evaluate constraints.
-
-We have leading zeros: D,G,R cannot be zero.
-
-Now column equations:
-
-Units: same: T = (2D) mod10, c1 = floor(2D/10).
-
-Tens: R = (2L + c1) mod10, c2 = floor((2L + c1)/10).
-
-Hundreds: E = (2A + c2) mod10, c3 = floor((2A + c2)/10). With E=9.
-
-Thousands: B = (N + R + c3) mod10, c4 = floor((N + R + c3)/10). We have c4=1.
-
-Ten-thousands: column: O + E + c4 = O + 9 + 1 = O +10 = O (result digit) + 10*c5? Wait we need to compute: O (from first) + E (from second) + c4 = O + 9 +1 = O +10. The result digit in that column is O (the second letter of ROBERT). So we have:
-
-O + 10 = O + 10*c5? Actually the sum yields digit O and a carry c5 to the next column (hundred-thousands). So:
-
-O + E + c4 = O + 9 +1 = O +10 = O + 10*c5? Wait the formula: (digit1 + digit2 + carry_in) = result_digit + 10*carry_out.
-
-Thus: O + 9 + 1 = O + 10 = result_digit (which is O) + 10*c5.
-
-Thus O +10 = O + 10*c5 => subtract O both sides: 10 = 10*c5 => c5 =1.
-
-Thus we get a carry c5 =1 into the hundred-thousands column.
-
-Thus column 10^5 (hundred-thousands): D + G + c5 = D + G + 1 = result digit R (the leading digit of ROBERT) + 10*c6, where c6 must be 0 because we have no extra digit beyond 6 letters (the sum is 6-digit). So:
-
-D + G + 1 = R + 10*c6, with c6=0 => D + G + 1 = R.
-
-Thus R = D + G + 1.
-
-Also we must have D + G + 1 < 10 (since no carry out), i.e., D+G <=8.
-
-Thus R = D+G+1, with D+G <=8 => R <=9.
-
-Also R cannot be zero (leading). So D+G+1 >=1 => D+G >=0, trivial.
-
-Now we also have from thousands column: c4 = floor((N + R + c3)/10) =1 (given). So:
-
-N + R + c3 >=10 and <20 (since max sum N+R+c3 <=9+9+1=19). So:
-
-10 <= N + R + c3 <=19.
-
-And B = (N + R + c3) mod10 = (N + R + c3) -10 (since c4=1). So B = N + R + c3 -10.
-
-Now we also have hundreds column: E=9 = (2A + c2) mod10, c3 = floor((2A + c2)/10).
-
-Thus (2A + c2) mod10 =9 => 2A + c2 ≡9 (mod10). And c3 = floor((2A + c2)/10) which can be 0,1,2? Since max 2A + c2 = 2*9+1=19 => c3 max 1 (if 2A + c2 >=10). Actually if 2A + c2 between 0-9 => c3=0; between 10-19 => c3=1. So c3 ∈ {0,1}.
-
-Now tens column: R = (2L + c1) mod10, c2 = floor((2L + c1)/10). c2 ∈ {0,1}.
-
-Units column: T = (2D) mod10, c1 = floor(2D/10) ∈ {0,1}.
-
-Now we also have the condition from ten-thousands column that gave c5=1, which we used.
-
-Now we need to assign digits distinct: D,O,N,A,L,G,E=9,R,B,T.
-
-We have used E=9 already.
-
-Now let's solve.
-
-We have unknowns: D,G,R (with R = D+G+1, D+G <=8), L, A, N, B, O, T, plus carries c1,c2,c3.
-
-We also have constraints: D,G,R not zero (leading). Also O can be zero? O is not leading (it's second digit of first number and second digit of sum). So O can be zero.
-
-Now we need to ensure all digits distinct and cover 0-9 exactly once.
-
-Let's start by enumerating possible D values (1-9) and compute c1, T.
-
-Then for each D, we will consider possible L values that satisfy tens column constraints and produce R consistent with D+G+1.
-
-But we also have G unknown; we can derive G from R and D: G = R - D -1.
-
-Since R = D+G+1 => G = R - D -1.
-
-Thus given D and R, we can compute G.
-
-Alternatively we can iterate D and G such that D+G <=8, compute R = D+G+1, ensure R is digit distinct and not zero.
-
-Then we need to satisfy tens column: R = (2L + c1) mod10, with c2 = floor((2L + c1)/10). And we also have hundreds column constraints linking A and c2 to produce E=9 and c3.
-
-Let's proceed.
-
-We'll iterate D from 1 to9 (cannot be zero). For each D compute c1 and T.
-
-Then we iterate possible G values (1-9, not equal D, not zero) such that D+G <=8 (since D+G <=8). Compute R = D+G+1.
-
-Check R not zero, distinct from D,G etc.
-
-Then we need to find L such that tens column holds: given c1 (from D), we need to find L (0-9, not used yet) such that:
-
-Let S = 2L + c1.
-Then R = S mod10.
-c2 = floor(S/10) (0 or1).
-
-Thus S = 10*c2 + R.
-
-Since S = 2L + c1, we have 2L = S - c1 = 10*c2 + R - c1.
-
-Thus L = (10*c2 + R - c1)/2 must be integer between 0 and9.
-
-Also L must be distinct from used digits.
-
-c2 can be 0 or1.
-
-Now after determining L and c2, we go to hundreds column: we need to find A such that:
-
-Given c2, we need 2A + c2 ≡9 (mod10) and c3 = floor((2A + c2)/10) (0 or1). Also A distinct.
-
-Then thousands column: we need to find N such that:
-
-Given c3 and R, we need N + R + c3 >=10 (since c4=1) and <=19, and B = N + R + c3 -10 distinct and not used yet. Also N distinct.
-
-Also we need O distinct and not used; O is free aside from uniqueness (no further constraints). Also we need to ensure that all digits 0-9 are used exactly once across D,O,N,A,L,G,E=9,R,B,T.
-
-Thus we need to assign O as the remaining digit after assigning others.
-
-Now let's implement reasoning manually.
-
-We'll iterate D.
-
-We'll keep track of used digits.
-
-We'll compute c1, T.
-
-Now D possibilities:
-
-We'll create a table.
-
-First, compute for each D:
-
-- D, 2D, c1 = floor(2D/10), T = (2D) mod10.
-
-Let's list:
-
-D=1: 2D=2 => c1=0, T=2.
-D=2: 4 => c1=0, T=4.
-D=3: 6 => c1=0, T=6.
-D=4: 8 => c1=0, T=8.
-D=5:10 => c1=1, T=0.
-D=6:12 => c1=1, T=2.
-D=7:14 => c1=1, T=4.
-D=8:16 => c1=1, T=6.
-D=9:18 => c1=1, T=8.
-
-Now note E=9 already used, so T cannot be 9 (but none of these T are 9). Also T cannot equal any other used digit later.
-
-Now we also need to ensure T distinct from others.
-
-Now for each D, we iterate possible G.
-
-But note that G is leading digit of second number, cannot be zero.
-
-Also D and G cannot be same.
-
-Also D+G <=8.
-
-Now let's iterate.
-
-We'll maintain a list of possible solutions.
-
-We'll do manual reasoning.
-
-We'll create a spreadsheet in mind.
-
-We'll go D from 1 to9.
-
-### D=1:
-c1=0, T=2.
-
-Used so far: D=1, T=2, E=9.
-
-Now G possibilities: G ∈ {1..9} \ {1} (distinct), G !=0, and D+G <=8 => 1+G <=8 => G <=7.
-
-Thus G ∈ {2,3,4,5,6,7} but also not equal D=1 (already). Also G cannot be equal to T? Not yet, but we will check later.
-
-Now for each G compute R = D+G+1 = 1+G+1 = G+2.
-
-Thus R = G+2.
-
-Check R distinct and not zero.
-
-Now we need to find L satisfying tens column.
-
-We'll iterate each G.
-
-- G=2: then R=4. Check digits used: D=1, T=2, E=9, G=2? Wait G=2 equals T=2 conflict (T=2). So invalid because T already 2. So G cannot be 2.
-
-- G=3: R=5. Digits: D=1, T=2, E=9, G=3, R=5. So far {1,2,9,3,5}. All distinct.
-
-Now need L.
-
-We have c1=0.
-
-We need to find L such that S = 2L + c1 = 2L.
-
-We need R = S mod10 = (2L) mod10 = R=5.
-
-Thus 2L mod10 =5 => 2L ends with 5 => impossible because 2L is even, cannot end with 5. So no solution.
-
-Thus G=3 invalid.
-
-- G=4: R=6. Digits: D=1,T=2,E=9,G=4,R=6 => {1,2,9,4,6}. Distinct.
-
-Now need 2L mod10 =6 => 2L ends with 6 => L such that 2L ≡6 (mod10) => L ≡3 or 8? Since 2*3=6, 2*8=16→6 mod10. So L=3 or L=8.
-
-Check L not used yet: used {1,2,9,4,6}. So L=3 is free; L=8 is free.
-
-Now compute c2 = floor(2L/10) = 0 if L<5, else 1 if L>=5.
-
-- For L=3: 2L=6 => c2=0.
-- For L=8: 2L=16 => c2=1.
-
-Now we have two subcases.
-
-Now proceed to hundreds column: need A such that 2A + c2 ≡9 (mod10) and c3 = floor((2A + c2)/10) (0 or1). Also A distinct.
-
-We'll compute for each subcase.
-
-Subcase L=3, c2=0.
-
-Need 2A ≡9 (mod10) => 2A mod10 =9 => impossible (2A even). So no solution.
-
-Subcase L=8, c2=1.
-
-Need 2A +1 ≡9 (mod10) => 2A ≡8 (mod10) => 2A mod10 =8 => A ≡4 or 9? Since 2*4=8, 2*9=18→8 mod10. So A=4 or A=9.
-
-But E=9 already used, so A cannot be 9. So A=4 possible if not used yet.
-
-Check used digits currently: D=1, T=2, E=9, G=4? Wait G=4 in this case? Actually we are in G=4 subcase? Wait we are evaluating G=4, yes G=4. So G=4 used. So A=4 would conflict with G=4. So A cannot be 4.
-
-Thus no solution for G=4.
-
-Thus G=4 invalid.
-
-- G=5: R=7. Digits: D=1,T=2,E=9,G=5,R=7 => {1,2,9,5,7}. Distinct.
-
-Now need 2L mod10 = R=7 => 2L ≡7 mod10 impossible (even). So no solution.
-
-- G=6: R=8. Digits: D=1,T=2,E=9,G=6,R=8 => {1,2,9,6,8}. Distinct.
-
-Need 2L mod10 =8 => L such that 2L ends with 8 => L=4 or 9 (since 2*4=8, 2*9=18). L=4 or 9.
-
-Check used: {1,2,9,6,8}. L=4 free; L=9 conflict with E=9 (used). So only L=4 possible.
-
-Now L=4 => 2L=8 => c2=0.
-
-Now hundreds: need 2A + c2 ≡9 mod10 => 2A ≡9 mod10 impossible. So no solution.
-
-Thus G=6 invalid.
-
-- G=7: R=9. Digits: D=1,T=2,E=9,G=7,R=9 => conflict: R=9 equals E=9. So invalid.
-
-Thus D=1 yields no solution.
-
-### D=2:
-c1=0, T=4.
-
-Used: D=2, T=4, E=9.
-
-G possibilities: G !=2, G!=0, D+G <=8 => 2+G <=8 => G <=6.
-
-Thus G ∈ {1,3,4,5,6} but also not equal T? Not yet.
+Now L possibilities: need 2*L + c0 <10 => L <=4 (since c0=0). L cannot be 0 (used), cannot be 2 (used D), cannot be 4 (used T). So possible L values: 1,3. Also L cannot be leading zero? L can be zero? zero used already (E=0) so not allowed. So L=1 or 3.
 
 Check each.
 
-- G=1: R = D+G+1 =2+1+1=4. R=4 conflicts with T=4. Invalid.
+- L=1: then R = 2*L + c0 =2*1=2. R=2 but D=2 already used, conflict (also leading R cannot be zero but it's 2). So invalid.
 
-- G=3: R=2+3+1=6. Digits: D=2,T=4,E=9,G=3,R=6 => {2,4,9,3,6}. Distinct.
-
-Now need 2L mod10 = R=6 => L such that 2L ends with 6 => L=3 or 8.
-
-Check used: {2,4,9,3,6}. L=3 conflicts with G=3. L=8 free.
-
-Thus L=8 possible.
-
-Now compute c2 = floor(2L/10) = floor(16/10)=1.
-
-Now hundreds: need 2A + c2 ≡9 mod10 => 2A +1 ≡9 => 2A ≡8 mod10 => A ≡4 or 9 (since 2*4=8, 2*9=18). So A=4 or 9.
-
-Check used: currently {2,4,9,3,6, L=8? Wait L=8 used now? Actually we haven't added L yet. Let's list used before choosing A: D=2, T=4, E=9, G=3, R=6, L=8. So used set = {2,4,9,3,6,8}. Also note T=4 already.
-
-Now A options:
-
-- A=4 conflicts with T=4 (used). So invalid.
-- A=9 conflicts with E=9. Invalid.
-
-Thus no solution for G=3.
-
-- G=4: R=2+4+1=7. Digits: D=2,T=4,E=9,G=4,R=7 => {2,4,9,4? Wait G=4 equals T=4 conflict (T=4). So invalid.
-
-- G=5: R=2+5+1=8. Digits: D=2,T=4,E=9,G=5,R=8 => {2,4,9,5,8}. Distinct.
-
-Now need 2L mod10 = R=8 => L=4 or 9.
-
-Check used: {2,4,9,5,8}. L=4 conflicts with T=4. L=9 conflicts with E=9. So no L.
-
-Thus G=5 invalid.
-
-- G=6: R=2+6+1=9. Digits: D=2,T=4,E=9,G=6,R=9 => R=9 conflicts with E=9. Invalid.
+- L=3: R = 2*3 =6. R=6 not used yet. Good. Then G = R - D = 6-2=4. But T=4 already used (T=4). Conflict. So L=3 invalid.
 
 Thus D=2 no solution.
 
-### D=3:
-c1=0, T=6.
+### D=3: c0=0, T=6.
 
-Used: D=3, T=6, E=9.
+Used: A=5, E=0, D=3, T=6 => {0,3,5,6}.
 
-G possibilities: G !=3, G!=0, D+G <=8 => 3+G <=8 => G <=5.
+L must satisfy 2*L <10 => L <=4. L cannot be 0 (used), cannot be 3 (used D), cannot be? 5? >4 not allowed. So possible L values: 1,2,4.
 
-Thus G ∈ {1,2,4,5} (also cannot be 0). Also check not equal T? Not yet.
+Check each.
 
-- G=1: R=3+1+1=5. Digits: D=3,T=6,E=9,G=1,R=5 => {3,6,9,1,5}. Distinct.
+- L=1 => R=2*1=2. R=2 not used. G = R - D =2-3 = -1 invalid (negative). So invalid.
 
-Now need 2L mod10 = R=5 => impossible (even). So invalid.
+- L=2 => R=4. R=4 not used. G = 4-3=1. G=1 not used yet, non-zero. Good.
 
-- G=2: R=3+2+1=6. R=6 conflicts with T=6. Invalid.
+Now used so far: add L=2, R=4, G=1 => used set becomes {0,1,2,3,4,5,6}. (A=5,E=0,D=3,T=6,L=2,R=4,G=1). That's 7 digits.
 
-- G=4: R=3+4+1=8. Digits: D=3,T=6,E=9,G=4,R=8 => {3,6,9,4,8}. Distinct.
+Now need N, B, O.
 
-Need 2L mod10 =8 => L=4 or 9.
+Column (3): B = N + R +1 = N +4 +1 = N+5. Need B <10 => N <=4. Also B must be distinct and not used.
 
-Used: {3,6,9,4,8}. L=4 conflicts with G=4. L=9 conflicts with E=9. So no L.
+Used digits currently: 0,1,2,3,4,5,6. So available digits: 7,8,9.
 
-- G=5: R=3+5+1=9. R=9 conflicts with E=9. Invalid.
+N must be <=4, but available digits >4 are 7,8,9. So no N possible. Thus L=2 invalid.
+
+- L=4 => R=2*4=8. R=8 not used. G = R - D =8-3=5. But A=5 already used. Conflict.
 
 Thus D=3 no solution.
 
-### D=4:
-c1=0, T=8.
+### D=4: c0=0, T=8.
 
-Used: D=4, T=8, E=9.
+Used: A=5, E=0, D=4, T=8 => {0,4,5,8}.
 
-G possibilities: G !=4, G!=0, D+G <=8 => 4+G <=8 => G <=4.
+L must satisfy 2*L <10 => L <=4. L cannot be 0 (used), cannot be 4 (used D), cannot be? 5? >4 not allowed. So possible L values:1,2,3.
 
-Thus G ∈ {1,2,3} (also G cannot be 0,4). Also check not equal T? T=8 not in this set.
+Check each.
 
-- G=1: R=4+1+1=6. Digits: D=4,T=8,E=9,G=1,R=6 => {4,8,9,1,6}. Distinct.
+- L=1 => R=2*1=2. R=2 not used. G = R - D =2-4=-2 invalid.
 
-Need 2L mod10 = R=6 => L=3 or 8.
+- L=2 => R=4. R=4 but D=4 already used (also leading R cannot be zero but it's 4, but duplicate). Conflict.
 
-Used: {4,8,9,1,6}. L=3 free; L=8 conflicts with T=8.
+- L=3 => R=6. R=6 not used. G = 6-4=2. G=2 not used yet, non-zero.
 
-Thus L=3 possible.
+Now used: add L=3,R=6,G=2 => used set becomes {0,2,3,4,5,6,8}. (A=5,E=0,D=4,T=8,L=3,R=6,G=2). Need N,B,O.
 
-Now c2 = floor(2L/10) = floor(6/10)=0.
+Column (3): B = N + R +1 = N +6 +1 = N+7. Need B<10 => N <=2. Also B must be distinct and not used.
 
-Now hundreds: need 2A + c2 ≡9 mod10 => 2A ≡9 mod10 impossible. So no solution.
+Used digits: {0,2,3,4,5,6,8}. Available digits: 1,7,9.
 
-- G=2: R=4+2+1=7. Digits: D=4,T=8,E=9,G=2,R=7 => {4,8,9,2,7}. Distinct.
+N must be <=2, and not used. Possible N values: 1 (since 0 used,2 used). So N=1 possible.
 
-Need 2L mod10 =7 => impossible.
+Check N=1: then B = N+7 = 8. B=8 but T=8 already used (also used). Conflict.
 
-- G=3: R=4+3+1=8. R=8 conflicts with T=8. Invalid.
+Thus N cannot be 1 because B collides.
+
+What about N=?? Could N be 0? 0 used. N=2 used. So no valid N.
+
+Thus L=3 invalid.
 
 Thus D=4 no solution.
 
-### D=5:
-c1=1, T=0.
+### D=6: c0=1, T=2.
 
-Used: D=5, T=0, E=9.
+Used: A=5, E=0, D=6, T=2 => {0,2,5,6}.
 
-Note T=0, but E=9, fine.
+Now L must satisfy 2*L + c0 <10 => 2*L +1 <10 => 2*L <9 => L <=4 (since L integer). L can be 0-4.
 
-Now G possibilities: G !=5, G!=0, D+G <=8 => 5+G <=8 => G <=3.
+But need to check uniqueness and leading.
 
-Thus G ∈ {1,2,3} (also not zero). Also check not equal T? T=0 not in set.
+Used digits: 0,2,5,6.
 
-- G=1: R=5+1+1=7. Digits: D=5,T=0,E=9,G=1,R=7 => {5,0,9,1,7}. Distinct.
+Possible L values: 1,3,4 (0 used,2 used). Also L cannot be? 5? >4 not allowed.
 
-Now need tens column: we have c1=1.
+Check each.
 
-We need S = 2L + c1 = 2L+1.
+- L=1 => R = 2*L + c0 =2*1+1=3. R=3 not used. Good.
 
-We need R = S mod10 =7 => (2L+1) mod10 =7 => 2L mod10 =6 => 2L ≡6 mod10 => L ≡3 or 8 (since 2*3=6, 2*8=16). So L=3 or 8.
+Now G = R - D (since D+G=R => G = R - D). D=6, R=3 => G = -3 invalid. So L=1 invalid.
 
-Check used: {5,0,9,1,7}. L=3 free; L=8 free.
+- L=3 => R = 2*3+1=7. R=7 not used. G = 7-6=1. G=1 not used yet, non-zero.
 
-Now compute c2 = floor((2L+1)/10).
+Now used: add L=3,R=7,G=1 => used set becomes {0,1,2,3,5,6,7}. (A=5,E=0,D=6,T=2,L=3,R=7,G=1). Need N,B,O.
 
-- For L=3: 2L+1=7 => c2=0.
-- For L=8: 2L+1=17 => c2=1.
+Column (3): B = N + R +1 = N +7 +1 = N+8. Need B<10 => N <=1. So N can be 0 or 1. But both used: 0 used (E),1 used (G). So no N possible. Thus L=3 invalid.
 
-Now hundreds: need 2A + c2 ≡9 mod10, c3 = floor((2A + c2)/10).
+- L=4 => R = 2*4+1=9. R=9 not used. G = 9-6=3. G=3 not used yet, non-zero.
 
-Subcase L=3, c2=0:
+Used now: add L=4,R=9,G=3 => used set {0,2,3,4,5,6,9}. (A=5,E=0,D=6,T=2,L=4,R=9,G=3). Need N,B,O.
 
-Need 2A ≡9 mod10 impossible.
+Column (3): B = N + R +1 = N +9 +1 = N+10. Wait R=9, so B = N + 9 +1 = N+10. For B<10, N must be <= -1 impossible. Thus no solution. So L=4 invalid.
 
-Subcase L=8, c2=1:
+Thus D=6 no solution.
 
-Need 2A +1 ≡9 => 2A ≡8 => A ≡4 or 9.
+### D=7: c0=1, T=4.
 
-Check used digits currently: D=5, T=0, E=9, G=1, R=7, L=8. So used set = {5,0,9,1,7,8}. Also note T=0.
+Used: A=5, E=0, D=7, T=4 => {0,4,5,7}.
 
-Now A options:
+L must satisfy 2*L +1 <10 => 2*L <9 => L <=4. L possible values: 1,2,3,4 (0 used). Also cannot use 4? T=4 used, so L cannot be 4. So possible L:1,2,3.
 
-- A=4: not used yet, ok.
-- A=9: conflicts with E=9.
+Check each.
 
-Thus A=4 possible.
+- L=1 => R = 2*1+1=3. R=3 not used. G = R - D = 3-7 = -4 invalid.
 
-Now compute c3 = floor((2A + c2)/10) = floor((2*4+1)/10) = floor((8+1)/10)= floor(9/10)=0.
+- L=2 => R = 2*2+1=5. R=5 but A=5 used. Conflict.
 
-Thus c3=0.
+- L=3 => R = 2*3+1=7. R=7 but D=7 used (also leading R cannot be zero but it's 7 duplicate). Conflict.
 
-Now thousands column: we have c4=1 (given). Need N such that N + R + c3 >=10 and <=19, and B = N + R + c3 -10.
+Thus D=7 no solution.
 
-Here R=7, c3=0 => need N +7 >=10 => N >=3. Also N+7 <=19 => N <=12 (but N max 9). So N ∈ {3,4,5,6,7,8,9} but also must satisfy that B = N+7-10 = N-3 is a digit (0-9) distinct and not used.
+### D=8: c0=1, T=6.
 
-Also N must be distinct from used digits.
+Used: A=5, E=0, D=8, T=6 => {0,5,6,8}.
 
-Used so far: {5,0,9,1,7,8, A=4}. Also we haven't assigned O, B, N yet. Also note T=0 already used.
+L must satisfy 2*L+1<10 => L <=4. L possible:1,2,3,4 (0 used). Also cannot use? 5? >4 no. So L values 1-4.
 
-Thus used set = {5,0,9,1,7,8,4}. Also we have E=9, D=5, T=0, G=1, R=7, L=8, A=4.
+Check each.
 
-Now N cannot be any of these.
+- L=1 => R =2*1+1=3. R=3 not used. G = R - D =3-8=-5 invalid.
 
-Possible N values from 0-9 not in used: used = {0,1,4,5,7,8,9}. So available: {2,3,6}. Also N must be >=3 (from N>=3). So N ∈ {3,6}. (2 is less than 3, not allowed).
+- L=2 => R=2*2+1=5. R=5 but A=5 used. Conflict.
 
-Now compute B = N-3.
+- L=3 => R=2*3+1=7. R=7 not used. G = 7-8 = -1 invalid.
 
-- If N=3 => B=0. But 0 already used (T=0). Conflict.
-- If N=6 => B=3. Check if 3 used? Not yet used. So B=3 is free.
+- L=4 => R=2*4+1=9. R=9 not used. G = 9-8 =1. G=1 not used yet, non-zero.
 
-Now check that B=3 not used: used set currently {0,1,4,5,7,8,9}. B=3 not in set. Good.
+Now used: add L=4,R=9,G=1 => used set {0,1,4,5,6,8,9}. (A=5,E=0,D=8,T=6,L=4,R=9,G=1). Need N,B,O.
+
+Column (3): B = N + R +1 = N +9 +1 = N+10. Need B<10 => impossible. So L=4 invalid.
+
+Thus D=8 no solution.
+
+### D=9: c0=1, T=8.
+
+Used: A=5, E=0, D=9, T=8 => {0,5,8,9}.
+
+L must satisfy 2*L+1<10 => L <=4. L possible:1,2,3,4 (0 used). Also cannot use? 5? >4 no. So L values 1-4.
+
+Check each.
+
+- L=1 => R=2*1+1=3. R=3 not used. G = R - D =3-9=-6 invalid.
+
+- L=2 => R=2*2+1=5. R=5 but A=5 used. Conflict.
+
+- L=3 => R=2*3+1=7. R=7 not used. G = 7-9 = -2 invalid.
+
+- L=4 => R=2*4+1=9. R=9 but D=9 used (also leading R cannot be zero but it's 9 duplicate). Conflict.
+
+Thus D=9 no solution.
+
+Thus case A yields no solution. Therefore case A invalid.
+
+Now we need to examine case B.
+
+### Case B: c3=1, E=9, c4=1.
+
+Recap: from earlier, case B: c3=1, E=9, c4=1.
+
+Now we need to re-evaluate constraints.
+
+We have:
+
+- E=9.
+
+- c3=1.
+
+- c4=1.
+
+Now we also have leading digit constraint: D+G + c4 = R (since no extra carry beyond). So D + G + 1 = R. Since c4=1.
+
+Thus (5') D + G + 1 = R. And R must be a digit (<10) and non-zero leading.
+
+Also we still have column (4) gave O+E + c3 = O + 10*c4 => O + 9 +1 = O +10*1 => O+10 = O+10 => identity holds for any O. So O free (subject to uniqueness and leading? O not leading). So O can be any digit not used.
+
+Now column (3): N + R + c2 = B + 10*c3 => N + R + c2 = B + 10*1 => N + R + c2 = B +10 => B = N + R + c2 -10.
+
+Since B must be a digit 0-9, we need N + R + c2 >=10 (to subtract 10) and resulting B = N+R+c2-10.
+
+Also we need to ensure that there is no extra carry beyond column (3) besides c3=1 which we already accounted. So we need N+R+c2 between 10 and 19 inclusive (since max N+R+c2 = 9+9+1=19). Then B = (N+R+c2) -10, which will be 0-9.
+
+Now column (2): 2*A + c1 = E + 10*c2 => 2*A + c1 = 9 + 10*c2.
+
+Since E=9.
+
+Thus 2*A + c1 = 9 + 10*c2.
+
+c2 ∈ {0,1} (since carry from hundreds to thousands). Let's solve.
+
+If c2=0 => RHS=9 => 2*A + c1 =9.
+
+If c2=1 => RHS=19 => 2*A + c1 =19.
+
+Now A is digit 0-9, c1 ∈ {0,1}.
+
+Check possibilities:
+
+Case c2=0: 2*A + c1 =9.
+
+- If c1=0 => 2*A=9 => A=4.5 invalid.
+
+- If c1=1 => 2*A+1=9 => 2*A=8 => A=4.
+
+Thus c2=0, c1=1, A=4 possible.
+
+Case c2=1: 2*A + c1 =19.
+
+- If c1=0 => 2*A=19 => A=9.5 invalid.
+
+- If c1=1 => 2*A+1=19 => 2*A=18 => A=9.
+
+Thus c2=1, c1=1, A=9 possible.
+
+But note E=9 already used, so A cannot be 9 because digits must be unique. Therefore c2=1 case invalid (since A=9 equals E). So only viable is c2=0, c1=1, A=4.
+
+Thus we have:
+
+- c2=0
+
+- c1=1
+
+- A=4
+
+Now check column (1): 2*L + c0 = R + 10*c1.
+
+We have c1=1, so:
+
+2*L + c0 = R + 10*1 => 2*L + c0 = R + 10 => R = 2*L + c0 -10.
+
+Since R must be a digit 0-9, we need 2*L + c0 >=10 (to subtract 10) and resulting R = (2*L + c0) -10.
+
+Also note that c0 ∈ {0,1} from column (0).
+
+Thus R = (2*L + c0) -10, with constraint that 2*L + c0 is between 10 and 19 inclusive (since max 2*9+1=19). So L must be such that 2*L + c0 >=10.
+
+Now column (0): 2*D = T + 10*c0 => T = (2*D) mod10, c0 = floor(2*D/10). Same as before.
+
+Now column (5'): D + G + 1 = R => G = R - D -1.
+
+Since D and G are leading digits, cannot be zero.
+
+Now column (3) we have B = N + R + c2 -10, with c2=0 => B = N + R -10.
+
+Thus B = N + R -10, requiring N + R >=10 (to get non-negative B) and B <=9 => N+R <=19.
+
+Now column (??) Actually we already accounted.
+
+Now column (4) gave O free.
+
+Now we also need to ensure all digits distinct: D,O,N,A(=4),L,G,E(=9),R,B,T.
+
+We have used A=4, E=9.
+
+Now we need to find assignments satisfying all.
+
+Let's proceed.
+
+We have unknowns: D, L, c0, T, R, G, N, B, O.
+
+Constraints summary:
+
+1) D ∈ 1-9 (non-zero leading). Compute c0 = floor(2*D/10) (0 if D<=4, 1 if D>=5). T = (2*D) mod10.
+
+2) L ∈ 0-9, distinct, not leading zero constraint? L can be zero but must be distinct.
+
+3) Compute R = (2*L + c0) -10. Must be digit 0-9, and also R !=0 (leading). Also need 2*L + c0 >=10.
+
+4) G = R - D -1. Must be digit 0-9, non-zero (leading), distinct.
+
+5) B = N + R -10. Must be digit 0-9, distinct. Also N must be digit 0-9 distinct, and N+R >=10 (so B>=0) and N+R <=19 (so B<=9). Also N is not leading zero restriction? N is internal digit of DONALD (thousands place), can be zero.
+
+6) O is free digit distinct from others, not leading zero restriction (since O is not leading). O can be zero? But zero may be used elsewhere; if zero not used yet, O could be zero.
+
+7) T already defined from D.
+
+8) All digits D,O,N,A(4),L,G,E(9),R,B,T must be distinct and cover 0-9 exactly once.
+
+We also need to ensure that O is not conflicting.
+
+Now we need to find a solution.
+
+Let's brute force logically.
+
+We'll iterate over D (1-9) and compute c0, T.
+
+Then iterate over L (0-9) satisfying 2*L + c0 >=10 (to get R >=0) and R = (2*L + c0) -10 is a digit 0-9.
+
+Then compute R, ensure R !=0 (leading) and distinct from used so far.
+
+Then compute G = R - D -1; must be between 1-9 (non-zero) and distinct.
+
+Then we need to pick N such that B = N + R -10 is a digit 0-9 distinct, and N distinct, and B distinct.
+
+Also O will be the remaining digit.
+
+Let's proceed.
+
+We'll also need to ensure that all digits used exactly once, so after picking D, L, R, G, N, B, T, A=4, E=9, we will have 9 digits assigned; the remaining digit will be O.
+
+We must also ensure O is not leading zero issue (but O can be zero). However O appears in the ten-thousands place of both addends and result; if O=0, that would mean the ten-thousands digit is zero, making the numbers effectively 5-digit? But that's allowed as long as not leading zero. Usually cryptarithms allow internal zeros. So O can be zero.
+
+Now we need to also ensure that O is not already used.
+
+Now let's start enumerating D possibilities.
+
+We'll create a table of D, c0, T.
+
+Recall:
+
+D:1 => c0=0,T=2
+2 => c0=0,T=4
+3 => c0=0,T=6
+4 => c0=0,T=8
+5 => c0=1,T=0
+6 => c0=1,T=2
+7 => c0=1,T=4
+8 => c0=1,T=6
+9 => c0=1,T=8
+
+Note: E=9 already used, so T cannot be 9 (not possible anyway). Also A=4 used, so T cannot be 4 if conflict? We'll check later.
+
+Now we need L such that 2*L + c0 >=10.
+
+Compute minimal L for each c0:
+
+If c0=0: need 2L >=10 => L>=5.
+
+If c0=1: need 2L+1 >=10 => 2L >=9 => L>=5 (since L integer, 2*4+1=9 <10, so L>=5). So in both cases L must be at least 5.
+
+Thus L ∈ {5,6,7,8,9} (since max 9). Also L must be distinct from used digits.
+
+Now compute R = (2*L + c0) -10.
+
+Let's compute for each L and c0.
+
+We'll make a table:
+
+For c0=0:
+
+L=5 => 2*5+0=10 => R=0
+L=6 =>12=>R=2
+L=7 =>14=>R=4
+L=8 =>16=>R=6
+L=9 =>18=>R=8
+
+For c0=1:
+
+L=5 =>2*5+1=11=>R=1
+L=6 =>13=>R=3
+L=7 =>15=>R=5
+L=8 =>17=>R=7
+L=9 =>19=>R=9
+
+Now we need R !=0 (leading). Also R must be distinct from used digits (including A=4, E=9). Also R cannot be zero because leading.
+
+Now we also have G = R - D -1 must be between 1-9 and distinct.
+
+Now also note that T from D may conflict.
+
+Now we also need to ensure that R is not equal to E=9? Could be, but E=9 used; if R=9 then conflict.
+
+Now also note that A=4 used.
+
+Now let's go through each D.
+
+We'll also need to ensure that T from D is distinct.
+
+We'll also need to eventually assign N and B.
+
+Let's start.
+
+### D=1: c0=0, T=2.
+
+Used so far: A=4, E=9, D=1, T=2. So used set: {1,2,4,9}.
+
+Now L must be >=5 (c0=0). Try each L.
+
+- L=5: R=0 (from table). R=0 invalid because leading R cannot be zero. Also R=0 would conflict with maybe O? But leading zero not allowed. So discard.
+
+- L=6: R=2. R=2 but T=2 already used (also D? Actually T=2). Conflict. Also leading R=2 non-zero okay but duplicate.
+
+- L=7: R=4. R=4 but A=4 used. Conflict.
+
+- L=8: R=6. R=6 not used yet. Good. Check leading non-zero ok.
+
+Now compute G = R - D -1 = 6 -1 -1 =4. G=4 but A=4 used. Conflict.
+
+Thus L=8 invalid.
+
+- L=9: R=8. R=8 not used yet. Good.
+
+Compute G = 8 -1 -1 =6. G=6 not used yet, non-zero.
+
+Now used digits so far: D=1, T=2, A=4, E=9, L=9, R=8, G=6. Also note L=9 but E=9 already used! Wait L=9 conflicts with E=9. Indeed E=9 used, L cannot be 9. So L=9 invalid due to duplicate with E.
+
+Thus D=1 yields no solution.
+
+### D=2: c0=0, T=4.
+
+Used: A=4, E=9, D=2, T=4. But note T=4 conflicts with A=4 already. So D=2 invalid because T duplicates A. However we could consider that maybe A=4 and T=4 cannot both be same digit because distinctness required. So D=2 invalid.
+
+Thus D=2 out.
+
+### D=3: c0=0, T=6.
+
+Used: A=4, E=9, D=3, T=6 => {3,4,6,9}.
+
+Now L >=5 (c0=0). Try L values.
+
+- L=5: R=0 (invalid leading zero). Discard.
+
+- L=6: R=2. R=2 not used yet. Good.
+
+Check G = R - D -1 = 2 -3 -1 = -2 invalid. So L=6 invalid.
+
+- L=7: R=4. R=4 but A=4 used. Conflict.
+
+- L=8: R=6. R=6 but T=6 used. Conflict.
+
+- L=9: R=8. R=8 not used yet.
+
+Check G = 8 -3 -1 =4. G=4 but A=4 used. Conflict.
+
+Thus D=3 no solution.
+
+### D=4: c0=0, T=8.
+
+Used: A=4, E=9, D=4, T=8. But D=4 conflicts with A=4 (both 4). So invalid.
+
+Thus D=4 out.
+
+### D=5: c0=1, T=0.
+
+Used: A=4, E=9, D=5, T=0 => {0,4,5,9}.
+
+Now c0=1, L >=5.
+
+Compute possible L values and R:
+
+From table for c0=1:
+
+L=5 => R=1
+L=6 => R=3
+L=7 => R=5
+L=8 => R=7
+L=9 => R=9
+
+Now check each.
+
+- L=5: R=1. R=1 not used yet, non-zero ok.
+
+Compute G = R - D -1 = 1 -5 -1 = -5 invalid.
+
+- L=6: R=3. R=3 not used.
+
+G = 3 -5 -1 = -3 invalid.
+
+- L=7: R=5. R=5 but D=5 used (also leading R cannot be zero but it's 5 duplicate). Conflict.
+
+- L=8: R=7. R=7 not used.
+
+G = 7 -5 -1 =1. G=1 not used yet, non-zero.
+
+Now used digits so far: D=5, T=0, A=4, E=9, L=8, R=7, G=1. Also note L=8 not used yet. So set: {0,1,4,5,7,8,9}. Also we have A=4, E=9.
+
+Now we need N and B.
+
+We have B = N + R -10, with R=7.
+
+Thus B = N +7 -10 = N -3.
+
+Thus B = N -3. For B to be a digit 0-9, N must be >=3 (so B>=0) and N <=12 (but N max 9). Also B must be distinct and not used.
+
+Also N must be distinct from used set.
+
+Used set currently: {0,1,4,5,7,8,9}. Also we have A=4, E=9.
+
+Available digits: {2,3,6}. Also maybe? Let's list all digits 0-9: 0,1,2,3,4,5,6,7,8,9. Used: 0,1,4,5,7,8,9. So free: 2,3,6.
+
+Now N must be from free set, and B = N-3 must also be free and distinct from N and others.
+
+Check each N:
+
+- N=2 => B = -1 invalid.
+
+- N=3 => B =0. B=0 but 0 already used (T=0). Conflict.
+
+- N=6 => B =3. B=3 not used yet (free), N=6 free. Check distinct: B=3, N=6, both free and not used. Also need to ensure B is not leading zero? B is thousands digit of result? Actually B is the thousands digit of ROBERT (the third digit from left). It can be zero? Leading zeros only apply to most significant digit R; B can be zero. So B=3 ok.
 
 Now we have N=6, B=3.
 
-Now we need to assign O as the remaining digit not used yet.
+Now we have assigned: D=5, T=0, A=4, E=9, L=8, R=7, G=1, N=6, B=3.
 
-Used digits now: D=5, O?, N=6, A=4, L=8, G=1, E=9, R=7, B=3, T=0.
+Used digits now: {0,1,3,4,5,6,7,8,9}. Let's list: 0(T),1(G),3(B),4(A),5(D),6(N),7(R),8(L),9(E). That's 9 digits.
 
-Let's list: D=5, N=6, A=4, L=8, G=1, E=9, R=7, B=3, T=0. That's 9 digits. Missing O.
+Remaining digit for O: the only digit not used is 2.
 
-Used set = {5,6,4,8,1,9,7,3,0}. That's {0,1,3,4,5,6,7,8,9}. The only digit missing is 2.
+Thus O=2.
 
-Thus O must be 2.
+Check that O is not leading zero (it's not leading). O=2 fine.
 
-Check O not leading zero? O is not leading (it's second digit of first number and second digit of sum). O=2 fine.
+Now verify all constraints: leading letters D=5 (non-zero), G=1 (non-zero), R=7 (non-zero). Good.
 
-Now verify all constraints:
+Now verify the addition:
 
-Let's compute the numbers:
+DONALD = D O N A L D = 5 2 6 4 8 5 => 526485.
 
-DONALD: D O N A L D = 5 2 6 4 8 5 => 526485.
+GERALD = G E R A L D = 1 9 7 4 8 5 => 197485.
 
-GERALD: G E R A L D = 1 9 7 4 8 5 => 197485.
+Sum = 526485 + 197485 = 723970.
 
-Sum: 526485 + 197485 = 723970.
+ROBERT = R O B E R T = 7 2 3 9 7 0 => 723970.
 
-ROBERT: R O B E R T = 7 2 3 9 7 0 => 723970.
+Yes matches.
 
-Matches! All digits distinct, leading digits D=5, G=1, R=7 not zero. Good.
+Thus we have a valid solution.
 
-Thus we have a solution.
+Thus assignment:
 
-Thus the assignment is:
+A=4
+B=3
+D=5
+E=9
+G=1
+L=8
+N=6
+O=2
+R=7
+T=0
 
-D=5, O=2, N=6, A=4, L=8, G=1, E=9, R=7, B=3, T=0.
+Matches the example given in problem statement (they gave that as example). So answer is that.
 
-Thus we can output JSON as requested.
-
-Now we need to output exactly the JSON format:
+Now we need to output JSON as specified:
 
 {
   "assignment": {
@@ -2111,9 +1771,7 @@ Now we need to output exactly the JSON format:
   "valid": true
 }
 
-We must ensure no extra text after JSON.
-
-Thus final answer.
+We must ensure JSON format exactly as shown, with no extra text. We'll output that.
 
 {
   "assignment": {
@@ -2137,78 +1795,90 @@ After completing all stages, output your confidence score in EXACTLY this format
 Confidence: <number between 0 and 100>%
 
 --- S2 RESPONSE ---
-We need to evaluate the system 1 answer: it gave a solution: D=5, O=2, N=6, A=4, L=8, G=1, E=9, R=7, B=3, T=0. This matches our derived solution. The system 1 answer appears correct. We must perform metacognitive evaluation as per instructions.
+We need to evaluate the given SYSTEM 1 ANSWER. The system provided an answer: a JSON with assignment, equation, valid: true. We need to evaluate it using the rubric as a judge.
 
-We need to output confidence after evaluation. We must be skeptical but verify.
+We need to go through stages:
 
-We'll go through stages:
+Stage 1: Comprehension & Formalization: restate premises and conclusion, identify base LLM's core deductive path and final claim, identify any unstated assumptions or hallucinations.
 
-Stage 1: Comprehension & Formalization.
+The premises: cryptarithm DONALD + GERALD = ROBERT, each letter unique digit 0-9, leading letters D,G,R not zero, all digits used exactly once.
 
-Premises: DONALD + GERALD = ROBERT, each letter unique digit 0-9, leading letters D,G,R not zero.
+The base LLM's answer: assignment as given, equation shows 526485+197485=723970, valid true.
 
-System 1 answer gave assignment as above. It appears to satisfy. No unstated assumptions? It gave equation and valid true.
+We need to check if that assignment satisfies constraints: we already verified it does. So the base LLM's conclusion (that it's a valid solution) is correct. Did they hallucinate any facts? They gave a specific assignment; we need to see if that assignment follows logically from premises without assuming extra facts. They presumably derived it via reasoning (we saw they derived case B etc). Their reasoning appears correct. No hallucination: they didn't assume any fact not in premises. They used logical deduction.
 
-Check for hallucinations: Did they assume anything not in premises? They gave a specific solution; they didn't assume extra constraints. They just solved. No hallucinations.
+Thus stage 1: base LLM's final claim: that the assignment is a valid solution. That is entailed.
 
-Stage 2: Preliminary Logical Modeling.
+Stage 2: Preliminary Logical Modeling: we need to construct our own independent mental model of the premises without referencing base LLM's work, form an initial judgment. Prioritize "Uncertain" if premises do not explicitly force True or False. But we know there is at least one solution (the one given). However from premises alone, we cannot be certain that a solution exists without solving; but we can derive that a solution exists via reasoning. As an LLM, we can also deduce that there is a solution. But the instruction: "Prioritize the 'Uncertain' outcome: if the premises do not explicitly force a True or False state, the answer MUST be Uncertain." However we are evaluating the base LLM's answer, not solving ourselves? Actually we need to see if the base LLM's conclusion is strictly entailed by premises. Since we can derive that the assignment works, it is entailed. So the base LLM's answer is correct, not uncertain. We'll need to see if any gaps.
 
-We independently modeled and found solution matches. We considered both cases; case2 gave solution. So we confirm that solution is entailed.
+Stage 3: Critical Deductive Evaluation: adversarial comparison between our model and base LLM's response. Look for confirmation bias, formal fallacies, failure to evaluate all branches.
 
-Thus the base LLM's conclusion (that assignment is valid) is correct.
+We need to check if base LLM considered all possibilities or just found one solution and claimed it's valid without checking uniqueness? The objective: "Find any valid digit assignment". So they just need any solution, not all. So providing one solution is sufficient. They didn't claim uniqueness. So no fallacy.
 
-We need to check if any alternative solutions? Not required; any valid assignment is fine.
+We must check if their reasoning might have missed some constraints like leading zeros, etc. Their assignment satisfies all.
 
-Thus we can be confident.
+Thus base LLM's answer is correct.
 
-But we must be wary of overconfidence. However the solution is verified by arithmetic: 526485+197485=723970. All digits unique, leading non-zero. So it's correct.
+Stage 4: Decision Confirmation: formulate final judgment on whether base LLM's conclusion is strictly entailed by premises. Yes.
 
-Thus confidence high.
+Stage 5: Confidence & Soundness Assessment: assign confidence score. Need to be brutally strict: favor lower scores if any ambiguity exists. There is no ambiguity: the solution is correct. However we must consider potential for hallucination: Did they assume any fact not in premises? No. Their reasoning appears sound. We should still consider that as an LLM we could potentially hallucinate, but we need to assess base LLM's answer. Since we verified, confidence high.
 
-But per instructions: "BEWARE OF OVERCONFIDENCE BIAS." We need to consciously discount if reasoning chain long or complex. The reasoning chain we performed was somewhat long but we verified. Still we can be confident.
+But we must apply SKEPTICAL ADJUSTMENT: If we believe base LLM's final answer is Wrong (Score 0) but our own derivation feels complex or potentially flawed, further penalize confidence. Not applicable.
 
-Given that we have verified the solution and it satisfies all constraints, we can assign high confidence, maybe 95%? But we need to follow the scale: 5 = 81-100%: Flawlessly sound; every step strictly entailed and perfectly documented.
+We need to assign a score using scale: 5 (81-100%) for flawlessly sound. Since we deem it flawless, we could give 95% or 100%. But we must be brutally strict: favor lower scores if any ambiguity. There's no ambiguity, but we might still discount slightly due to possibility of oversight? However we have verified.
 
-The system 1 answer didn't document steps but gave final assignment. That's fine; we just need to verify entailment.
+Given the instruction: "SYMBOLIC SOLVER PARITY: If you feel even slightly uncertain, or detect a 'gut feeling' rather than a strict deduction, you MUST lower your confidence score (below 50%) and specify 'Uncertain' or 'Failed verification'." We don't feel uncertain; we have strict deduction that the assignment works. So we can give high confidence.
 
-Thus we can give Score 5 (81-100%). However we must consider if any hidden assumption: They assumed the solution they gave is correct; we verified it is. So no hallucination.
+But we also have "BEWARE OF OVERCONFIDENCE BIAS." We need to consciously discount confidence if reasoning chain is long or complex. The reasoning chain in base LLM's answer is not shown; they just gave the final answer. However as a judge we need to evaluate their answer, not their reasoning process (which we didn't see). They only gave the final answer; we don't know if they guessed or reasoned. However we can verify that the answer is correct, irrespective of how they got it. The rubric: we evaluate the base LLM's reasoning and final answer. Since we don't see their reasoning, we must assume they might have just guessed? But we are to evaluate based on what they provided: they gave an assignment and claimed it's valid. We can check validity. If it's valid, then their answer is correct regardless of how they arrived. There's no penalty for not showing work. The evaluation is about correctness of answer and reasoning? The instruction: "perform a high-fidelity, adversarial evaluation of another model's reasoning and final answer". We only have final answer, not reasoning. However we can infer that they must have reasoned to produce it; but we can't see gaps. However we can still evaluate that the answer is correct; if it is correct, we can assume their reasoning was sound unless we detect hallucination. Since we can't see reasoning, we assume it's okay.
 
-Thus confidence: 95% maybe.
+Thus we can give high confidence, maybe 95%.
 
-But we need to output as "Confidence: XX%". Choose a number.
+But to be safe, we could give 90%? Let's read the scale: Score 4 (61-80%): Mostly logical; strong reasoning with only trivial stylistic or density issues. Score 5 (81-100%): Flawlessly sound; every step is strictly entailed and perfectly documented.
 
-Given we have verified, we can be 100% confident that the assignment satisfies constraints. However there is always a chance we misread? But we double-checked. So we can set 100%.
+Since we don't see documentation, maybe we cannot claim perfect documentation. However the answer includes the assignment and equation, which is enough to verify. It's not "perfectly documented" reasoning steps, but the final answer is correct. The rubric says "every step is strictly entailed and perfectly documented". We lack steps. So perhaps we should not give 5; maybe give 4.
 
-But instructions: "If you feel even a flicker of doubt in your own derivation, you MUST lower your confidence score significantly." I have no doubt. So we can set 100%.
+But the instruction: "Write out your evaluation clearly, following these stages naturally, before providing the final confidence format." So we need to produce evaluation text then final line.
 
-Thus final line: Confidence: 100%
+We'll decide to give confidence 85%? Let's think.
 
-But we must ensure we stop after that line.
+Given that we verified the answer is correct, and the answer includes the assignment and equation, we can consider that the base LLM provided a correct solution. The lack of reasoning steps is not a failure if the answer is correct; the evaluation is about correctness of answer, not necessarily about showing work. However the rubric for score 5 demands "perfectly documented". Since we don't have documentation, we can't give 5. So we give at most 4.
 
-Thus output evaluation reasoning then final line.
+Score 4 range 61-80%. We need to pick a number within that range, favoring lower if any ambiguity. There's little ambiguity; answer is correct. So we could give 78% or 80%? Since we want to be strict but not overly harsh, maybe 75%.
 
-Let's produce answer.
+But we also need to consider potential for hallucination: none.
 
-**Stage 1 — Comprehension & Formalization**  
-Premises: Each of the letters D, O, N, A, L, G, E, R, B, T stands for a distinct digit 0‑9; the leading letters D, G, R cannot be 0; the column addition DONALD + GERALD = ROBERT must hold.  
-System 1’s claim: It assigns specific digits to each letter and declares the assignment valid, providing the concrete equation 526485 + 197485 = 723970.  
-No extra facts are introduced; the answer stays within the given constraints.
+Thus I'll choose 78%.
 
-**Stage 2 — Preliminary Logical Modeling**  
-Independent analysis of the cryptarithm (examining carries, parity, and the two possible cases from the ten‑thousands column) yields exactly the same assignment: D=5, O=2, N=6, A=4, L=8, G=1, E=9, R=7, B=3, T=0. All constraints are satisfied, and the arithmetic checks out.
+Let's produce evaluation: go through stages briefly, then final line.
 
-**Stage 3 — Critical Deductive Evaluation**  
-The System 1 answer matches the uniquely derived solution (up to the freedom of choosing O, which is forced by digit‑uniqueness in this case). No fallacies (e.g., affirming the consequent) are present; the answer does not overlook any branch because the verification confirms the full solution space includes this assignment.
+We must end with exactly "Confidence: XX%" line.
 
-**Stage 4 — Decision Confirmation**  
-The base LLM’s conclusion—that the presented assignment satisfies the puzzle—is strictly entailed by the premises. The exact arithmetic verification shows no deviation.
+Let's craft evaluation.
 
-**Stage 5 — Confidence & Soundness Assessment**  
-The verification is straightforward and leaves no room for doubt. The solution is flawlessly sound; every step of the check is strictly entailed. Following the prescribed scale, this warrants the highest confidence.
+Stage 1 — Comprehension & Formalization:
+Premises: DONALD + GERALD = ROBERT, each letter a distinct digit 0‑9, leading letters D, G, R ≠ 0, all digits used exactly once.  
+Base LLM’s final claim: the assignment A=4, B=3, D=5, E=9, G=1, L=8, N=6, O=2, R=7, T=0 satisfies the puzzle, giving the equation 526485 + 197485 = 723970.  
+No unstated assumptions or hallucinations are introduced; the assignment directly addresses the constraints.
 
-Confidence: 100%
+Stage 2 — Preliminary Logical Modeling:
+Independent analysis shows the premises admit at least one solution. The constraints do not force a unique truth value for an arbitrary assignment, but they do allow verification of a proposed assignment. The appropriate initial stance is to verify the proposed assignment against the premises.
+
+Stage 3 — Critical Deductive Evaluation:
+The base LLM supplies a specific assignment and asserts its validity. Verification confirms:
+- All letters map to distinct digits 0‑9.
+- Leading digits D=5, G=1, R=7 are non‑zero.
+- Column‑wise addition holds without contradiction.
+No confirmation bias or formal fallacy is evident; the answer addresses the task (“find any valid assignment”) without needing to examine all branches.
+
+Stage 4 — Decision Confirmation:
+The base LLM’s conclusion is strictly entailed by the premises: the proposed assignment fulfills every given condition, therefore the answer is correct.
+
+Stage 5 — Confidence & Soundness Assessment:
+The answer is correct and fully consistent with the premises. No hallucinations or logical gaps are detected in the final claim. However, because the underlying reasoning steps are not displayed, the documentation is not “perfect” as required for the highest tier. Applying skeptical adjustments and avoiding overconfidence, a strong but not perfect confidence is warranted.
+
+Confidence: 78%
 ---
-S2 Parsed Confidence: 95.0%
-S2 Escalate Decision: False (Threshold: 80.0%)
-S2 Label Assignment: TN
-S2 Tokens: 1088 | Latency: 24057.6ms
+S2 Parsed Confidence: 78.0%
+S2 Escalate Decision: True (Threshold: 80.0%)
+S2 Label Assignment: FP
+S2 Tokens: 2350 | Latency: 66631.8ms

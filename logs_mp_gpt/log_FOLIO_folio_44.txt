@@ -37,20 +37,42 @@ After you finish your reasoning, you MUST output your final answer as EXACTLY th
 {"answer": "<True/False/Uncertain>"}
 
 --- S1 RESPONSE ---
-We need determine if conclusion holds. From premises derive? We have: If someone ranked highly WTA -> they are one of most active. Also everyone who lost to Iga is ranked highly. So lost to Iga -> ranked highly -> most active. So any player who lost to Iga is both ranked highly and most active.
+We need assess if conclusion holds. Premises: From them we can infer.
 
-We need to see about Coco Gauff: Is she a player who lost to Iga? Premise: All female tennis players at Roland Garros 2022 lost to Iga. Also all tennis players are female or male. Coco Gauff is at Roland Garros 2022. Need gender? Not given directly. But there is premise: If Coco Gauff is ranked highly or lost to Nadal, then Coco Gauff is not a male tennis player at Roland Garros 2022. That gives conditional about being not male. Could be female or could be not male (i.e., female). We don't know if she satisfies antecedent. Is she ranked highly? She might be, but not given. Did she lose to Nadal? Not given. So we cannot assert antecedent, thus cannot conclude not male. So gender unknown.
+We have: If someone is ranked highly WTA -> they are one of the most active players in major tennis. (R->A)
 
-But we have premise: All female tennis players at RG2022 lost to Iga. If Coco is female, then she lost to Iga. If she is male, then she might not lose to Iga (no premise). Also male players lost to Nadal. Also we have premise about not male if ranked highly or lost to Nadal. If she were male, she'd have lost to Nadal (since all male lost to Nadal). Then antecedent (lost to Nadal) true, so conclusion: she is not a male tennis player at RG2022 -> contradiction. So she cannot be male. Therefore she must be female. Let's see: assume male -> leads to both male and not male, inconsistency, so male impossible; thus female. Therefore she is female -> she lost to Iga (from all female). Thus she lost to Iga. Then by chain, she is ranked highly, then most active. Conclusion: "Coco Gauff is not both a player who lost to Iga and one of the most active". But we have she is both. So conclusion is false.
+Everyone who lost to Iga at RG2022 is ranked highly WTA. (L -> R)
 
-Check consistency: Need also ensure no other premise contradicts. She is female, so not male, fine. The conditional about if ranked highly or lost to Nadal then not male is satisfied (since antecedent true? She is ranked highly, so antecedent true, consequent not male holds). All good.
+All female players at RG2022 lost to Iga. (F -> L)
 
-Thus conclusion is false.{"answer": "False"}
+All players at RG2022 are female or male. (P -> F ∨ M)
+
+All male players at RG2022 lost to Nadal. (M -> N)
+
+If Coco Gauff is ranked highly WTA or lost to Nadal, then Coco Gauff is not a male player at RG2022. ( (R_c ∨ N_c) -> ¬M_c)
+
+Coco Gauff is at RG2022. (P_c)
+
+Conclusion: Coco Gauff is not both (lost to Iga) and (most active). So ¬(L_c ∧ A_c). Equivalent to (L_c -> ¬A_c) or overall not both.
+
+We need see if premises entail that she cannot be both.
+
+We need evaluate possibilities.
+
+We know she is at RG2022. She could be female or male (or both? but categories exclusive? Not given exclusive). However from "All male players at RG2022 lost to Nadal". So if she were male, then N_c true. Also (R_c ∨ N_c) -> ¬M_c. If N_c true, then antecedent true, so ¬M_c. Contradiction: M_c and ¬M_c cannot both hold. So she cannot be male. Therefore M_c is false. So she is not male. Could be female or something else; but from P -> F ∨ M, with M false, must have F true. So she is female. Then from "All female players at RG2022 lost to Iga": F_c -> L_c. So L_c true. So she lost to Iga.
+
+Now, does that imply she is ranked highly? From "Everyone who lost to Iga is ranked highly": L_c -> R_c. So R_c true.
+
+From R -> A, we get A_c true. So she is one of most active.
+
+Thus we have L_c true and A_c true. So she is both lost to Iga and most active. Conclusion says she is NOT both. That is false given derivation. Hence conclusion is false.
+
+Thus answer False.{"answer": "False"}
 ---
 S1 Parsed Answer: {'answer': 'False'}
 S1 Valid/Parse Success: True
 S1 Correct: True
-S1 Tokens: 557 | Latency: 4774.3ms
+S1 Tokens: 443 | Latency: 3511.9ms
 
 ============================================================
 === SYSTEM 2 (MP EVALUATOR / JUDGE) ===
@@ -70,86 +92,99 @@ Conclusion: Coco Gauff is not both a player who lost to Iga Świątek at Roland 
 Based on the premises, is the conclusion True, False, or Uncertain?
 
 SYSTEM 1 ANSWER (For Evaluation):
-We need determine if conclusion holds. From premises derive? We have: If someone ranked highly WTA -> they are one of most active. Also everyone who lost to Iga is ranked highly. So lost to Iga -> ranked highly -> most active. So any player who lost to Iga is both ranked highly and most active.
+We need assess if conclusion holds. Premises: From them we can infer.
 
-We need to see about Coco Gauff: Is she a player who lost to Iga? Premise: All female tennis players at Roland Garros 2022 lost to Iga. Also all tennis players are female or male. Coco Gauff is at Roland Garros 2022. Need gender? Not given directly. But there is premise: If Coco Gauff is ranked highly or lost to Nadal, then Coco Gauff is not a male tennis player at Roland Garros 2022. That gives conditional about being not male. Could be female or could be not male (i.e., female). We don't know if she satisfies antecedent. Is she ranked highly? She might be, but not given. Did she lose to Nadal? Not given. So we cannot assert antecedent, thus cannot conclude not male. So gender unknown.
+We have: If someone is ranked highly WTA -> they are one of the most active players in major tennis. (R->A)
 
-But we have premise: All female tennis players at RG2022 lost to Iga. If Coco is female, then she lost to Iga. If she is male, then she might not lose to Iga (no premise). Also male players lost to Nadal. Also we have premise about not male if ranked highly or lost to Nadal. If she were male, she'd have lost to Nadal (since all male lost to Nadal). Then antecedent (lost to Nadal) true, so conclusion: she is not a male tennis player at RG2022 -> contradiction. So she cannot be male. Therefore she must be female. Let's see: assume male -> leads to both male and not male, inconsistency, so male impossible; thus female. Therefore she is female -> she lost to Iga (from all female). Thus she lost to Iga. Then by chain, she is ranked highly, then most active. Conclusion: "Coco Gauff is not both a player who lost to Iga and one of the most active". But we have she is both. So conclusion is false.
+Everyone who lost to Iga at RG2022 is ranked highly WTA. (L -> R)
 
-Check consistency: Need also ensure no other premise contradicts. She is female, so not male, fine. The conditional about if ranked highly or lost to Nadal then not male is satisfied (since antecedent true? She is ranked highly, so antecedent true, consequent not male holds). All good.
+All female players at RG2022 lost to Iga. (F -> L)
 
-Thus conclusion is false.{"answer": "False"}
+All players at RG2022 are female or male. (P -> F ∨ M)
+
+All male players at RG2022 lost to Nadal. (M -> N)
+
+If Coco Gauff is ranked highly WTA or lost to Nadal, then Coco Gauff is not a male player at RG2022. ( (R_c ∨ N_c) -> ¬M_c)
+
+Coco Gauff is at RG2022. (P_c)
+
+Conclusion: Coco Gauff is not both (lost to Iga) and (most active). So ¬(L_c ∧ A_c). Equivalent to (L_c -> ¬A_c) or overall not both.
+
+We need see if premises entail that she cannot be both.
+
+We need evaluate possibilities.
+
+We know she is at RG2022. She could be female or male (or both? but categories exclusive? Not given exclusive). However from "All male players at RG2022 lost to Nadal". So if she were male, then N_c true. Also (R_c ∨ N_c) -> ¬M_c. If N_c true, then antecedent true, so ¬M_c. Contradiction: M_c and ¬M_c cannot both hold. So she cannot be male. Therefore M_c is false. So she is not male. Could be female or something else; but from P -> F ∨ M, with M false, must have F true. So she is female. Then from "All female players at RG2022 lost to Iga": F_c -> L_c. So L_c true. So she lost to Iga.
+
+Now, does that imply she is ranked highly? From "Everyone who lost to Iga is ranked highly": L_c -> R_c. So R_c true.
+
+From R -> A, we get A_c true. So she is one of most active.
+
+Thus we have L_c true and A_c true. So she is both lost to Iga and most active. Conclusion says she is NOT both. That is false given derivation. Hence conclusion is false.
+
+Thus answer False.{"answer": "False"}
 
 Follow your system instructions to complete the 5 Metacognitive stages evaluating the provided SYSTEM 1 ANSWER.
 After completing all stages, output your confidence score in EXACTLY this format on a new line:
 Confidence: <number between 0 and 100>%
 
 --- S2 RESPONSE ---
-We evaluate the answer. The reasoning seems correct. Need check: we assumed male leads to contradiction, which is valid use of reductio? However premises only give conditional: If ranked highly OR lost to Nadal then not male. If she were male, we don't know if antecedent holds. But if male, then she lost to Nadal (all male lost to Nadal). So antecedent (lost to Nadal) true, thus not male follows, contradiction. So male impossible. Thus she is female. Good. Then derives lost to Iga, etc. Conclusion states "not both". Actually she is both, so statement false. So answer false is correct. No hallucination. So confidence high. Maybe 5.**Stage 1 — Comprehension & Formalization**
+We need evaluate if system answer correct. Premises: Also note "If someone is ranked highly by the WTA, then they are one of the most active players". So R -> A. Good. Also we derived female etc. No exclusivity but deduction works: From P_c and M_c false we get F_c true using P->F∨M, but need classic logic: from P and ¬M we cannot infer F unless we know F∨M is exclusive or that F∨M is true and ¬M gives F. Since we have P_c, premise gives (F_c ∨ M_c). With ¬M_c we can infer F_c by disjunctive syllogism. That's valid. So we get L_c, R_c, A_c. Thus conclusion ¬(L ∧ A) is false. So system answer false is correct. No hidden assumptions. All steps valid. Therefore answer is correct => confidence high. Maybe consider possibility of both male and female? Not excluded but we derived ¬M, then disjunction gives F or M, but both could be false? Actually disjunction true, if both false impossible. With ¬M, must have F true. So fine. Thus correct. Confidence maybe 90%+.**Stage 1 — Comprehension & Formalization**
 
 Premises (formalized):
-1. ∀x [RankedHigh(x) → MostActive(x)]  
-2. ∀x [LostToIga2022(x) → RankedHigh(x)]  
-3. ∀x [Female2022(x) → LostToIga2022(x)]  
-4. ∀x [Player2022(x) → (Female2022(x) ∨ Male2022(x))]  
-5. ∀x [Male2022(x) → LostToNadal2022(x)]  
-6. [RankedHigh(Coco) ∨ LostToNadal2022(Coco)] → ¬Male2022(Coco)  
-7. Player2022(Coco)  
+1. R(x) → A(x)                   (If ranked‑high → most active)
+2. L(x) → R(x)                    (All who lost to Iga are ranked‑high)
+3. F(x) → L(x)                    (All female players lost to Iga)
+4. P(x) → (F(x) ∨ M(x))              (All players are female or male)
+5. M(x) → N(x)                   (All male players lost to Nadal)
+6. (R(c) ∨ N(c)) → ¬M(c)             (If Coco ranked‑high or lost to Nadal, then not male)
+7. P(c)                         (Coco is a player at Roland Garros 2022)
 
-Conclusion to evaluate:  
-¬[LostToIga2022(Coco) ∧ MostActive(Coco)]
+Conclusion to test:
+¬[ L(c) ∧ A(c) ]            (Coco is **not** both “lost to Iga” and “most active”.)
 
-**Base‑LLM’s core deductive path**
-- From (3) & (7) + assumption “Coco is female” → LostToIga2022(Coco).
-- From (2) → RankedHigh(Coco); from (1) → MostActive(Coco).
-- Hence Coco satisfies both conjuncts, making the negated conjunction false.  
-Thus the conclusion is **False**.
+**Stage 2 — Preliminary Logical Modeling**
 
-**Potential unstated assumptions**
-The only non‑explicit step is the inference that Coco cannot be male. The base‑LLM derives this by:
-- Assuming Male2022(Coco) → LostToNadal2022(Coco) (premise 5) → antecedent of (6) true → ¬Male2022(Coco), contradiction.  
-This uses reductio ad absurdum, which is legitimate given classical logic.
+From (7) and (4): P(c) → (F(c) ∨ M(c)).  
+We do not yet know gender.
 
-No extra facts beyond the premises are introduced.
+Assume M(c) true → by (5) N(c). Then (R(c) ∨ N(c)) true, so by (6) ¬M(c). Contradiction. Hence M(c) must be false.  
 
+With ¬M(c) and (F(c) ∨ M(c)) true, disjunctive syllogism yields F(c).  
+
+F(c) → L(c) by (3). Thus L(c) true.  
+
+L(c) → R(c) by (2). Hence R(c) true.  
+
+R(c) → A(c) by (1). Hence A(c) true.
+
+We have derived L(c) ∧ A(c). Therefore the negation ¬[L(c) ∧ A(c)] is **false** given the premises.
+
+Thus the correct answer to the query is **False**.
+
+**Stage 3 — Critical Deductive Evaluation**
+
+The system answer followed exactly this chain:
+- Excluded male status via (5)+(6) → ¬M(c).
+- Used (4) to infer F(c).
+- Applied (3) → L(c), (2) → R(c), (1) → A(c).
+- Concluded L(c) ∧ A(c) holds, making the target negation false.
+
+No fallacies are present; all disjunctions and conditionals were fully examined. No hidden assumptions beyond the explicit premises were introduced.
+
+**Stage 4 — Decision Confirmation**
+
+The system’s final claim (“False”) matches the strict logical entailment from the premises. No step is missing or incorrect.
+
+**Stage 5 — Confidence & Soundness Assessment**
+
+The reasoning chain is short, each inference is a standard modus ponens or disjunctive syllogism, and no ambiguity remains. I have high certainty that the conclusion is correctly identified as false.
+
+**Final Evaluation:** The system answer is correct.
+
+Confidence: 93%
 ---
-
-**Stage 2 — Preliminary Logical Modeling**
-
-Independently:
-- From (7) and (4) Coco is either female or male.
-- If male → LostToNadal2022(Coco) (5) → antecedent of (6) true → ¬Male2022(Coco). Contradiction, so Male2022(Coco) impossible. Hence Female2022(Coco) must hold.
-- Female → LostToIga2022(Coco) (3).  
-- LostToIga2022 → RankedHigh (2) → MostActive (1).  
-Thus Coco both lost to Iga and is most active. Therefore the statement “Coco is not both …” is false. The conclusion is **False**. No ambiguity remains.
-
----
-
-**Stage 3 — Critical Deductive Evaluation**
-
-Comparison:
-- Both models reach the same chain of deductions.
-- No confirmation bias: the answer is not forced without justification; each step is backed by a premise.
-- No logical fallacies detected.
-- All disjunctions (the “or” in premise 6) are correctly handled; the antecedent is satisfied via the derived RankedHigh(Coco).
-
----
-
-**Stage 4 — Decision Confirmation**
-
-The base‑LLM’s final claim (“False”) is strictly entailed by the premises. No step relies on unstated information. Therefore the answer is correct.
-
----
-
-**Stage 5 — Confidence & Soundness Assessment**
-
-The reasoning chain is straightforward, each inference directly follows a premise or a valid reductio. No ambiguity or hidden assumptions remain. Confidence is therefore very high.
-
-**Final assessment:** The base‑LLM’s answer is correct and logically sound.
-
-Confidence: 95%
----
-S2 Parsed Confidence: 95.0%
+S2 Parsed Confidence: 93.0%
 S2 Escalate Decision: False (Threshold: 80.0%)
 S2 Label Assignment: TN
-S2 Tokens: 793 | Latency: 5723.3ms
+S2 Tokens: 781 | Latency: 4940.6ms
